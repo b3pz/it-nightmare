@@ -27,7 +27,7 @@ const special=[
  {x:1050,y:625,room:"RIFUGIO DIGITALE"},{x:1380,y:520,room:"SALA CORTE"},
  {x:960,y:790,room:"CUCINA"},{x:1170,y:790,room:"STAMPANTI"}
 ];
-let state={min:540,stress:0,rep:4,xp:0,incident:0},player={x:465,y:535,r:9,s:185},tickets=[],last=performance.now(),spawn=0;
+let state={min:540,stress:0,rep:4,xp:0,incident:0,bossStarted:false,bossResolved:false,finished:false},player={x:465,y:535,r:9,s:185},tickets=[],last=performance.now(),spawn=0;
 function insideDoor(x,y){return doors.some(d=>x>d[0]&&x<d[0]+d[2]&&y>d[1]&&y<d[1]+d[3])}
 function inRoom(x,y,r){return x>r[1]&&x<r[1]+r[3]&&y>r[2]&&y<r[2]+r[4]}
 function legal(x,y){
@@ -49,7 +49,7 @@ addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=1;if(e.key.toLowerCase(
 function fmt(m){return String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.floor(m%60)).padStart(2,"0")}
 const probs=["Revit non apre il modello","Stampante bloccata","Wi-Fi senza accesso ai server","Monitor nero","Licenza Autodesk non disponibile","Sala meeting senza segnale","Desktop Connector offline"];
 function newTicket(){
- if(tickets.length>=3)return;
+ if(state.bossStarted || state.finished || tickets.length>=3)return;
  const p=special[Math.floor(Math.random()*special.length)];
  tickets.push({p,txt:probs[Math.floor(Math.random()*probs.length)],due:state.min+28+Math.random()*18});
  showTicket();
@@ -62,14 +62,121 @@ function interact(){
  $("#modal").classList.remove("hidden");document.querySelectorAll(".choice").forEach(b=>b.onclick=()=>resolve(i,b.dataset.ok=="1"));
 }
 function resolve(i,ok){$("#modal").classList.add("hidden");tickets.splice(i,1);if(ok){state.xp+=150;state.stress=Math.max(0,state.stress-5);state.incident=Math.max(0,state.incident-5);toast("TASK RISOLTA +150 XP")}else{state.stress+=12;state.incident+=10;state.rep--;toast("INTERVENTO ERRATO")}showTicket()}
-$("#x").onclick=()=>$("#modal").classList.add("hidden");
+$("#x").onclick=()=>{
+ if(state.bossStarted && !state.bossResolved && !state.finished){
+   toast("Devi gestire l'incidente ARCH-VOID.");
+   return;
+ }
+ $("#modal").classList.add("hidden");
+};
 function toast(s){let t=$("#toast");t.textContent=s;t.classList.add("on");clearTimeout(t.q);t.q=setTimeout(()=>t.classList.remove("on"),1500)}
+
+const BOSS_TIME=18*60+52; // 18:52, trigger obbligatorio
+const END_TIME=19*60;
+
+function startBoss(){
+ if(state.bossStarted || state.finished) return;
+ state.bossStarted=true;
+ state.min=BOSS_TIME;              // il tempo si ferma qui finché il boss non viene gestito
+ tickets=[]; showTicket();
+ toast("18:52 // CHIAMATA IN ARRIVO");
+ $("#modalBody").innerHTML=`
+   <h2 class="urgent">18:52 — INCOMING CALL // INTERNO 000</h2>
+   <p>«Ciao, scusa l'orario. Hai un secondo?»</p>
+   <p>Tutti i monitor dello studio si accendono insieme. Compare una sessione sconosciuta: <b>ARCH-VOID</b>.</p>
+   <p>Sul server appare <b>\\\\ARCHEA\\\\Projects\\\\_DO_NOT_OPEN\\\\19_03</b>.</p>
+   <button class="choice boss-choice" data-i="0">Apri la cartella per capire cosa contiene</button>
+   <button class="choice boss-choice" data-i="1">Isola la sessione, blocca l'account e controlla i log</button>
+   <button class="choice boss-choice" data-i="2">Riavvia immediatamente tutti i server</button>`;
+ $("#modal").classList.remove("hidden");
+ document.querySelectorAll(".boss-choice").forEach(b=>b.onclick=()=>resolveBoss(+b.dataset.i));
+}
+
+function resolveBoss(choice){
+ if(state.bossResolved) return;
+ state.bossResolved=true;
+ $("#modal").classList.add("hidden");
+ if(choice===1){
+   state.xp+=1000;
+   state.incident=Math.max(0,state.incident-30);
+   state.stress=Math.max(0,state.stress-10);
+   toast("ARCH-VOID ISOLATO // +1000 XP");
+   finishGame(true);
+ } else {
+   state.incident=Math.min(100,state.incident+35);
+   state.stress=Math.min(100,state.stress+25);
+   state.rep=Math.max(0,state.rep-1);
+   toast("ARCH-VOID SI È PROPAGATO");
+   finishGame(state.incident<100 && state.rep>0);
+ }
+}
+
+function finishGame(win){
+ state.finished=true;
+ state.min=END_TIME;
+ $("#modalBody").innerHTML=`
+   <h2 class="${win?'good':'urgent'}">${win?'SHIFT COMPLETE // 19:00':'BAD ENDING // INCIDENT CRITICO'}</h2>
+   <p>${win
+     ? 'Hai contenuto l’incidente e lo studio è ancora operativo. La porta d’uscita si sblocca.'
+     : 'La rete non risponde più. Il tuo account viene disconnesso dal dominio.'}</p>
+   <p>XP: <b>${state.xp}</b><br>Stress: <b>${Math.round(state.stress)}%</b><br>Incident: <b>${Math.round(state.incident)}%</b></p>
+   <button class="choice" onclick="location.reload()">NUOVO TURNO</button>`;
+ $("#modal").classList.remove("hidden");
+}
+
 function update(dt){
- let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
- if(dx||dy){let l=Math.hypot(dx,dy),nx=player.x+dx/l*player.s*dt,ny=player.y+dy/l*player.s*dt;if(legal(nx,player.y))player.x=nx;if(legal(player.x,ny))player.y=ny}
- state.min+=dt*2.2;spawn+=dt;if(spawn>10){spawn=0;newTicket()}
- for(let t of tickets)if(!t.dead&&state.min>t.due){t.dead=1;state.incident+=15;state.stress+=8;state.rep=Math.max(0,state.rep-1);toast("TASK SCADUTA: INCIDENT +15")}
- $("#clock").textContent=fmt(state.min);$("#stress").textContent=Math.round(state.stress)+"%";$("#rep").textContent="★".repeat(Math.max(0,state.rep))+"☆".repeat(5-Math.max(0,state.rep));$("#xp").textContent=state.xp;$("#incident").textContent=Math.round(state.incident)+"%";
+ if(state.finished){
+   $("#clock").textContent=fmt(state.min);
+   return;
+ }
+
+ let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),
+     dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
+
+ if(dx||dy){
+   let l=Math.hypot(dx,dy),
+       nx=player.x+dx/l*player.s*dt,
+       ny=player.y+dy/l*player.s*dt;
+   if(legal(nx,player.y))player.x=nx;
+   if(legal(player.x,ny))player.y=ny;
+ }
+
+ // Il turno non può più andare oltre il boss.
+ if(!state.bossStarted){
+   state.min += dt*2.2;
+   if(state.min >= BOSS_TIME){
+     startBoss();
+   } else {
+     spawn+=dt;
+     if(spawn>10){spawn=0;newTicket()}
+     for(let t of tickets){
+       if(!t.dead && state.min>t.due){
+         t.dead=1;
+         state.incident=Math.min(100,state.incident+15);
+         state.stress=Math.min(100,state.stress+8);
+         state.rep=Math.max(0,state.rep-1);
+         toast("TASK SCADUTA: INCIDENT +15");
+       }
+     }
+   }
+ } else {
+   state.min=BOSS_TIME; // resta 18:52 mentre il popup boss è aperto
+ }
+
+ // Clamp globale: mai più 115%, 26:08 ecc.
+ state.incident=Math.max(0,Math.min(100,state.incident));
+ state.stress=Math.max(0,Math.min(100,state.stress));
+ state.rep=Math.max(0,Math.min(5,state.rep));
+
+ if(!state.bossStarted && (state.incident>=100 || state.stress>=100 || state.rep<=0)){
+   finishGame(false);
+ }
+
+ $("#clock").textContent=fmt(state.min);
+ $("#stress").textContent=Math.round(state.stress)+"%";
+ $("#rep").textContent="★".repeat(state.rep)+"☆".repeat(5-state.rep);
+ $("#xp").textContent=state.xp;
+ $("#incident").textContent=Math.round(state.incident)+"%";
 }
 function draw(){
  g.fillStyle="#080a09";g.fillRect(0,0,W,H);

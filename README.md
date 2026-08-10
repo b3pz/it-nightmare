@@ -14,3 +14,12 @@ Versione pronta per GitHub Pages.
 
 ## GitHub
 Caricare `index.html`, `style.css`, `game.js` nella root del repository.
+
+
+## V1.1 — controllo turno e boss
+- Boss ARCH-VOID obbligatorio alle 18:52.
+- Il timer si blocca alle 18:52 finché il boss non viene affrontato.
+- Dopo il boss il turno termina alle 19:00.
+- Incident Level e Stress sono limitati a 0–100%.
+- Non è più possibile lasciare il gioco aperto e arrivare a orari come 26:08.
+- I ticket normali smettono di generarsi quando parte il boss.
