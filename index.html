@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT NIGHTMARE — ARCHEA // After Hours</title>
+  <meta name="description" content="IT NIGHTMARE — horror survival browser game ambientato in uno studio di architettura." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="crt"></div>
+  <div id="boot" class="screen active">
+    <div class="terminal">
+      <div class="logo glitch" data-text="IT NIGHTMARE">IT NIGHTMARE</div>
+      <div class="subtitle">ARCHEA // AFTER HOURS</div>
+      <div id="bootLines" class="boot-lines"></div>
+      <button id="enterBtn" class="btn hidden">ENTER THE STUDIO</button>
+    </div>
+  </div>
+
+  <div id="intro" class="screen">
+    <div class="story-card">
+      <h1>LORE // FILE 19:03</h1>
+      <p>Firenze. Lungarno. Uno studio di architettura che di giorno disegna città.</p>
+      <p>Di notte, invece, qualcosa continua a lavorare.</p>
+      <p>Da settimane il reparto IT riceve ticket dopo la chiusura. Account senza proprietario. Stampanti che inviano pagine vuote. Sessioni Revit aperte da utenti che non sono più nell'edificio.</p>
+      <p>Alle <strong>18:57</strong> arriva sempre la stessa chiamata.</p>
+      <p class="quote">«Ciao, scusa l'orario. Hai un secondo?»</p>
+      <p>Stasera sei rimasto tu.</p>
+      <button id="startBtn" class="btn">INIZIA TURNO</button>
+    </div>
+  </div>
+
+  <div id="game" class="screen">
+    <header class="hud">
+      <div><span class="label">TIME</span><span id="clock">09:00</span></div>
+      <div><span class="label">STRESS</span><span id="stress">0%</span></div>
+      <div><span class="label">REP</span><span id="rep">3/5</span></div>
+      <div><span class="label">TICKETS</span><span id="ticketCount">0</span></div>
+      <div><span class="label">XP</span><span id="xp">0</span></div>
+    </header>
+
+    <main class="layout">
+      <section class="map-wrap">
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
+        <div id="interactionHint" class="interaction-hint hidden">E — INTERAGISCI</div>
+        <div id="flashMessage" class="flash hidden"></div>
+      </section>
+
+      <aside class="sidebar">
+        <div class="panel">
+          <h2>ACTIVE TICKETS</h2>
+          <div id="tickets" class="tickets"></div>
+        </div>
+        <div class="panel">
+          <h2>SYSTEM LOG</h2>
+          <div id="log" class="log"></div>
+        </div>
+        <div class="panel controls">
+          <h2>CONTROLS</h2>
+          <p>WASD / Frecce — movimento</p>
+          <p>E — interagisci</p>
+          <p>ESC — chiudi popup</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <button id="closeModal" class="modal-close">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <div id="ending" class="screen">
+    <div class="story-card ending-card">
+      <h1 id="endingTitle">SHIFT COMPLETE</h1>
+      <p id="endingText"></p>
+      <div id="endingStats" class="ending-stats"></div>
+      <button id="restartBtn" class="btn">NUOVO TURNO</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
