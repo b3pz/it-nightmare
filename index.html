@@ -38,6 +38,7 @@
       <div><span class="label">REP</span><span id="rep">3/5</span></div>
       <div><span class="label">TICKETS</span><span id="ticketCount">0</span></div>
       <div><span class="label">XP</span><span id="xp">0</span></div>
+      <div><span class="label">INCIDENT</span><span id="incident">0%</span></div>
     </header>
 
     <main class="layout">
@@ -45,6 +46,10 @@
         <canvas id="gameCanvas" width="960" height="540"></canvas>
         <div id="interactionHint" class="interaction-hint hidden">E — INTERAGISCI</div>
         <div id="flashMessage" class="flash hidden"></div>
+      <div id="touchControls" class="touch-controls">
+          <div id="joystick" class="joystick"><div id="stick" class="stick"></div></div>
+          <button id="touchInteract" class="touch-interact">E<br><span>INTERAGISCI</span></button>
+        </div>
       </section>
 
       <aside class="sidebar">
@@ -55,6 +60,11 @@
         <div class="panel">
           <h2>SYSTEM LOG</h2>
           <div id="log" class="log"></div>
+        </div>
+        <div class="panel objective">
+          <h2>SHIFT OBJECTIVE</h2>
+          <p id="objectiveText">Mantieni operativo lo studio fino alle 19:00.</p>
+          <div class="incident-bar"><div id="incidentFill"></div></div>
         </div>
         <div class="panel controls">
           <h2>CONTROLS</h2>

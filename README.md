@@ -25,3 +25,12 @@ Il gioco usa una versione romanzata e horror di uno studio di architettura. Nomi
 - `index.html`: interfaccia e schermate
 - `style.css`: grafica CRT / terminal horror
 - `game.js`: gameplay, ticket, mappa, lore e boss finale
+
+
+## V0.2
+- PC + smartphone/tablet
+- joystick touch + tasto interazione
+- muri con collisione
+- mappa astratta dalla planimetria reale
+- Incident Level
+- deadline e conseguenze per task non completate

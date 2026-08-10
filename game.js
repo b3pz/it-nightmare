@@ -33,27 +33,51 @@ const keys={};
 addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==="e") interact();if(e.key==="Escape")closeModal()});
 addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
 
+// V0.2: mappa astratta dalla planimetria reale.
+// I muri sono collisioni vere: non si attraversano.
 const rooms=[
- {x:20,y:20,w:280,h:150,name:"OPEN SPACE A"},
- {x:330,y:20,w:250,h:150,name:"MEETING"},
- {x:610,y:20,w:330,h:150,name:"OPEN SPACE B"},
- {x:20,y:200,w:220,h:170,name:"RECEPTION"},
- {x:270,y:200,w:310,h:170,name:"CORRIDOR"},
- {x:610,y:200,w:330,h:170,name:"SERVER ROOM"},
- {x:20,y:400,w:300,h:120,name:"PRINT AREA"},
- {x:350,y:400,w:250,h:120,name:"IT DESK"},
- {x:630,y:400,w:310,h:120,name:"EXIT"}
+ {x:18,y:22,w:190,h:116,name:"LOFT"},
+ {x:228,y:22,w:210,h:116,name:"CONTRATTI"},
+ {x:458,y:22,w:212,h:116,name:"ABA"},
+ {x:690,y:22,w:252,h:116,name:"DIREZIONE"},
+ {x:18,y:158,w:252,h:144,name:"SPAZIO A"},
+ {x:290,y:158,w:184,h:144,name:"GRAFICA"},
+ {x:494,y:158,w:176,h:144,name:"CENTRALE"},
+ {x:690,y:158,w:252,h:144,name:"PANTHEON"},
+ {x:18,y:322,w:190,h:196,name:"RIFUGIO DIGITALE"},
+ {x:228,y:322,w:246,h:196,name:"IT"},
+ {x:494,y:322,w:176,h:196,name:"SALA MEET"},
+ {x:690,y:322,w:252,h:196,name:"SERVER / SOPPALCO"}
 ];
+// corridoio principale "Via della Fornace": fascia orizzontale tra i blocchi.
+const walls=[];
+rooms.forEach(r=>{
+ const d=7;
+ // porte centrali verso il corridoio: spezza il muro inferiore/superiore a seconda della fila
+ walls.push({x:r.x,y:r.y,w:r.w,h:d});
+ walls.push({x:r.x,y:r.y,w:d,h:r.h});
+ walls.push({x:r.x+r.w-d,y:r.y,w:d,h:r.h});
+ if(r.y<300){
+   const doorX=r.x+r.w/2-18;
+   walls.push({x:r.x,y:r.y+r.h-d,w:doorX-r.x,h:d});
+   walls.push({x:doorX+36,y:r.y+r.h-d,w:r.x+r.w-(doorX+36),h:d});
+ }else{
+   const doorX=r.x+r.w/2-18;
+   walls.push({x:r.x,y:r.y,w:doorX-r.x,h:d});
+   walls.push({x:doorX+36,y:r.y,w:r.x+r.w-(doorX+36),h:d});
+   walls.push({x:r.x,y:r.y+r.h-d,w:r.w,h:d});
+ }
+});
 
 const interactables=[
- {id:"pc_a",x:105,y:95,type:"pc",label:"PC — OPEN SPACE A",room:"OPEN SPACE A"},
- {id:"meeting",x:450,y:95,type:"screen",label:"VIDEOCONFERENZA",room:"MEETING"},
- {id:"pc_b",x:760,y:95,type:"pc",label:"PC — OPEN SPACE B",room:"OPEN SPACE B"},
- {id:"reception",x:105,y:290,type:"phone",label:"TELEFONO RECEPTION",room:"RECEPTION"},
- {id:"server",x:790,y:285,type:"server",label:"RACK SERVER",room:"SERVER ROOM"},
- {id:"printer",x:155,y:460,type:"printer",label:"STAMPANTE",room:"PRINT AREA"},
- {id:"it",x:475,y:460,type:"terminal",label:"TERMINALE IT",room:"IT DESK"},
- {id:"exit",x:850,y:460,type:"exit",label:"USCITA",room:"EXIT"}
+ {id:"pc_a",x:85,y:220,type:"pc",label:"POSTAZIONE — SPAZIO A",room:"SPAZIO A"},
+ {id:"meeting",x:580,y:420,type:"screen",label:"SALA MEET",room:"SALA MEET"},
+ {id:"pc_b",x:370,y:220,type:"pc",label:"POSTAZIONE — GRAFICA",room:"GRAFICA"},
+ {id:"reception",x:785,y:220,type:"phone",label:"TELEFONO — PANTHEON",room:"PANTHEON"},
+ {id:"server",x:815,y:420,type:"server",label:"RACK SERVER",room:"SERVER / SOPPALCO"},
+ {id:"printer",x:555,y:220,type:"printer",label:"STAMPANTE — CENTRALE",room:"CENTRALE"},
+ {id:"it",x:350,y:420,type:"terminal",label:"TERMINALE IT",room:"IT"},
+ {id:"exit",x:125,y:420,type:"exit",label:"USCITA",room:"RIFUGIO DIGITALE"}
 ];
 
 const ticketTemplates=[
@@ -68,8 +92,8 @@ const ticketTemplates=[
 let state, player, tickets, last=0, spawnTimer=0, horrorLevel=0, bossStarted=false, running=false;
 
 function startGame(){
- state={minute:540,stress:0,rep:3,xp:0,solved:0,failed:0};
- player={x:480,y:330,r:10,speed:150};
+ state={minute:540,stress:0,rep:3,xp:0,solved:0,failed:0,incident:0};
+ player={x:350,y:455,r:10,speed:150};
  tickets=[];
  running=true; last=performance.now(); spawnTimer=0;
  addLog("Turno iniziato. Nessun ticket aperto.","system");
@@ -86,7 +110,7 @@ function spawnTicket(force){
  const pool=ticketTemplates.filter(t=>!tickets.some(x=>x.id===t.id));
  if(!pool.length)return;
  const base=pool[Math.floor(Math.random()*pool.length)];
- const t={...base,created:state.minute,urgent:Math.random()<.28};
+ const t={...base,created:state.minute,urgent:Math.random()<.28,deadline:state.minute+(Math.random()<.28?24:42),expired:false};
  if(t.urgent){t.title="URGENTISSIMO // "+t.title;t.stress+=4;t.xp+=40}
  tickets.push(t); addLog("Nuovo ticket: "+t.title,t.urgent?"bad":"");
  renderTickets();
@@ -94,7 +118,7 @@ function spawnTicket(force){
 
 function renderTickets(){
  $("#tickets").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket ${t.urgent?"urgent":""}">
- <div class="ticket-title">${t.title}</div><div>${t.desc}</div><div class="ticket-location">→ ${interactables.find(i=>i.id===t.target).room}</div></div>`).join(""):`<div class="muted">Queue vuota. Troppo silenzio.</div>`;
+ <div class="ticket-title">${t.title}</div><div>${t.desc}</div><div class="ticket-location">→ ${interactables.find(i=>i.id===t.target).room}<br>DEADLINE ${formatTime(t.deadline)}</div></div>`).join(""):`<div class="muted">Queue vuota. Troppo silenzio.</div>`;
  $("#ticketCount").textContent=tickets.length;
 }
 
@@ -104,7 +128,7 @@ function updateHUD(){
  $("#clock").textContent=formatTime(state.minute);
  $("#stress").textContent=Math.round(state.stress)+"%";
  $("#rep").textContent=Math.max(0,Math.min(5,state.rep))+"/5";
- $("#xp").textContent=state.xp;
+ $("#xp").textContent=state.xp; $("#incident").textContent=Math.round(state.incident)+"%"; $("#incidentFill").style.width=Math.round(state.incident)+"%";
 }
 
 function loop(now){
@@ -115,21 +139,36 @@ function loop(now){
 }
 
 function update(dt){
- let dx=0,dy=0;
+ let dx=0,dy=0; const prevX=player.x, prevY=player.y;
  if(keys["w"]||keys["arrowup"])dy-=1;if(keys["s"]||keys["arrowdown"])dy+=1;
  if(keys["a"]||keys["arrowleft"])dx-=1;if(keys["d"]||keys["arrowright"])dx+=1;
  if(dx||dy){const l=Math.hypot(dx,dy);player.x+=dx/l*player.speed*dt;player.y+=dy/l*player.speed*dt}
  player.x=Math.max(14,Math.min(W-14,player.x));player.y=Math.max(14,Math.min(H-14,player.y));
+ // collisione muri
+ for(const w of walls){
+   if(player.x+8>w.x && player.x-8<w.x+w.w && player.y+10>w.y && player.y-10<w.y+w.h){
+     player.x=prevX; player.y=prevY; break;
+   }
+ }
 
  state.minute += dt*3.25; // ~3 minutes per second
  spawnTimer+=dt;
  let spawnEvery=Math.max(5.5,12-(state.minute-540)/90);
  if(spawnTimer>spawnEvery && state.minute<1137){spawnTimer=0;spawnTicket(false)}
- horrorLevel=Math.max(0,(state.minute-1020)/120);
+ // ticket scaduti: fanno crescere l'incidente e possono propagare il caos
+ tickets.forEach(t=>{
+   if(!t.expired && state.minute>=t.deadline){
+     t.expired=true; state.incident=Math.min(100,state.incident+(t.urgent?18:12));
+     state.stress=Math.min(100,state.stress+8); state.rep=Math.max(0,state.rep-1);
+     addLog("TASK SCADUTA: "+t.title+" // incidente propagato","bad");
+     flash("TASK FALLITA // INCIDENT LEVEL +");
+   }
+ });
+ horrorLevel=Math.max(state.incident/100,Math.max(0,(state.minute-1020)/120));
 
  if(state.minute>=1137&&!bossStarted){startBoss()}
  if(state.minute>=1162 && !bossStarted===false && running && tickets.length===0)endGame(true);
- if(state.stress>=100||state.rep<=0)endGame(false);
+ if(state.stress>=100||state.rep<=0||state.incident>=100)endGame(false);
 
  const near=getNear();
  $("#interactionHint").classList.toggle("hidden",!near);
@@ -158,10 +197,10 @@ function resolveTicket(t,choice){
  const idx=tickets.indexOf(t);if(idx<0)return;
  tickets.splice(idx,1);
  if(choice===t.solution){
-  state.xp+=t.xp;state.stress=Math.max(0,state.stress-t.stress*.65);state.rep=Math.min(5,state.rep+(Math.random()<.35?1:0));state.solved++;
+  state.xp+=t.xp;state.stress=Math.max(0,state.stress-t.stress*.65);state.incident=Math.max(0,state.incident-(t.expired?3:6));state.rep=Math.min(5,state.rep+(Math.random()<.35?1:0));state.solved++;
   addLog("Risolto: "+t.title,"good");flash("TICKET RISOLTO +"+t.xp+" XP");
  }else{
-  state.stress=Math.min(100,state.stress+t.stress);state.rep--;state.failed++;
+  state.stress=Math.min(100,state.stress+t.stress);state.incident=Math.min(100,state.incident+8);state.rep--;state.failed++;
   addLog("Intervento errato: "+t.title,"bad");flash("ERRORE // stress aumentato");
  }
  renderTickets();
@@ -227,10 +266,13 @@ function flash(t){const f=$("#flashMessage");f.textContent=t;f.classList.remove(
 function draw(){
  ctx.fillStyle="#050707";ctx.fillRect(0,0,W,H);
  rooms.forEach((r,i)=>{
-   ctx.fillStyle=i===5?"#0c1010":"#0b0e0d";ctx.fillRect(r.x,r.y,r.w,r.h);
+   ctx.fillStyle=r.name==="IT"?"#0d1210":"#0b0e0d";ctx.fillRect(r.x,r.y,r.w,r.h);
    ctx.strokeStyle="#28332d";ctx.strokeRect(r.x+.5,r.y+.5,r.w-1,r.h-1);
    ctx.fillStyle="#435149";ctx.font="11px monospace";ctx.fillText(r.name,r.x+10,r.y+17);
  });
+ ctx.fillStyle="#111613";ctx.fillRect(0,140,W,18);ctx.fillRect(0,302,W,20);
+ ctx.fillStyle="#4d5b53";ctx.font="10px monospace";ctx.fillText("VIA DELLA FORNACE // CORRIDOIO",355,315);
+ walls.forEach(w=>{ctx.fillStyle="#39423e";ctx.fillRect(w.x,w.y,w.w,w.h)});
  drawFurniture();
  interactables.forEach(drawObj);
  // eerie flicker late game
@@ -242,12 +284,16 @@ function draw(){
 }
 function drawFurniture(){
  ctx.fillStyle="#151b18";
- for(let x of [55,170,665,790]){ctx.fillRect(x,55,80,38);ctx.fillRect(x+10,105,55,8)}
- ctx.fillRect(375,65,160,55);
- ctx.fillRect(305,255,235,35);
- ctx.fillRect(665,235,230,90);
- ctx.fillStyle="#1c2420";for(let x=680;x<895;x+=35)ctx.fillRect(x,240,22,75);
- ctx.fillStyle="#161c19";ctx.fillRect(55,430,180,55);ctx.fillRect(395,430,150,55);
+ // file di scrivanie; volutamente astratte ma coerenti con gli ambienti reali
+ [[45,190],[135,190],[320,190],[405,190],[520,190],[720,190],[815,190],
+  [260,370],[350,370],[520,370],[720,370],[815,370]].forEach(([x,y])=>{
+    ctx.fillRect(x,y,62,26);ctx.fillStyle="#202925";ctx.fillRect(x+17,y+5,28,12);ctx.fillStyle="#151b18";
+ });
+ // parete lunga IT: quattro postazioni, ispirata alla foto fornita
+ ctx.fillStyle="#202724";ctx.fillRect(245,475,210,12);
+ for(let x=255;x<440;x+=52){ctx.fillStyle="#28332e";ctx.fillRect(x,449,38,22)}
+ // rack
+ for(let x=730;x<900;x+=36){ctx.fillStyle="#1b2420";ctx.fillRect(x,390,24,76)}
 }
 function drawObj(o){
  let active=tickets.some(t=>t.target===o.id);
@@ -258,3 +304,31 @@ function drawObj(o){
  else ctx.fillRect(o.x-12,o.y-9,24,18);
  if(active){ctx.fillStyle="#ffcf5a";ctx.font="bold 16px monospace";ctx.fillText("!",o.x-4,o.y-20)}
 }
+
+// Touch controls: convivono con tastiera e mouse.
+const joy=$("#joystick"), stick=$("#stick"), touchInteract=$("#touchInteract");
+let joyId=null, joyCenter={x:0,y:0};
+function joyStart(e){
+ const t=e.changedTouches[0];joyId=t.identifier;
+ const r=joy.getBoundingClientRect();joyCenter={x:r.left+r.width/2,y:r.top+r.height/2};joyMove(e);
+}
+function joyMove(e){
+ const t=[...e.changedTouches].find(x=>x.identifier===joyId);if(!t)return;
+ let dx=t.clientX-joyCenter.x,dy=t.clientY-joyCenter.y,l=Math.hypot(dx,dy),max=36;
+ if(l>max){dx*=max/l;dy*=max/l}
+ stick.style.transform=`translate(${dx}px,${dy}px)`;
+ keys["a"]=dx<-9;keys["d"]=dx>9;keys["w"]=dy<-9;keys["s"]=dy>9;
+ e.preventDefault();
+}
+function joyEnd(e){
+ if([...e.changedTouches].some(x=>x.identifier===joyId)){
+   joyId=null;stick.style.transform="translate(0,0)";
+   keys["a"]=keys["d"]=keys["w"]=keys["s"]=false;
+ }
+}
+joy.addEventListener("touchstart",joyStart,{passive:false});
+joy.addEventListener("touchmove",joyMove,{passive:false});
+joy.addEventListener("touchend",joyEnd,{passive:false});
+joy.addEventListener("touchcancel",joyEnd,{passive:false});
+touchInteract.addEventListener("touchstart",e=>{e.preventDefault();interact()},{passive:false});
+touchInteract.addEventListener("click",interact);
