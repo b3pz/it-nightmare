@@ -72,3 +72,14 @@ Nessuna modifica a collisioni, F2, ticket, tempo, anomalie o boss.
 - Le anomalie non sono più semplici toast: appaiono come eventi grandi quasi full-screen.
 - Le anomalie avanzate rimangono più a lungo.
 - F2, mappa, porte e collisioni V2.2.2 inalterate.
+
+## V2.4 — NPC & RANDOM ANSWERS
+- Le risposte corrette non sono più sempre A: ogni ticket mescola le opzioni preservando la risposta corretta.
+- Aggiunte nuove domande IT per tutti i livelli.
+- NPC fisici sulla mappa, interagibili con E / pulsante mobile.
+- NPC bonus: Focus, tempo extra, diagnosi, riduzione stress.
+- NPC malus: stress, deadline anticipata.
+- Direzione può generare un CRITICAL.
+- NPC anomalo appare solo con anomalie avanzate.
+- Cooldown NPC per evitare farming continuo.
+- Mappa, porte, collisioni e F2 invariati.

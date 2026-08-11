@@ -74,25 +74,75 @@ const points=[
 const bosses=["DIREZIONE","PRESIDENZA","CAPO ASSOLUTO"];
 const questions={
 LOW:[
-["Un solo PC non naviga, mentre gli altri funzionano. Primo controllo sensato?",["Verificare IP, gateway e connettività del PC","Riavviare il domain controller","Formattare il PC","Disinstallare Revit"],0],
-["Un monitor è nero ma il PC sembra acceso. Cosa controlli prima?",["Alimentazione/input/cavo del monitor","DNS","Licenza Autodesk","GPO"],0],
-["Una stampante locale risulta offline. Primo passo?",["Controllare alimentazione, collegamento e coda","Reinstallare Windows","Spegnere lo switch core","Cambiare dominio"],0]
+["Un solo PC non naviga, mentre gli altri funzionano. Primo controllo sensato?",["Riavviare il domain controller","Verificare IP, gateway e connettività del PC","Formattare il PC","Disinstallare Revit"],1],
+["Un monitor è nero ma il PC sembra acceso. Cosa controlli prima?",["DNS","Licenza Autodesk","Alimentazione, input e cavo del monitor","GPO"],2],
+["Una stampante locale risulta offline. Primo passo?",["Reinstallare Windows","Spegnere lo switch core","Cambiare dominio","Controllare alimentazione, collegamento e coda"],3],
+["Un utente dice che tastiera e mouse non rispondono. Primo controllo?",["Collegamento/ricevitore, batteria e porte USB","Riavvio file server","Reset DNS","Reinstallazione Autodesk"],0],
+["Il Wi-Fi non funziona su un solo portatile. Cosa verifichi prima?",["Riavviare tutti gli access point","Scheda Wi-Fi, rete associata e configurazione IP del client","Cambiare password di dominio a tutti","Spegnere il firewall aziendale"],1]
 ],
 MEDIUM:[
-["Un nome server non risolve ma il ping all'IP funziona. Quale componente sospetti?",["DNS","GPU","HDMI","Bluetooth"],0],
-["Una share di rete non è raggiungibile da un solo utente. Cosa verifichi?",["Connettività, mapping e permessi dell'utente","Formatti il file server","Resetti tutti gli switch","Disinstalli Office"],0],
-["Desktop Connector non sincronizza correttamente. Quale approccio è più sensato?",["Verificare stato client/account/cache e log prima del reset","Cancellare il progetto BIM","Cambiare scheda video","Spegnere il server"],0]
+["Un nome server non risolve ma il ping all'IP funziona. Quale componente sospetti?",["GPU","HDMI","DNS","Bluetooth"],2],
+["Una share di rete non è raggiungibile da un solo utente. Cosa verifichi?",["Formatti il file server","Connettività, mapping e permessi dell'utente","Resetti tutti gli switch","Disinstalli Office"],1],
+["Desktop Connector non sincronizza correttamente. Quale approccio è più sensato?",["Cancellare il progetto BIM","Cambiare scheda video","Spegnere il server","Verificare stato client, account, cache e log prima del reset"],3],
+["Un utente accede a Internet ma non alle risorse interne. Quale verifica è più utile?",["DNS interno, routing/VPN e autenticazione","Cambiare monitor","Reinstallare stampante","Aggiornare il BIOS senza diagnosi"],0],
+["Una stampante di rete risponde al ping ma non stampa. Passo successivo?",["Riavviare il dominio","Controllare coda, spooler, driver e porta configurata","Cambiare VLAN a tutto l'ufficio","Formattare il print server"],1]
 ],
 HIGH:[
-["Più utenti perdono contemporaneamente accesso alle risorse di rete. Prima priorità?",["Determinare ampiezza incidente e verificare rete/servizi centrali","Formattare un client","Cambiare mouse","Riavviare ogni PC singolarmente"],0],
-["Un servizio critico è irraggiungibile. Qual è la diagnosi più corretta?",["Verificare host, rete, servizio e log prima di intervenire","Riavviare tutto senza verifiche","Eliminare DNS","Disabilitare antivirus ovunque"],0],
-["Problemi di autenticazione coinvolgono molti utenti. Cosa controlli?",["Servizi di dominio, DNS, connettività e log","Driver stampante","HDMI sala meeting","Luminosità monitor"],0]
+["Più utenti perdono contemporaneamente accesso alle risorse di rete. Prima priorità?",["Formattare un client","Cambiare mouse","Determinare ampiezza incidente e verificare rete/servizi centrali","Riavviare ogni PC singolarmente"],2],
+["Un servizio critico è irraggiungibile. Qual è la diagnosi più corretta?",["Riavviare tutto senza verifiche","Verificare host, rete, servizio e log prima di intervenire","Eliminare DNS","Disabilitare antivirus ovunque"],1],
+["Problemi di autenticazione coinvolgono molti utenti. Cosa controlli?",["Driver stampante","HDMI sala meeting","Luminosità monitor","Servizi di dominio, DNS, connettività e log"],3],
+["Dopo una modifica di rete molti client non raggiungono più un server. Cosa fai prima?",["Confronti configurazione precedente, routing/VLAN/firewall e log","Reinstalli Windows sui client","Cancelli i profili utente","Sostituisci tutti i cavi HDMI"],0],
+["Un file server mostra latenze improvvise per tutti. Prima diagnosi?",["Cambiare mouse agli utenti","Controllare risorse host, storage, rete e log eventi","Resettare Desktop Connector","Disinstallare Office"],1]
 ],
 CRITICAL:[
-["CRITICAL: «Il PDF non si apre». Qual è la prima verifica sensata?",["Capire file/app/errore e provare apertura controllata","Riavviare tutti i server","Resettare il dominio","Cambiare VLAN"],0],
-["CRITICAL: «Il mouse non va». Cosa fai?",["Controllo collegamento/batteria/porta e prova rapida","Riavvio hypervisor","Reset DNS aziendale","Formatto il PC"],0],
-["CRITICAL: «La TV non si vede». Primo controllo?",["Input, sorgente, cavo e stato display","Riavvio domain controller","Reset Autodesk Licensing","Elimino profilo Windows"],0]
+["CRITICAL: «Il PDF non si apre». Qual è la prima verifica sensata?",["Riavviare tutti i server","Capire file, applicazione, errore e provare un'apertura controllata","Resettare il dominio","Cambiare VLAN"],1],
+["CRITICAL: «Il mouse non va». Cosa fai?",["Riavvio hypervisor","Reset DNS aziendale","Formatto il PC","Controllo collegamento, batteria, porta e prova rapida"],3],
+["CRITICAL: «La TV non si vede». Primo controllo?",["Input, sorgente, cavo e stato display","Riavvio domain controller","Reset Autodesk Licensing","Elimino profilo Windows"],0],
+["CRITICAL: «Non trovo l'icona sul desktop». Prima risposta tecnica sensata?",["Riavviare lo storage","Verificare cosa cerca l'utente e dove dovrebbe trovarsi","Cambiare VLAN","Reset del dominio"],1]
 ]};
+
+const npcs=[
+ {id:"matteo",name:"MATTEO",x:600,y:525,room:"IT",role:"IT MANAGER",effect:"bonus",line:"Controlla prima i log. Sempre.",bonus:"FOCUS",desc:"Il prossimo errore non aumenta lo stress.",shirt:"#536b76"},
+ {id:"cristian",name:"CRISTIAN",x:690,y:570,room:"IT",role:"IT",effect:"bonus",line:"Ho già controllato la postazione, prova adesso.",bonus:"TEMPO",desc:"+12 minuti sulla deadline del ticket più urgente.",shirt:"#465e8a"},
+ {id:"razvan",name:"RAZVAN",x:470,y:570,room:"IT",role:"IT",effect:"bonus",line:"Aspetta, questa l'ho già vista.",bonus:"DIAGNOSI",desc:"Rivela una risposta errata nella prossima task.",shirt:"#685b77"},
+ {id:"utente_grafica",name:"UTENTE GRAFICA",x:185,y:115,room:"GRAFICA",role:"ARCHITETTO",effect:"malus",line:"Già che sei qui... avrei anche un'altra cosina.",bonus:"INTERRUZIONE",desc:"+6% stress.",shirt:"#745b48"},
+ {id:"utente_aba",name:"UTENTE ABA",x:145,y:365,room:"ABA",role:"ARCHITETTO",effect:"malus",line:"È urgentissimo. Cioè, non proprio, però mi serve.",bonus:"URGENZA",desc:"-8 minuti dal ticket più urgente.",shirt:"#6c4d4d"},
+ {id:"direzione",name:"DIREZIONE",x:1135,y:120,room:"CONTRATTI",role:"DIREZIONE",effect:"mixed",line:"Ho un problema velocissimo.",bonus:"PRIORITÀ",desc:"Può generare un CRITICAL, ma vale XP extra.",shirt:"#7b6542"},
+ {id:"laura",name:"LAURA",x:935,y:120,room:"SALA MEET",role:"MEETING",effect:"bonus",line:"Ti ho lasciato libera la sala. Hai due minuti di pace.",bonus:"CALMA",desc:"-8% stress.",shirt:"#536d5c"},
+ {id:"fantasma",name:"???",x:1510,y:590,room:"SALA CORTE",role:"UNKNOWN",effect:"anomaly",line:"19:03",bonus:"ANOMALIA",desc:"Non dovrebbe essere qui.",shirt:"#27242d"}
+];
+let npcCooldowns={},npcHint=null,npcReveal=false,npcStressShield=false;
+
+function shuffledQuestion(q){
+ const pairs=q[1].map((text,i)=>({text,correct:i===q[2]}));
+ for(let i=pairs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pairs[i],pairs[j]]=[pairs[j],pairs[i]]}
+ return [q[0],pairs.map(x=>x.text),pairs.findIndex(x=>x.correct)];
+}
+function nearestNPC(){
+ return npcs.map(n=>({n,d:Math.hypot(player.x-n.x,player.y-n.y)})).sort((a,b)=>a.d-b.d)[0];
+}
+function interactNPC(n){
+ const now=state.min,last=npcCooldowns[n.id]??-999;
+ if(now-last<45){toast(`${n.name}: ci siamo già parlati.`);return}
+ npcCooldowns[n.id]=now;
+ let extra="";
+ if(n.id==="matteo"){npcStressShield=true;extra="FOCUS ATTIVO";}
+ else if(n.id==="cristian"){
+   let t=[...tickets].sort((a,b)=>a.due-b.due)[0];if(t)t.due=Math.min(BOSS-.2,t.due+12);extra=t?"+12 MINUTI":"NESSUN TICKET APERTO";
+ }
+ else if(n.id==="razvan"){npcReveal=true;extra="PROSSIMA TASK: UNA RISPOSTA ERRATA SARÀ SEGNALATA";}
+ else if(n.id==="utente_grafica"){state.stress+=6*difficultyConfig[difficulty].stressMult;extra="+STRESS";}
+ else if(n.id==="utente_aba"){
+   let t=[...tickets].sort((a,b)=>a.due-b.due)[0];if(t)t.due=Math.max(state.min+5,t.due-8);extra=t?"DEADLINE ANTICIPATA":"NESSUN TICKET APERTO";
+ }
+ else if(n.id==="direzione"){newTicket("CRITICAL");extra="NUOVO CRITICAL";}
+ else if(n.id==="laura"){state.stress-=8;extra="-8% STRESS";}
+ else if(n.id==="fantasma"){showAnomaly("L'NPC NON COMPARE NELLA LISTA UTENTI.",3200);state.incident+=4;extra="INCIDENT +4%";}
+ clamp();renderTickets();hud();
+ $("#modalBody").innerHTML=`<h2 class="${n.effect==="malus"?"critical":n.effect==="bonus"?"low":"medium"}">${n.name}</h2><p><b>${n.role}</b></p><p>«${n.line}»</p><p><b>${n.bonus}</b><br>${n.desc}</p><p>${extra}</p>`;
+ $("#modal").classList.remove("hidden");
+}
+
 
 let state,player,tickets,last,spawnTimer,anomTimer,debug=false,keys={};
 
@@ -120,7 +170,7 @@ function validateMap(){
  console.log("V2.1 MAP CHECK:",bad.length?"UNREACHABLE":"ALL TASK ZONES REACHABLE",bad);
  return bad;
 }
-function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;newTicket("LOW");hud()}
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];npcCooldowns={};npcReveal=false;npcStressShield=false;last=performance.now();spawnTimer=0;anomTimer=0;newTicket("LOW");hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x+5&&x<o.x+o.w-5&&y>o.y+5&&y<o.y+o.h-5)}
 function fmt(m){m=Math.max(START,Math.min(END,m));return String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.floor(m%60)).padStart(2,"0")}
@@ -133,7 +183,7 @@ function newTicket(force){
  let level=force||levelForTime(),p;
  let valid=reachablePoints();if(!valid.length)return;if(level==="CRITICAL")p=farthestPoint();else p=valid[Math.floor(Math.random()*valid.length)];
  let mins={LOW:95,MEDIUM:75,HIGH:55,CRITICAL:30}[level]*difficultyConfig[difficulty].timeMult;
- tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:questions[level][Math.floor(Math.random()*questions[level].length)],criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
+ tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:shuffledQuestion(questions[level][Math.floor(Math.random()*questions[level].length)]),criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
  renderTickets();
 }
 function renderTickets(){
@@ -142,16 +192,20 @@ function renderTickets(){
 function interact(){
  if(state.phase!=="shift")return;
  let i=tickets.findIndex(t=>Math.hypot(player.x-t.p.x,player.y-t.p.y)<75);
- if(i<0){toast("Nessuna task in questo punto.");return}
+ if(i<0){
+   let near=nearestNPC();
+   if(near&&near.d<58){interactNPC(near.n);return}
+   toast("Nessuna task o NPC in questo punto.");return
+ }
  let t=tickets[i],q=t.q;
- $("#modalBody").innerHTML=`<h2 class="${t.level.toLowerCase()}">${t.level}${t.criticalFrom?" // "+t.criticalFrom:""}</h2><p><b>${t.p.room}</b></p><p>${q[0]}</p>${q[1].map((a,n)=>`<button class="choice answer" data-n="${n}">${String.fromCharCode(65+n)}. ${a}</button>`).join("")}`;
- $("#modal").classList.remove("hidden");document.querySelectorAll(".answer").forEach(b=>b.onclick=()=>answer(i,+b.dataset.n));
+ $("#modalBody").innerHTML=`<h2 class="${t.level.toLowerCase()}">${t.level}${t.criticalFrom?" // "+t.criticalFrom:""}</h2><p><b>${t.p.room}</b></p><p>${q[0]}</p>${q[1].map((a,n)=>`<button class="choice answer${npcReveal&&n!==q[2]?" npc-wrong":""}" data-n="${n}">${String.fromCharCode(65+n)}. ${a}${npcReveal&&n!==q[2]?"  [DIAGNOSI: improbabile]":""}</button>`).join("")}`;
+ $("#modal").classList.remove("hidden");if(npcReveal)npcReveal=false;document.querySelectorAll(".answer").forEach(b=>b.onclick=()=>answer(i,+b.dataset.n));
 }
 function answer(i,n){
  let t=tickets[i],ok=n===t.q[2],xp={LOW:100,MEDIUM:250,HIGH:500,CRITICAL:750}[t.level];
  tickets.splice(i,1);$("#modal").classList.add("hidden");
  if(ok){state.xp+=xp;state.solved++;state.incident-=({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]);state.stress-=4;toast(`${t.level} RISOLTO +${xp} XP`)}
- else{state.strikes++;state.stress+=({LOW:7,MEDIUM:12,HIGH:18,CRITICAL:20}[t.level])*difficultyConfig[difficulty].stressMult;state.incident+=({LOW:5,MEDIUM:9,HIGH:15,CRITICAL:18}[t.level])*difficultyConfig[difficulty].incidentMult;state.rep-=t.level==="CRITICAL"?2:1;toast("RISPOSTA ERRATA // STRIKE +1")}
+ else{state.strikes++;if(npcStressShield){npcStressShield=false;toast("FOCUS // STRESS ASSORBITO")}else state.stress+=({LOW:7,MEDIUM:12,HIGH:18,CRITICAL:20}[t.level])*difficultyConfig[difficulty].stressMult;state.incident+=({LOW:5,MEDIUM:9,HIGH:15,CRITICAL:18}[t.level])*difficultyConfig[difficulty].incidentMult;state.rep-=t.level==="CRITICAL"?2:1;toast("RISPOSTA ERRATA // STRIKE +1")}
  clamp();renderTickets();checkEarlyEnd();
 }
 function expireTickets(){for(const t of tickets)if(!t.expired&&state.min>=t.due){t.expired=true;state.strikes++;state.incident+=(t.level==="CRITICAL"?22:({LOW:7,MEDIUM:12,HIGH:18}[t.level]))*difficultyConfig[difficulty].incidentMult;state.stress+=10*difficultyConfig[difficulty].stressMult;state.rep-=t.level==="CRITICAL"?2:1;toast(`${t.level} SCADUTO // STRIKE +1`) }checkEarlyEnd()}
