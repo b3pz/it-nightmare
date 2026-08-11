@@ -13,11 +13,11 @@ const boot=["[BOOT] ARCHEA IT SERVICES","[OK] Domain reachable","[OK] Autodesk l
 let bl=0;(function b(){if(bl<boot.length){$("#bootlog").innerHTML+=boot[bl++]+"<br>";setTimeout(b,280)}else $("#toLore").classList.remove("hidden")})();$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{difficulty=$("#difficulty")?.value||"normal";show("game");reset();requestAnimationFrame(loop)};
 
 const rooms=[
-{name:"GRAFICA",x:30,y:55,w:250,h:210,f:"stone"},{name:"CENTRALE",x:300,y:55,w:205,h:210,f:"stone"},{name:"SERVER / SOPPALCO",x:525,y:55,w:230,h:210,f:"server"},
-{name:"ABA",x:30,y:310,w:210,h:185,f:"stone"},{name:"LOFT",x:30,y:535,w:210,h:180,f:"wood"},{name:"IT",x:315,y:310,w:440,h:355,f:"stone"},
-{name:"SALA MEET",x:840,y:55,w:190,h:270,f:"stone"},{name:"CONTRATTI",x:1050,y:55,w:170,h:270,f:"wood"},{name:"PANTHEON",x:1240,y:55,w:210,h:270,f:"wood"},
+{name:"GRAFICA",x:30,y:55,w:250,h:210,f:"stone"},{name:"LOFT",x:300,y:55,w:205,h:210,f:"stone"},{name:"SERVER",x:525,y:55,w:230,h:210,f:"server"},
+{name:"ABA",x:30,y:310,w:210,h:185,f:"stone"},{name:"IT",x:30,y:535,w:210,h:180,f:"wood"},{name:"CENTRALE",x:315,y:310,w:440,h:355,f:"stone"},
+{name:"SALA MEET",x:840,y:55,w:190,h:270,f:"stone"},{name:"THE BUNKER",x:1050,y:55,w:170,h:270,f:"wood"},{name:"PANTHEON",x:1240,y:55,w:210,h:270,f:"wood"},
 {name:"SPAZIO A",x:840,y:365,w:300,h:185,f:"stone"},{name:"BAGNI",x:840,y:585,w:180,h:125,f:"tile"},{name:"RIFUGIO DIGITALE",x:1040,y:585,w:180,h:125,f:"wood"},
-{name:"SALA CORTE",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:840,y:735,w:285,h:130,f:"tile"},{name:"STAMPANTI",x:1145,y:735,w:285,h:130,f:"stone"}];
+{name:"SALA CORTE",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO / SEGRETERIA",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:840,y:735,w:285,h:130,f:"tile"},{name:"STAMPANTI",x:1145,y:735,w:285,h:130,f:"stone"}];
 // NAVIGATION LAYER: corridoi enormi e porte sovradimensionate. Nessun bordo grafico è una collisione.
 /*
  V2.1 NAVIGATION
@@ -33,6 +33,9 @@ const corridors=[
  {x:805,y:690,w:655,h:88},       // corridoio basso destra
  {x:1205,y:300,w:100,h:455},     // dorsale destra
  {x:1260,y:665,w:205,h:95}       // raccordo sala corte
+,
+ {x:165,y:235,w:95,h:525},        // V2.6.1 LEFT SPINE: Grafica / ABA / IT
+ {x:165,y:685,w:175,h:95}         // raccordo sinistro verso corridoio basso
 ];
 const doors=[
  // GRAFICA -> corridoio
@@ -61,6 +64,11 @@ const doors=[
  {x:650,y:675,w:150,h:130},{x:735,y:735,w:120,h:125},
  // CUCINA / STAMPANTI -> corridoio basso dx
  {x:805,y:720,w:120,h:140},{x:1080,y:710,w:120,h:150},{x:1370,y:710,w:100,h:150}
+,
+ {x:205,y:205,w:75,h:115},         // GRAFICA -> LEFT SPINE
+ {x:190,y:345,w:110,h:110},        // ABA -> LEFT SPINE
+ {x:190,y:575,w:110,h:130},        // IT -> LEFT SPINE
+ {x:210,y:665,w:145,h:120}         // LEFT SPINE -> lower corridor
 ];
 const walkZones=[...roomFloors,...corridors,...doors];
 const obstacles=[
@@ -94,6 +102,98 @@ CRITICAL:[
 ["CRITICAL: «La TV non si vede». Primo controllo?",["Input, sorgente, cavo e stato display","Riavvio domain controller","Reset Autodesk Licensing","Elimino profilo Windows"],0]
 ]};
 
+/* ================= V2.6.1 OFFICE ALIVE =================
+   NPC + physical workstation layer.
+   Navigation/F2 base remains unchanged apart from LEFT SPINE above.
+*/
+const stations=[
+ ...[[405,405],[455,405],[505,405],[555,405],[605,405],[655,405],
+     [405,480],[455,480],[505,480],[555,480],[605,480],[655,480]].map((p,i)=>({id:"C"+String(i+1).padStart(2,"0"),room:"CENTRALE",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[95,155],[145,155],[195,155],[120,205]].map((p,i)=>({id:"G"+String(i+1).padStart(2,"0"),room:"GRAFICA",type:"MAC",x:p[0],y:p[1]})),
+ ...[[1080,170],[1130,170],[1170,220]].map((p,i)=>({id:"B"+String(i+1).padStart(2,"0"),room:"THE BUNKER",type:"MAC",x:p[0],y:p[1]})),
+ ...[[350,155],[405,155],[455,205]].map((p,i)=>({id:"L"+String(i+1).padStart(2,"0"),room:"LOFT",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[110,385],[165,385],[135,450]].map((p,i)=>({id:"A"+String(i+1).padStart(2,"0"),room:"ABA",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[1300,165],[1360,165],[1415,215]].map((p,i)=>({id:"P"+String(i+1).padStart(2,"0"),room:"PANTHEON",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[95,600],[150,600],[195,650]].map((p,i)=>({id:"IT"+String(i+1).padStart(2,"0"),room:"IT",type:"HP Z",x:p[0],y:p[1]})),
+ {id:"MEET-TV",room:"SALA MEET",type:"AV",x:925,y:205},
+ {id:"SPAZIO-TV",room:"SPAZIO A",type:"AV",x:1030,y:480},
+ {id:"CORTE-TV",room:"SALA CORTE",type:"AV",x:1395,y:535},
+ {id:"PIX-01",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1080,y:635},
+ {id:"PIX-02",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1130,y:635},
+ {id:"SRV-01",room:"SERVER",type:"SERVER",x:610,y:145},
+ {id:"SRV-02",room:"SERVER",type:"SERVER",x:665,y:145},
+ {id:"PRN-01",room:"STAMPANTI",type:"PRINTER",x:1210,y:805},
+ {id:"PRN-02",room:"STAMPANTI",type:"PRINTER",x:1260,y:805},
+ {id:"PRN-03",room:"STAMPANTI",type:"PRINTER",x:1310,y:805}
+];
+
+const npcDefs=[
+ {id:"pao",name:"PAO",role:"BIMER",x:250,y:620,tone:"mixed",shirt:"#536f8b"},
+ {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,tone:"good",shirt:"#765d78"},
+ {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51"}
+];
+let npcs=[],mokasa=null,npcCooldown={},mokasaTimer=0,lastZiaHour=-1,idleMinutes=0,lastPlayerPos={x:0,y:0};
+
+function shuffledQuestion(q){
+ const arr=q[1].map((text,i)=>({text,correct:i===q[2]}));
+ for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
+ return [q[0],arr.map(x=>x.text),arr.findIndex(x=>x.correct)];
+}
+function spawnNPCs(){
+ npcs=npcDefs.map(n=>({...n}));mokasa=null;npcCooldown={};mokasaTimer=0;lastZiaHour=-1;
+ lastPlayerPos={x:player.x,y:player.y};idleMinutes=0;
+}
+function nearestNPC(){
+ const all=mokasa?[...npcs,mokasa]:npcs;
+ return all.map(n=>({n,d:Math.hypot(player.x-n.x,player.y-n.y)})).sort((a,b)=>a.d-b.d)[0];
+}
+function spawnMokasa(){
+ const candidates=stations.filter(s=>s.room!=="SERVER");
+ const s=candidates[Math.floor(Math.random()*candidates.length)];
+ mokasa={id:"mokasa",name:"MOKASA",role:"CAPO",x:s.x+22,y:s.y+26,tone:"bad",shirt:"#75483d",life:45};
+ showAnomaly("⚠ MOKASA È NELLO STUDIO",2300);
+}
+function npcTalk(n){
+ const now=state.min;
+ if((npcCooldown[n.id]??-999)+35>now){toast(`${n.name}: ci siamo già parlati.`);return}
+ npcCooldown[n.id]=now;
+ let title="",desc="",good=true;
+
+ if(n.id==="pao"){
+  if(Math.random()<.70){
+   const topics=["FIORENTINA","RASSINA","CALCIO","CAFFÈ"];title=topics[Math.floor(Math.random()*topics.length)];
+   state.stress=Math.max(0,state.stress-7);state.xp+=4;desc="STRESS -7 · XP +4";
+  }else{
+   title=Math.random()<.5?"REVIT":"DESKTOP CONNECTOR";good=false;newTicket(Math.random()<.6?"MEDIUM":"HIGH");
+   desc="«Già che sei qui...» Nuova rogna BIM.";
+  }
+ }else if(n.id==="zia"){
+  if(Math.random()<.80){
+   const r=Math.random();
+   if(r<.4){title="CAFFÈ";state.stress=Math.max(0,state.stress-10);desc="STRESS -10";}
+   else if(r<.7){title="PILLOLA DI SAGGEZZA";state.rep=Math.min(5,state.rep+1);desc="REPUTAZIONE +1";}
+   else{title="TI COPRO IO";let t=[...tickets].sort((a,b)=>a.due-b.due)[0];if(t)t.due+=12;desc="+12 MINUTI AL TICKET PIÙ URGENTE";}
+  }else{title="PROBLEMA DA BOOMER";good=false;newTicket("LOW");desc="Nuova task LOW."}
+ }else if(n.id==="don"){
+  const ev=[["CAFFÈ",-8],["SIGARETTA",-11],["CHIACCHIERE",-6]][Math.floor(Math.random()*3)];
+  title=ev[0];state.stress=Math.max(0,state.stress+ev[1]);desc=`STRESS ${ev[1]}`;
+ }else if(n.id==="mokasa"){
+  title="TI HA VISTO";good=false;
+  if(Math.random()<.90){state.stress+=12;state.rep-=1;if(Math.random()<.4)newTicket("CRITICAL");desc="«Qui bisogna lavorare.» STRESS +12 · REPUTAZIONE -1";}
+  else{state.rep=Math.min(5,state.rep+1);desc="Per una volta approva. REPUTAZIONE +1";}
+ }
+ clamp();hud();renderTickets();
+ $("#modalBody").innerHTML=`<h2 class="${good?"low":"critical"}">${n.name} // ${title}</h2><p>${desc}</p>`;
+ $("#modal").classList.remove("hidden");
+}
+function showStrike(level){
+ const o=$("#strikeOverlay");
+ if(!o)return;
+ $("#strikeCount").textContent=`${level} SCADUTO // STRIKE +1 // ERRORI ${state.strikes}/${state.maxStrikes}`;
+ o.classList.remove("hidden");clearTimeout(o._t);o._t=setTimeout(()=>o.classList.add("hidden"),1900);
+}
+
+
 let state,player,tickets,last,spawnTimer,anomTimer,debug=false,keys={};
 
 function reachableSet(){
@@ -120,7 +220,7 @@ function validateMap(){
  console.log("V2.1 MAP CHECK:",bad.length?"UNREACHABLE":"ALL TASK ZONES REACHABLE",bad);
  return bad;
 }
-function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;newTicket("LOW");hud()}
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;spawnNPCs();newTicket("LOW");hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x+5&&x<o.x+o.w-5&&y>o.y+5&&y<o.y+o.h-5)}
 function fmt(m){m=Math.max(START,Math.min(END,m));return String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.floor(m%60)).padStart(2,"0")}
@@ -131,9 +231,13 @@ function farthestPoint(){let ps=reachablePoints();return [...ps].sort((a,b)=>Mat
 function newTicket(force){
  if(state.phase!=="shift"||tickets.length>=4)return;
  let level=force||levelForTime(),p;
- let valid=reachablePoints();if(!valid.length)return;if(level==="CRITICAL")p=farthestPoint();else p=valid[Math.floor(Math.random()*valid.length)];
+ let valid=stations.filter(s=>walkable(s.x,s.y)||reachablePoints().some(p=>Math.hypot(p.x-s.x,p.y-s.y)<95));
+ if(!valid.length)valid=reachablePoints();
+ const weighted=[...valid,...valid.filter(s=>s.room==="CENTRALE"),...valid.filter(s=>s.room==="CENTRALE")];
+ if(level==="CRITICAL")p=[...valid].sort((a,b)=>Math.hypot(player.x-b.x,player.y-b.y)-Math.hypot(player.x-a.x,player.y-a.y))[0];
+ else p=weighted[Math.floor(Math.random()*weighted.length)];
  let mins={LOW:95,MEDIUM:75,HIGH:55,CRITICAL:30}[level]*difficultyConfig[difficulty].timeMult;
- tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:questions[level][Math.floor(Math.random()*questions[level].length)],criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
+ tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:shuffledQuestion(questions[level][Math.floor(Math.random()*questions[level].length)]),criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
  renderTickets();
 }
 function renderTickets(){
@@ -142,7 +246,11 @@ function renderTickets(){
 function interact(){
  if(state.phase!=="shift")return;
  let i=tickets.findIndex(t=>Math.hypot(player.x-t.p.x,player.y-t.p.y)<75);
- if(i<0){toast("Nessuna task in questo punto.");return}
+ if(i<0){
+ const near=nearestNPC();
+ if(near&&near.d<65){npcTalk(near.n);return}
+ toast("Nessuna task o NPC in questo punto.");return
+}
  let t=tickets[i],q=t.q;
  $("#modalBody").innerHTML=`<h2 class="${t.level.toLowerCase()}">${t.level}${t.criticalFrom?" // "+t.criticalFrom:""}</h2><p><b>${t.p.room}</b></p><p>${q[0]}</p>${q[1].map((a,n)=>`<button class="choice answer" data-n="${n}">${String.fromCharCode(65+n)}. ${a}</button>`).join("")}`;
  $("#modal").classList.remove("hidden");document.querySelectorAll(".answer").forEach(b=>b.onclick=()=>answer(i,+b.dataset.n));
@@ -164,13 +272,13 @@ function showAnomaly(text,duration=2600){
  o._timer=setTimeout(()=>o.classList.add("hidden"),duration);
 }
 function anomalyEvent(){
- let a=anomalyLevel(),r=Math.random(),msg;
- if(a<.2)msg=["UN MONITOR SI ACCENDE PER UN ISTANTE.","IL TELEFONO SQUILLA. UNA SOLA VOLTA.","UN TICKET DUPLICATO COMPARE E SCOMPARE."][Math.floor(r*3)];
- else if(a<.45)msg=["LA STAMPANTE PRODUCE UNA PAGINA VUOTA.","UN PC SENZA UTENTE SI ACCENDE.","QUALCOSA BATTE DENTRO IL SERVER RACK."][Math.floor(r*3)];
- else if(a<.7)msg=["SESSIONE SENZA PROPRIETARIO RILEVATA.","LE LUCI DEL CORRIDOIO TREMANO.","ARRIVA UN TICKET DA UN UTENTE ASSENTE."][Math.floor(r*3)];
- else msg=["19:03 COMPARE SU TUTTI I MONITOR.","QUALCOSA ATTRAVERSA IL CORRIDOIO.","ARCH-VOID COMPARE NEI LOG.","TUTTI I TELEFONI MOSTRANO INTERNO 000."][Math.floor(r*4)];
- showAnomaly(msg,a>.7?3300:2500);
- if(a>.55&&Math.random()<.25){state.anomalyPenalty++;state.stress+=3*difficultyConfig[difficulty].stressMult}
+ const a=anomalyLevel();
+ let pool;
+ if(a<.25)pool=["UNA LUCE DEL CORRIDOIO LAMPEGGIA.","UN MONITOR SI ACCENDE DA SOLO.","DAL BAGNO ARRIVA UN COLPO SECCO.","UNA STAMPANTE PARTE SENZA JOB."];
+ else if(a<.55)pool=["NEL RIFUGIO DIGITALE PIXERA MOSTRA 19:03.","DAL BAGNO SI SENTE UN TELEFONO.","UN PC SENZA UTENTE MOSTRA UNA SESSIONE ATTIVA.","LE LUCI DELLA CENTRALE SI SPENGONO PER UN ISTANTE."];
+ else pool=["TUTTI I MONITOR DEL RIFUGIO DIGITALE MOSTRANO LA STESSA FIGURA.","QUALCOSA È PASSATO DAVANTI ALLA PORTA DEL BAGNO.","19:03 COMPARE SU PIÙ POSTAZIONI.","ARCH-VOID COMPARE NEI LOG DEL SERVER."];
+ showAnomaly(pool[Math.floor(Math.random()*pool.length)],a>.55?3400:2700);
+ if(a>.55&&Math.random()<.22){state.anomalyPenalty++;state.stress+=3*difficultyConfig[difficulty].stressMult}
 }
 function maybeCritical(){if(state.min>600&&Math.random()<difficultyConfig[difficulty].criticalChance)newTicket("CRITICAL")}
 function startBoss(){
@@ -201,7 +309,16 @@ function update(dt){
   let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
   if(dx||dy){let l=Math.hypot(dx,dy),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(walkable(player.x+vx,player.y))player.x+=vx;if(walkable(player.x,player.y+vy))player.y+=vy}
   state.min=Math.min(BOSS,state.min+dt*TIME_SPEED);if(state.min>=BOSS){startBoss();hud();return}
-  spawnTimer+=dt;anomTimer+=dt;if(spawnTimer>11){spawnTimer=0;newTicket();maybeCritical()}if(anomTimer>Math.max(5,14-anomalyLevel()*8)){anomTimer=0;anomalyEvent()}
+  spawnTimer+=dt;anomTimer+=dt;
+ const hr=Math.floor(state.min/60);
+ if(hr!==lastZiaHour){lastZiaHour=hr;if(state.min>START+10&&Math.random()<.80)toast("ZIA ALE // potresti passare dalla Segreteria.");}
+ mokasaTimer+=dt*TIME_SPEED;
+ if(!mokasa&&state.min>620&&mokasaTimer>55&&Math.random()<.004){spawnMokasa();mokasaTimer=0}
+ if(mokasa){mokasa.life-=dt*TIME_SPEED;if(mokasa.life<=0)mokasa=null}
+ const moved=Math.hypot(player.x-lastPlayerPos.x,player.y-lastPlayerPos.y);
+ if(moved<2)idleMinutes+=dt*TIME_SPEED;else{idleMinutes=0;lastPlayerPos={x:player.x,y:player.y}}
+ if(mokasa&&Math.hypot(player.x-mokasa.x,player.y-mokasa.y)<90&&idleMinutes>4){npcTalk(mokasa);idleMinutes=0}
+if(spawnTimer>11){spawnTimer=0;newTicket();maybeCritical()}if(anomTimer>Math.max(5,14-anomalyLevel()*8)){anomTimer=0;anomalyEvent()}
   expireTickets();
  } else if(state.phase==="boss")state.min=BOSS;else state.min=END;
  hud();
@@ -356,6 +473,19 @@ function draw(){
  furniture();
  rooms.forEach(label);
 
+ // V2.6.1 workstation overlay
+ stations.forEach(s=>{
+   if(s.type==="MAC"){g.fillStyle="#e3e1d9";g.fillRect(s.x-10,s.y-10,20,16);g.fillStyle="#87aeb9";g.fillRect(s.x-7,s.y-7,14,9)}
+   else if(s.type==="HP Z"){g.fillStyle="#252c29";g.fillRect(s.x-11,s.y-10,22,16);g.fillStyle="#4d94b3";g.fillRect(s.x-8,s.y-7,16,9);g.fillStyle="#111";g.fillRect(s.x+13,s.y-6,6,14)}
+   else if(s.type==="AV"||s.type==="PIXERA"){g.fillStyle="#151a18";g.fillRect(s.x-18,s.y-13,36,22);g.fillStyle=s.type==="PIXERA"?"#725b96":"#3d778e";g.fillRect(s.x-14,s.y-9,28,14)}
+ });
+ [...npcs,...(mokasa?[mokasa]:[])].forEach(n=>{
+   g.fillStyle="rgba(0,0,0,.3)";g.beginPath();g.ellipse(n.x,n.y+14,11,5,0,0,Math.PI*2);g.fill();
+   g.fillStyle=n.shirt;g.fillRect(n.x-8,n.y-12,16,22);g.fillStyle="#d0a887";g.fillRect(n.x-6,n.y-19,12,8);
+   g.fillStyle="#050706";g.fillRect(n.x-30,n.y-39,60,13);
+   g.fillStyle=n.tone==="bad"?"#ff6262":n.tone==="good"?"#62e568":"#ffd447";
+   g.font="bold 9px monospace";g.textAlign="center";g.fillText(n.name,n.x,n.y-30);g.textAlign="left";
+ });
  tickets.forEach(t=>{
   const b=Math.sin(performance.now()/120)>0;
   g.fillStyle=t.level==="CRITICAL"?"#ff3131":b?"#ffd447":"#c43d35";

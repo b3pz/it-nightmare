@@ -108,3 +108,7 @@ Base: V2.3 stabile, senza usare la V2.4 NPC difettosa.
 - Ticket scaduto = overlay rosso quasi fullscreen con STRIKE +1.
 - Anomalie contestuali anche in BAGNI e RIFUGIO DIGITALE/Pixera.
 - Oggetti/collectible NON ancora implementati: riservati alla V3.
+
+
+## V2.6.1 TRUE BUILD
+Build verificata automaticamente prima della consegna. Include davvero corridoio sinistro, nuovi nomi stanze, postazioni, 4 NPC, risposte randomizzate, strike overlay e anomalie Bagni/Rifugio Digitale.
