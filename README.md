@@ -53,3 +53,11 @@ Corretto un errore nel Visual Map Pass V2.2: il renderer usava `ctx` mentre
 il contesto Canvas del gioco è definito come `g`. Questo interrompeva `draw()`
 e lasciava visibili HUD e Ticket Queue ma non la mappa.
 Nessuna modifica a collisioni, F2, ticket, tempo, anomalie o boss.
+
+## V2.2.2 — DOOR PASS
+- F2 e tutte le collisioni V2.2.1 restano inalterate.
+- Rimossi i rettangoli marroni che simulavano le porte nel mezzo dei corridoi.
+- Le doorZone servono ora solo per individuare il muro reale da interrompere.
+- Aperture grafiche ricavate direttamente sui bordi delle stanze.
+- Aggiunti stipiti e soglie semplici in pixel-art.
+- L'apertura visiva è più stretta dell'area di collisione, quindi il passaggio rimane facile.

@@ -229,15 +229,65 @@ function drawRoomWalls(r){
  wallRect(r.x,r.y,t,r.h);wallRect(r.x+r.w-t,r.y,t,r.h);
  g.fillStyle="rgba(0,0,0,.22)";g.fillRect(r.x+t,r.y+t,r.w-t*2,5);g.fillRect(r.x+t,r.y+t,5,r.h-t*2);
 }
+
+function doorwayFloorColor(r){
+ return r.f==="wood" ? "#2a1b10" : r.f==="tile" ? "#18211d" : r.f==="server" ? "#101613" : "#1b201d";
+}
+
+/*
+ V2.2.2 DOOR PASS
+ Non disegna più un rettangolo "porta" nel centro della doorZone.
+ Usa invece la doorZone soltanto per trovare il muro reale della stanza
+ che deve essere interrotto. La collisione resta identica e permissiva.
+*/
 function visualDoor(z){
- const cx=z.x+z.w/2,cy=z.y+z.h/2,horiz=z.w>=z.h;
- const dw=horiz?Math.min(44,z.w*.48):Math.min(30,z.w*.55);
- const dh=horiz?Math.min(24,z.h*.52):Math.min(48,z.h*.48);
- const x=cx-dw/2,y=cy-dh/2;
- g.fillStyle="#2b1c11";g.fillRect(x-4,y-4,dw+8,dh+8);
- g.fillStyle="#74471f";g.fillRect(x,y,dw,dh);
- g.strokeStyle="#a76e33";g.lineWidth=2;g.strokeRect(x,y,dw,dh);
- g.fillStyle="#d0aa68";g.fillRect(x+dw-6,y+dh/2,2,2);
+ const wallT=12;
+ rooms.forEach(r=>{
+   const overlapX=Math.min(z.x+z.w,r.x+r.w)-Math.max(z.x,r.x);
+   const overlapY=Math.min(z.y+z.h,r.y+r.h)-Math.max(z.y,r.y);
+   const color=doorwayFloorColor(r);
+
+   // Porta su parete superiore
+   if(overlapX>12 && z.y <= r.y+wallT && z.y+z.h >= r.y-wallT){
+     const center=Math.max(r.x+24,Math.min(r.x+r.w-24,z.x+z.w/2));
+     const width=Math.min(48,Math.max(34,overlapX*.72));
+     const x=center-width/2;
+     g.fillStyle=color;g.fillRect(x,r.y-3,width,18);
+     // stipiti
+     g.fillStyle="#8b5a31";g.fillRect(x-4,r.y-3,4,18);g.fillRect(x+width,r.y-3,4,18);
+     g.fillStyle="#c09155";g.fillRect(x-4,r.y-3,width+8,3);
+   }
+
+   // Porta su parete inferiore
+   if(overlapX>12 && z.y <= r.y+r.h+wallT && z.y+z.h >= r.y+r.h-wallT){
+     const center=Math.max(r.x+24,Math.min(r.x+r.w-24,z.x+z.w/2));
+     const width=Math.min(48,Math.max(34,overlapX*.72));
+     const x=center-width/2,y=r.y+r.h-14;
+     g.fillStyle=color;g.fillRect(x,y,width,18);
+     g.fillStyle="#8b5a31";g.fillRect(x-4,y,4,18);g.fillRect(x+width,y,4,18);
+     g.fillStyle="#c09155";g.fillRect(x-4,y+15,width+8,3);
+   }
+
+   // Porta su parete sinistra
+   if(overlapY>12 && z.x <= r.x+wallT && z.x+z.w >= r.x-wallT){
+     const center=Math.max(r.y+24,Math.min(r.y+r.h-24,z.y+z.h/2));
+     const height=Math.min(52,Math.max(36,overlapY*.72));
+     const y=center-height/2;
+     g.fillStyle=color;g.fillRect(r.x-3,y,18,height);
+     g.fillStyle="#8b5a31";g.fillRect(r.x-3,y-4,18,4);g.fillRect(r.x-3,y+height,18,4);
+     g.fillStyle="#c09155";g.fillRect(r.x-3,y-4,3,height+8);
+   }
+
+   // Porta su parete destra
+   if(overlapY>12 && z.x <= r.x+r.w+wallT && z.x+z.w >= r.x+r.w-wallT){
+     const center=Math.max(r.y+24,Math.min(r.y+r.h-24,z.y+z.h/2));
+     const height=Math.min(52,Math.max(36,overlapY*.72));
+     const y=center-height/2,x=r.x+r.w-14;
+     g.fillStyle=color;g.fillRect(x,y,18,height);
+     g.fillStyle="#8b5a31";g.fillRect(x,y-4,18,4);g.fillRect(x,y+height,18,4);
+     g.fillStyle="#c09155";g.fillRect(x+15,y-4,3,height+8);
+   }
+ });
 }
 function desk(x,y,w){
  g.fillStyle="rgba(0,0,0,.25)";g.fillRect(x+4,y+5,w,30);
