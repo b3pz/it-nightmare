@@ -127,3 +127,32 @@ canvas{image-rendering:pixelated!important;image-rendering:crisp-edges!important
 #answers button{position:relative;text-align:left;padding-left:16px!important;min-height:42px}
 #answers button:first-letter{color:#b7ff4a}
 canvas{filter:contrast(1.05) saturate(.92)}
+
+/* =============================================================
+   V4 — ARCADE CAMERA / LIVING STUDIO
+   ============================================================= */
+body{background:#010201;overflow:hidden}
+#viewportFrame{position:absolute;inset:0;overflow:hidden;background:#020302}
+#game{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;filter:contrast(1.12) saturate(.95)}
+#miniMapWrap{position:absolute;right:14px;top:112px;width:266px;padding:5px;background:#030604e8;border:2px solid #48564d;box-shadow:5px 5px #000;z-index:35}
+#miniMapWrap .mapTitle{font:700 8px monospace;color:#8fa198;letter-spacing:2px;margin-bottom:4px}
+#miniMap{width:100%;height:auto;display:block;image-rendering:pixelated;border:1px solid #27342d}
+#ticketPanel{top:280px!important;width:126px!important;background:transparent!important;border:0!important;box-shadow:none!important}
+#ticketPanel #ticketContent{display:none!important}
+#ticketToggle{height:34px!important;border:2px solid #566159!important;background:#050806f2!important}
+#missionPanel{display:none!important}
+#inventoryWrap{left:14px!important;bottom:18px!important;opacity:.82!important;transform:scale(.88);transform-origin:bottom left}
+#pda{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,86vw);max-height:68vh;overflow:auto;background:#050806f5;border:4px solid #53625a;box-shadow:10px 10px #000;z-index:70;padding:12px}
+#pda.hidden{display:none}.pdaHead{display:flex;justify-content:space-between;border-bottom:2px solid #304038;padding-bottom:8px;color:#b7ff4a;font:700 12px monospace}.pdaHead span{color:#72857a;font-size:9px}
+.pdaTask,.pdaCarry{padding:10px;margin-top:8px;background:#0a100c;border-left:4px solid #ffd447}.pdaTask b,.pdaCarry b{display:block;color:#fff}.pdaTask span,.pdaCarry span{display:block;color:#b7c8bd;margin-top:3px}.pdaTask small{color:#6ee7ff}.pdaCarry{border-color:#6ee7ff}
+#taskProgressWrap{height:20px!important;padding:2px 10px!important}#taskProgress{height:7px!important}
+.screen:after{background:repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 4px)!important}
+#hud{background:#030604f2!important}
+.roomLabel{font-size:10px!important}
+.switchGame,.raidGame,.psuGame{gap:10px}.switchPort,.raidDisk,.psu{min-width:82px;padding:12px;background:#0d1410;color:#dce8df;border:3px solid #48584d;box-shadow:4px 4px #000}.switchPort i,.raidDisk small,.psu i{display:block;font-size:8px;margin-top:7px}.switchPort.down,.psu.fault{border-color:#e34843}.switchPort.fixed{border-color:#69e878}.raidDisk i{display:block;width:10px;height:10px;margin:0 auto 6px}.raidDisk i.green{background:#65e576}.raidDisk i.amber{background:#ffaf35}
+@media(max-width:700px){
+ #miniMapWrap{right:5px;top:100px;width:150px}
+ #ticketPanel{right:5px!important;top:195px!important}
+ #inventoryWrap{bottom:135px!important;left:5px!important;transform:scale(.72)}
+ #pda{width:88vw;max-height:60vh}
+}

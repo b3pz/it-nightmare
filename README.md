@@ -287,3 +287,51 @@ una parte diagnosi, una parte consegna tramite inventario.
 - Ticket Queue compatta e richiudibile, per non coprire la mappa.
 - Pool domande ampliato con distrattori di lunghezza e plausibilità simili.
 - Renderer pixel, minigiochi, NPC, inventario e F2 preservati.
+
+
+# V4.0 — LIVING STUDIO / ARC_VOID
+
+## Camera / esplorazione
+- Camera arcade centrata sul player con zoom pixel.
+- Minimappa sempre visibile: planimetria, player e ticket; NPC/anomalie non sono rivelati.
+- `M` mostra/nasconde la visione completa per orientarsi.
+- `F2` mantiene il debug completo.
+
+## Giornata narrativa
+- 09:00–12:59: studio operativo.
+- 13:00–14:00: PAUSA PRANZO ASSOLUTA. Tutti gli NPC, inclusi Pao/Don/Zia Ale, sono in Cucina; MoKasa non spawna.
+- Durante pranzo nessun ticket USER può essere generato. Restano solo task/anomalie ARC_VOID.
+- 14:00–17:30: rientro e sovrapposizione problemi/anomalie.
+- 17:30–18:52: escalation e lore più esplicita.
+- Dialoghi/telefonate narrative progressive chiariscono ARC_VOID senza popup continui.
+
+## Living Studio
+- NPC ambientali hanno routine differenziate: caffè, Sala Meet, Stampanti, Rifugio Digitale.
+- Un NPC che usa una zona può generare un ticket coerente con ciò che sta facendo.
+- Meeting → AV/CABLE; Stampanti → TONER/PROCESS; Rifugio → PIXERA.
+- Gli encounter ! e gli NPC speciali restano separati.
+
+## Server
+- Rack pixel interattivi con LED.
+- Nuove famiglie task: SWITCH, RAID, PSU oltre a SERVICES/CABLE.
+- Anomalie lunch/late possono accendere fault LED e creare ticket ARC_VOID nel Server.
+
+## UI
+- Rimossa la missione fisica permanente.
+- Inventario compatto.
+- `TAB` apre il PDA con ticket e consegne; rilascio TAB lo chiude.
+- TASKS apre lo stesso PDA.
+- Progress bar = tempo + performance, massimo 94% prima del boss; 100% solo a partita conclusa.
+
+## Quiz
+- Nuovo advancedQuestionBanks con distrattori plausibili e lunghezze simili.
+- Normal/Hard/Nightmare privilegiano le domande avanzate.
+- Vero/Falso incluso.
+- Risposte numerate e controllabili da tastiera.
+- ENTER funziona su boot/lore per proseguire/iniziare.
+
+## Validazione
+- game.js validato con `node --check`.
+- Controllata presenza/connessione di camera, minimappa, lunch, routine NPC, PDA,
+  Server task, progress, quiz, lore, boss e F2.
+- Controllata assenza di ID HTML duplicati.
