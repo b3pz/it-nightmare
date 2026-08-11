@@ -164,3 +164,18 @@ Mappa, corridoio sinistro, F2, NPC e Office Alive invariati.
 Corretto un errore di sintassi nella funzione `expireTickets()` introdotto dal Balance Pass.
 L'errore bloccava completamente l'esecuzione di `game.js`, quindi il pulsante INIZIA TURNO non rispondeva.
 Nessuna modifica a gameplay, mappa, NPC, bilanciamento, F2 o collisioni.
+
+## V2.7 — QUESTION & LIVING OFFICE
+- Fix reale del timer per difficoltà (la 2.6.4.1 usava ancora TIME_SPEED fisso nell'update).
+- 96 domande contestuali divise in 8 pool: Mac/Adobe, Workstation, Network, Meeting, Server, Print, Pixera, IT.
+- Question deck anti-ripetizione + risposte random.
+- Centrale mantiene peso ticket maggiore.
+- Dilik aggiunto; Pao e Dilik possono cercare il giocatore.
+- Encounter con ! stile Pokémon.
+- 14 NPC ambientali occupano postazioni; alcuni fanno routine postazione → cucina → ritorno.
+- Notifiche telefono per Zia Ale/Pao/Dilik.
+- Inventario 3 slot + prime missioni fisiche di trasporto.
+- Anomalie visive sulla mappa: monitor, 19:05, Pixera, luci, blackout, RGB, ombra, bagno.
+- MoKasa può comparire in Sala Corte come incontro EXTREME opzionale.
+- Finale positivo: HAI VINTO, poi falsa chiusura e CMD ARC_VOID_00 LOGIN 19:05.
+- Collisioni, F2 e geometria della V2.6.4.1 mantenute.

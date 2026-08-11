@@ -1,18 +1,20 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>IT NIGHTMARE V2 — ARCHEA // After Hours</title><link rel="stylesheet" href="style.css?v=2.6.4.1"></head>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>IT NIGHTMARE V2 — ARCHEA // After Hours</title><link rel="stylesheet" href="style.css?v=2.7"></head>
 <body>
 <section id="boot" class="screen active"><div class="card terminal"><h1>IT NIGHTMARE</h1><div class="subtitle">ARCHEA // AFTER HOURS</div><div id="bootlog"></div><button id="toLore" class="mainbtn hidden">CONTINUA</button></div></section>
 <section id="lore" class="screen"><div class="card lore"><div class="kicker">FILE // 19:03</div><h2>Lo studio continua a lavorare anche quando è vuoto.</h2><p>Da alcune settimane il reparto IT registra attività impossibili: sessioni senza proprietario, monitor accesi dopo la chiusura, ticket provenienti da utenti assenti.</p><p>All'inizio sembrano normali problemi informatici. Durante la giornata, però, le anomalie aumentano.</p><blockquote>Il tuo obiettivo è semplice: mantieni operativo lo studio fino alle 19:00.</blockquote><p>Se commetti troppi errori, perdi prima. Se resisti fino alle 18:52, scoprirai cosa sta realmente succedendo.</p><div class="difficulty-box">
 <label for="difficulty">DIFFICOLTÀ</label>
 <select id="difficulty">
-  <option value="easy">EASY — molto più tempo, max 2 ticket, 7 errori</option>
-  <option value="normal" selected>NORMAL — bilanciata, max 3 ticket, 4 errori</option>
-  <option value="hard">HARD — veloce, max 4 ticket, 2 errori</option>
-  <option value="nightmare">NIGHTMARE — brutale, 1 errore</option>
+  <option value="easy">EASY — 11-12 min, max 2 ticket, 8 errori</option>
+  <option value="normal" selected>NORMAL — 8 min circa, max 3 ticket, 5 errori</option>
+  <option value="hard">HARD — 5-6 min, max 3 ticket, 3 errori</option>
+  <option value="nightmare">NIGHTMARE — brutale, 2 errori</option>
 </select>
 </div>
 <button id="start" class="mainbtn">INIZIA TURNO — 09:00</button></div></section>
 <section id="gameScreen" class="screen"><header id="hud"><div><b id="clock">09:00</b><small>TIME</small></div><div><b id="stress">0%</b><small>STRESS</small></div><div><b id="rep">★★★★★</b><small>REPUTAZIONE</small></div><div><b id="strikes">0/3</b><small>ERRORI</small></div><div><b id="xp">0</b><small>XP</small></div><div><b id="incident">0%</b><small>INCIDENT</small></div></header>
-<main><canvas id="game" width="1600" height="900"></canvas><aside id="ticketPanel"><h3>TICKET QUEUE</h3><div id="ticketText"></div></aside><div id="toast"></div>
+<main><canvas id="game" width="1600" height="900"></canvas>
+<div id="phoneNotification"><div class="phoneApp">MESSAGGIO</div><b id="phoneSender">ZIA ALE</b><span id="phoneText"></span></div>
+<div id="inventoryWrap"><small>INVENTARIO</small><div id="inventory"></div></div><aside id="ticketPanel"><h3>TICKET QUEUE</h3><div id="ticketText"></div></aside><div id="toast"></div>
 <div id="strikeOverlay" class="strike-overlay hidden"><div class="strike-inner">
 <div class="strike-title">TICKET FALLITO</div><div id="strikeCount" class="strike-count">STRIKE +1</div>
 </div></div>
@@ -22,4 +24,4 @@
     <div id="anomalyText"></div>
   </div>
 </div><div id="mobile"><div id="joy"><i></i></div><button id="act">E<span>INTERAGISCI</span></button></div></main><footer>WASD/FRECCE — MUOVITI · E — INTERAGISCI · F2 — COLLISION DEBUG</footer></section>
-<div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=2.6.4.1"></script></body></html>
+<div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=2.7"></script></body></html>
