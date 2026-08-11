@@ -73,13 +73,38 @@ Nessuna modifica a collisioni, F2, ticket, tempo, anomalie o boss.
 - Le anomalie avanzate rimangono più a lungo.
 - F2, mappa, porte e collisioni V2.2.2 inalterate.
 
-## V2.4 — NPC & RANDOM ANSWERS
-- Le risposte corrette non sono più sempre A: ogni ticket mescola le opzioni preservando la risposta corretta.
-- Aggiunte nuove domande IT per tutti i livelli.
-- NPC fisici sulla mappa, interagibili con E / pulsante mobile.
-- NPC bonus: Focus, tempo extra, diagnosi, riduzione stress.
-- NPC malus: stress, deadline anticipata.
-- Direzione può generare un CRITICAL.
-- NPC anomalo appare solo con anomalie avanzate.
-- Cooldown NPC per evitare farming continuo.
-- Mappa, porte, collisioni e F2 invariati.
+## V2.6 — OFFICE ALIVE
+Base: V2.3 stabile, senza usare la V2.4 NPC difettosa.
+
+### Mappa
+- Geometria, porte, F2 e collisioni della base stabile mantenute.
+- Aggiunta dorsale/corridoio sinistro per Grafica → ABA → IT.
+- Rinominate le stanze:
+  - vecchia IT = CENTRALE
+  - vecchio Loft = IT
+  - vecchia Centrale = LOFT
+  - Server/Soppalco = SERVER
+  - Contratti = THE BUNKER
+  - Sala Meet Laura = SALA MEET
+  - Ingresso = INGRESSO / SEGRETERIA
+
+### Postazioni
+- CENTRALE: 12 HP Z Workstation e peso di spawn ticket maggiore.
+- GRAFICA: Mac/macOS.
+- THE BUNKER: Mac/macOS.
+- Altri reparti PC: HP Z Workstation.
+- Sale meeting: endpoint AV.
+- RIFUGIO DIGITALE: monitor/Pixera.
+- SERVER: endpoint infrastrutturali.
+- STAMPANTI: printer endpoint.
+
+### NPC
+- PAO: 70% bonus (Fiorentina/Rassina/calcio/caffè), 30% rogne Revit/Desktop Connector.
+- ZIA ALE: fissa in Segreteria; richiamo circa ogni ora; 80% bonus / 20% problema boomer.
+- DON: jolly prevalentemente benevolo; caffè/sigaretta/chiacchiere.
+- MOKASA: spawn casuale; può punire inattività/cazzeggio, stress/reputazione/CRITICAL.
+
+### Feedback
+- Ticket scaduto = overlay rosso quasi fullscreen con STRIKE +1.
+- Anomalie contestuali anche in BAGNI e RIFUGIO DIGITALE/Pixera.
+- Oggetti/collectible NON ancora implementati: riservati alla V3.

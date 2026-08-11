@@ -27,6 +27,13 @@ canvas{border:1px solid #1c241f}
 #anomalyText{font-size:clamp(24px,4vw,54px);font-weight:800;color:#e9e4e2;text-shadow:2px 0 #6b1722,-2px 0 #173c45;line-height:1.15}
 @keyframes anomalyFlash{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:scale(1)}}
 
-/* V2.4 NPC PASS */
-.npc-hint{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);padding:8px 12px;background:rgba(5,8,7,.94);border:1px solid #4a5b50;color:#d7e1da;font-size:11px;letter-spacing:1px;pointer-events:none}
-.npcname{color:#f2cc6b}.npcbonus{color:#62e568}.npcmalus{color:#ff6262}
+/* V2.6 — OFFICE ALIVE */
+.npc-card{border-left:4px solid #ffd447}
+.npc-good{color:#62e568}.npc-bad{color:#ff6262}.npc-mixed{color:#ffd447}
+.strike-overlay{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+background:rgba(90,0,8,.82);pointer-events:none;animation:strikeIn .16s ease-out}
+.strike-overlay.hidden{display:none}
+.strike-inner{text-align:center;font-family:monospace;text-shadow:3px 0 #300}
+.strike-title{font-size:clamp(32px,7vw,84px);font-weight:900;color:#fff}
+.strike-count{font-size:clamp(22px,4vw,48px);color:#ffd4d4;margin-top:10px}
+@keyframes strikeIn{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:scale(1)}}
