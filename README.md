@@ -24,3 +24,17 @@ Baseline: ZIP legacy fornito dall'utente.
 
 ## Regola V2
 Nessun nuovo sviluppo deve eliminare funzioni approvate in questa build senza decisione esplicita.
+
+
+## V2.1 HOTFIX
+- Desktop: schermate rese mutuamente esclusive; la Lore non può restare sopra il gioco.
+- Cache busting CSS/JS per GitHub Pages.
+- Navigation layer completamente ridisegnato.
+- Corridoi più larghi.
+- Porte come ponti reali tra stanza e corridoio.
+- Collisione mobili resa meno aggressiva.
+- Test automatico di raggiungibilità dei punti task.
+- I ticket possono spawnare solo su zone raggiungibili.
+- CRITICAL sceglie il punto più lontano solo tra quelli raggiungibili.
+- Deadline temporaneamente più generose: LOW 75m, MEDIUM 55m, HIGH 40m, CRITICAL 20m.
+- F2: verde=stanze, blu=corridoi, giallo=porte, rosso=ostacoli.

@@ -11,15 +11,50 @@ const rooms=[
 {name:"SPAZIO A",x:840,y:365,w:300,h:185,f:"stone"},{name:"BAGNI",x:840,y:585,w:180,h:125,f:"tile"},{name:"RIFUGIO DIGITALE",x:1040,y:585,w:180,h:125,f:"wood"},
 {name:"SALA CORTE",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:840,y:735,w:285,h:130,f:"tile"},{name:"STAMPANTI",x:1145,y:735,w:285,h:130,f:"stone"}];
 // NAVIGATION LAYER: corridoi enormi e porte sovradimensionate. Nessun bordo grafico è una collisione.
-const walkZones=[
-...rooms.map(r=>({x:r.x+13,y:r.y+13,w:r.w-26,h:r.h-26})),
-{x:238,y:260,w:545,h:65},{x:238,y:700,w:555,h:70},{x:750,y:30,w:90,h:840},
-{x:805,y:320,w:470,h:70},{x:805,y:700,w:650,h:70},{x:1215,y:320,w:80,h:420},{x:1260,y:675,w:200,h:80},
-// aperture molto larghe
-{x:210,y:350,w:70,h:100},{x:210,y:610,w:70,h:100},{x:255,y:235,w:100,h:90},{x:465,y:235,w:100,h:90},{x:710,y:190,w:100,h:110},{x:710,y:565,w:100,h:120},
-{x:800,y:235,w:90,h:120},{x:1000,y:150,w:100,h:120},{x:1190,y:235,w:100,h:120},{x:1090,y:515,w:120,h:100},{x:1180,y:380,w:120,h:120},{x:1180,y:540,w:120,h:120},
-{x:1250,y:490,w:100,h:130},{x:1250,y:650,w:100,h:100},{x:800,y:610,w:100,h:110},{x:990,y:680,w:120,h:100},{x:1110,y:680,w:120,h:100},{x:1320,y:680,w:120,h:100}
+/*
+ V2.1 NAVIGATION
+ Ogni stanza ha un'area interna; ogni porta è un vero "ponte" che sovrappone
+ stanza + corridoio. I corridoi sono volutamente larghi.
+*/
+const roomFloors=rooms.map(r=>({x:r.x+8,y:r.y+8,w:r.w-16,h:r.h-16}));
+const corridors=[
+ {x:235,y:250,w:555,h:78},       // corridoio alto sinistra
+ {x:235,y:690,w:560,h:88},       // corridoio basso sinistra
+ {x:745,y:35,w:105,h:835},       // dorsale centrale
+ {x:805,y:310,w:485,h:88},       // corridoio alto destra
+ {x:805,y:690,w:655,h:88},       // corridoio basso destra
+ {x:1205,y:300,w:100,h:455},     // dorsale destra
+ {x:1260,y:665,w:205,h:95}       // raccordo sala corte
 ];
+const doors=[
+ // GRAFICA -> corridoio
+ {x:245,y:235,w:75,h:105},
+ // CENTRALE -> corridoio
+ {x:455,y:235,w:85,h:105},
+ // SERVER -> dorsale centrale
+ {x:710,y:180,w:145,h:105},
+ // ABA -> corridoio alto e LOFT -> corridoio basso
+ {x:205,y:330,w:95,h:120},{x:205,y:595,w:95,h:130},
+ // IT -> corridoio alto, dorsale, corridoio basso
+ {x:285,y:265,w:105,h:105},{x:700,y:300,w:155,h:130},{x:690,y:610,w:165,h:135},
+ // SALA MEET -> dorsale centrale
+ {x:800,y:210,w:105,h:135},
+ // CONTRATTI -> corridoio alto dx
+ {x:1020,y:260,w:100,h:130},
+ // PANTHEON -> corridoio alto dx
+ {x:1190,y:255,w:120,h:140},
+ // SPAZIO A -> corridoio alto dx + dorsale destra
+ {x:805,y:350,w:105,h:125},{x:1095,y:430,w:150,h:130},
+ // BAGNI / RIFUGIO -> corridoio basso dx
+ {x:805,y:620,w:105,h:135},{x:900,y:665,w:110,h:105},{x:1080,y:660,w:120,h:110},
+ // SALA CORTE -> dorsale destra / raccordo basso
+ {x:1240,y:500,w:115,h:135},{x:1240,y:640,w:130,h:125},
+ // INGRESSO -> corridoio basso sinistra + dorsale
+ {x:650,y:675,w:150,h:130},{x:735,y:735,w:120,h:125},
+ // CUCINA / STAMPANTI -> corridoio basso dx
+ {x:805,y:720,w:120,h:140},{x:1080,y:710,w:120,h:150},{x:1370,y:710,w:100,h:150}
+];
+const walkZones=[...roomFloors,...corridors,...doors];
 const obstacles=[
 {x:385,y:420,w:290,h:42},{x:385,y:350,w:245,h:35},{x:75,y:145,w:155,h:45},{x:340,y:145,w:120,h:55},{x:565,y:115,w:150,h:90},
 {x:75,y:385,w:125,h:55},{x:75,y:600,w:125,h:55},{x:885,y:160,w:105,h:115},{x:1080,y:155,w:100,h:60},{x:1280,y:155,w:125,h:70},{x:890,y:435,w:190,h:60},{x:1330,y:495,w:185,h:85},{x:885,y:775,w:180,h:55},{x:1190,y:775,w:190,h:60}
@@ -52,18 +87,44 @@ CRITICAL:[
 ]};
 
 let state,player,tickets,last,spawnTimer,anomTimer,debug=false,keys={};
-function reset(){state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;newTicket("LOW");hud()}
+
+function reachableSet(){
+ const step=12,sx=Math.round(535/step),sy=Math.round(610/step),q=[[sx,sy]],seen=new Set([sx+","+sy]);
+ const D=[[1,0],[-1,0],[0,1],[0,-1]];
+ while(q.length){
+  const [gx,gy]=q.shift();
+  for(const [dx,dy] of D){
+   const nx=gx+dx,ny=gy+dy,k=nx+","+ny,x=nx*step,y=ny*step;
+   if(x<0||y<0||x>W||y>H||seen.has(k)||!walkable(x,y))continue;
+   seen.add(k);q.push([nx,ny]);
+  }
+ }
+ return {seen,step};
+}
+function pointReachable(p,R){
+ const gx=Math.round(p.x/R.step),gy=Math.round(p.y/R.step);
+ // accetta anche celle vicine: il marker può stare sopra un mobile, l'interazione è a distanza
+ for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++)if(R.seen.has((gx+x)+","+(gy+y)))return true;
+ return false;
+}
+function validateMap(){
+ const R=reachableSet(),bad=points.filter(p=>!pointReachable(p,R));
+ console.log("V2.1 MAP CHECK:",bad.length?"UNREACHABLE":"ALL TASK ZONES REACHABLE",bad);
+ return bad;
+}
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;newTicket("LOW");hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
-function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x-7&&x<o.x+o.w+7&&y>o.y-7&&y<o.y+o.h+7)}
+function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x+5&&x<o.x+o.w-5&&y>o.y+5&&y<o.y+o.h-5)}
 function fmt(m){m=Math.max(START,Math.min(END,m));return String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.floor(m%60)).padStart(2,"0")}
 function anomalyLevel(){return Math.max(0,Math.min(1,(state.min-START)/(BOSS-START)))}
 function levelForTime(){let a=Math.random();if(state.min<720)return a<.75?"LOW":"MEDIUM";if(state.min<900)return a<.45?"LOW":a<.88?"MEDIUM":"HIGH";return a<.2?"LOW":a<.65?"MEDIUM":"HIGH"}
-function farthestPoint(){return [...points].sort((a,b)=>Math.hypot(player.x-b.x,player.y-b.y)-Math.hypot(player.x-a.x,player.y-a.y))[0]}
+function reachablePoints(){const R=reachableSet();return points.filter(p=>pointReachable(p,R))}
+function farthestPoint(){let ps=reachablePoints();return [...ps].sort((a,b)=>Math.hypot(player.x-b.x,player.y-b.y)-Math.hypot(player.x-a.x,player.y-a.y))[0]}
 function newTicket(force){
  if(state.phase!=="shift"||tickets.length>=4)return;
  let level=force||levelForTime(),p;
- if(level==="CRITICAL")p=farthestPoint();else p=points[Math.floor(Math.random()*points.length)];
- let mins={LOW:55,MEDIUM:38,HIGH:27,CRITICAL:12}[level];
+ let valid=reachablePoints();if(!valid.length)return;if(level==="CRITICAL")p=farthestPoint();else p=valid[Math.floor(Math.random()*valid.length)];
+ let mins={LOW:75,MEDIUM:55,HIGH:40,CRITICAL:20}[level];
  tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:questions[level][Math.floor(Math.random()*questions[level].length)],criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
  renderTickets();
 }
@@ -134,16 +195,23 @@ function floor(r){let a={stone:["#1b201d","#252b27"],wood:["#261910","#342116"],
 function desk(x,y,w){g.fillStyle="#5a3b22";g.fillRect(x,y,w,25);for(let i=8;i<w-25;i+=45){g.fillStyle="#26332d";g.fillRect(x+i,y-25,32,20);g.fillStyle="#4b8cac";g.fillRect(x+i+4,y-21,24,12)}}
 function draw(){
  g.fillStyle="#050706";g.fillRect(0,0,W,H);
- walkZones.slice(rooms.length).forEach(z=>{g.fillStyle="#2b1c12";g.fillRect(z.x,z.y,z.w,z.h)});
+ corridors.forEach(z=>{g.fillStyle="#2b1c12";g.fillRect(z.x,z.y,z.w,z.h)});
  rooms.forEach(r=>{floor(r);g.strokeStyle="#707970";g.lineWidth=9;g.strokeRect(r.x,r.y,r.w,r.h);g.fillStyle="#0b0e0c";g.fillRect(r.x+12,r.y+10,Math.min(r.w-24,r.name.length*9+24),24);g.fillStyle="#d3c5aa";g.font="bold 13px monospace";g.fillText(r.name,r.x+19,r.y+27)});
  // porte: cancellano VISIVAMENTE il muro, coerenti con la navigation layer
- walkZones.slice(rooms.length+7).forEach(z=>{g.fillStyle="#2b1c12";g.fillRect(z.x,z.y,z.w,z.h)});
+ doors.forEach(z=>{g.fillStyle="#2b1c12";g.fillRect(z.x,z.y,z.w,z.h)});
  desk(80,185,150);desk(340,185,120);desk(390,455,280);desk(390,380,240);desk(890,470,180);desk(1090,200,100);desk(1280,200,125);desk(1340,540,180);desk(890,810,170);desk(1190,810,190);
  for(let x=565;x<710;x+=42){g.fillStyle="#17231e";g.fillRect(x,115,34,92);g.strokeStyle="#40534a";g.strokeRect(x,115,34,92)}
  tickets.forEach(t=>{let b=Math.sin(performance.now()/120)>0;g.fillStyle=t.level==="CRITICAL"?"#ff3131":b?"#ffd447":"#c43d35";g.beginPath();g.arc(t.p.x,t.p.y,11,0,Math.PI*2);g.fill();g.fillStyle="#111";g.fillText("!",t.p.x-4,t.p.y+5)});
  let a=anomalyLevel();if(a>.15){g.fillStyle=`rgba(20,0,18,${a*.14})`;g.fillRect(0,0,W,H)}if(a>.55&&Math.random()<.02){g.fillStyle="#b4002a18";g.fillRect(0,Math.random()*H,W,4)}
  g.fillStyle="#1b1e1c";g.fillRect(player.x-9,player.y-14,18,26);g.fillStyle="#d0a887";g.fillRect(player.x-6,player.y-19,12,8);g.strokeStyle="#62e568";g.lineWidth=3;g.beginPath();g.ellipse(player.x,player.y+15,14,7,0,0,Math.PI*2);g.stroke();
- if(debug){g.globalAlpha=.25;g.fillStyle="#37ff82";walkZones.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));g.fillStyle="#ff3040";obstacles.forEach(o=>g.fillRect(o.x,o.y,o.w,o.h));g.globalAlpha=1}
+ if(debug){
+ g.globalAlpha=.24;
+ g.fillStyle="#37ff82";roomFloors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
+ g.fillStyle="#2aa8ff";corridors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
+ g.fillStyle="#ffe14a";doors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
+ g.fillStyle="#ff3040";obstacles.forEach(o=>g.fillRect(o.x,o.y,o.w,o.h));
+ g.globalAlpha=1
+}
 }
 function loop(n){let dt=Math.min(.05,(n-last)/1000);last=n;update(dt);draw();requestAnimationFrame(loop)}
 function toast(s){let t=$("#toast");t.textContent=s;t.classList.add("on");clearTimeout(t.q);t.q=setTimeout(()=>t.classList.remove("on"),1800)}
