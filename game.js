@@ -1,202 +1,151 @@
-const C=document.querySelector("#game"),g=C.getContext("2d");g.imageSmoothingEnabled=false;
-const $=s=>document.querySelector(s), keys={}, W=C.width,H=C.height;
+const $=s=>document.querySelector(s),C=$("#game"),g=C.getContext("2d");g.imageSmoothingEnabled=false;
+const W=C.width,H=C.height,START=540,BOSS=1132,END=1140,TIME_SPEED=5.2;
+const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
+const boot=["[BOOT] ARCHEA IT SERVICES","[OK] Domain reachable","[OK] Autodesk licensing","[OK] File servers","[WARN] Orphan session detected","[USER] ARCH-VOID","[LAST LOGIN] 19:03"];
+let bl=0;(function b(){if(bl<boot.length){$("#bootlog").innerHTML+=boot[bl++]+"<br>";setTimeout(b,280)}else $("#toLore").classList.remove("hidden")})();$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{show("game");reset();requestAnimationFrame(loop)};
+
 const rooms=[
- ["GRAFICA",20,80,245,210],["CENTRALE",275,80,190,210],["SERVER / SOPPALCO",475,80,220,210],
- ["ABA",20,310,195,190],["LOFT",20,515,195,180],["IT",300,310,395,285],
- ["SALA MEET",790,80,175,260],["CONTRATTI",975,80,155,260],["PANTHEON",1140,80,190,260],
- ["SPAZIO A",790,365,285,175],["BAGNO",790,555,85,135],["BAGNO",885,555,85,135],
- ["RIFUGIO DIGITALE",980,555,175,135],["SALA CORTE",1240,420,270,270],
- ["INGRESSO",400,710,300,135],["CUCINA",790,710,270,135],["STAMPANTI",1075,710,255,135]
+{name:"GRAFICA",x:30,y:55,w:250,h:210,f:"stone"},{name:"CENTRALE",x:300,y:55,w:205,h:210,f:"stone"},{name:"SERVER / SOPPALCO",x:525,y:55,w:230,h:210,f:"server"},
+{name:"ABA",x:30,y:310,w:210,h:185,f:"stone"},{name:"LOFT",x:30,y:535,w:210,h:180,f:"wood"},{name:"IT",x:315,y:310,w:440,h:355,f:"stone"},
+{name:"SALA MEET",x:840,y:55,w:190,h:270,f:"stone"},{name:"CONTRATTI",x:1050,y:55,w:170,h:270,f:"wood"},{name:"PANTHEON",x:1240,y:55,w:210,h:270,f:"wood"},
+{name:"SPAZIO A",x:840,y:365,w:300,h:185,f:"stone"},{name:"BAGNI",x:840,y:585,w:180,h:125,f:"tile"},{name:"RIFUGIO DIGITALE",x:1040,y:585,w:180,h:125,f:"wood"},
+{name:"SALA CORTE",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:840,y:735,w:285,h:130,f:"tile"},{name:"STAMPANTI",x:1145,y:735,w:285,h:130,f:"stone"}];
+// NAVIGATION LAYER: corridoi enormi e porte sovradimensionate. Nessun bordo grafico è una collisione.
+const walkZones=[
+...rooms.map(r=>({x:r.x+13,y:r.y+13,w:r.w-26,h:r.h-26})),
+{x:238,y:260,w:545,h:65},{x:238,y:700,w:555,h:70},{x:750,y:30,w:90,h:840},
+{x:805,y:320,w:470,h:70},{x:805,y:700,w:650,h:70},{x:1215,y:320,w:80,h:420},{x:1260,y:675,w:200,h:80},
+// aperture molto larghe
+{x:210,y:350,w:70,h:100},{x:210,y:610,w:70,h:100},{x:255,y:235,w:100,h:90},{x:465,y:235,w:100,h:90},{x:710,y:190,w:100,h:110},{x:710,y:565,w:100,h:120},
+{x:800,y:235,w:90,h:120},{x:1000,y:150,w:100,h:120},{x:1190,y:235,w:100,h:120},{x:1090,y:515,w:120,h:100},{x:1180,y:380,w:120,h:120},{x:1180,y:540,w:120,h:120},
+{x:1250,y:490,w:100,h:130},{x:1250,y:650,w:100,h:100},{x:800,y:610,w:100,h:110},{x:990,y:680,w:120,h:100},{x:1110,y:680,w:120,h:100},{x:1320,y:680,w:120,h:100}
 ];
-// porte ricavate dai segni rossi dell'annotazione dell'utente.
-// Ogni stanza ha almeno un varco. Muri e porte sono entità distinte.
-const doors=[
- [215,335,18,44],[215,385,18,44],[215,655,18,40],                 // ABA/LOFT -> corridoio
- [255,285,35,18],[345,285,35,18],                               // Grafica/Centrale
- [695,235,18,42],[695,585,18,42],                               // Server/IT -> dorsale
- [770,285,18,45],[950,185,18,42],[1120,295,18,42],              // sale alte dx
- [1075,520,42,18],[1155,390,18,42],[1155,540,18,42],            // Spazio/Rifugio
- [1230,535,18,42],[1230,680,18,42],                             // Sala Corte
- [780,615,18,42],[865,680,42,18],[1035,680,42,18],[1190,680,42,18], // bagni/cucina/stampanti
- [680,800,18,42],[780,800,18,42]                                // ingresso/cucina verso corridoio
+const obstacles=[
+{x:385,y:420,w:290,h:42},{x:385,y:350,w:245,h:35},{x:75,y:145,w:155,h:45},{x:340,y:145,w:120,h:55},{x:565,y:115,w:150,h:90},
+{x:75,y:385,w:125,h:55},{x:75,y:600,w:125,h:55},{x:885,y:160,w:105,h:115},{x:1080,y:155,w:100,h:60},{x:1280,y:155,w:125,h:70},{x:890,y:435,w:190,h:60},{x:1330,y:495,w:185,h:85},{x:885,y:775,w:180,h:55},{x:1190,y:775,w:190,h:60}
 ];
-const special=[
- {x:160,y:220,room:"GRAFICA"},{x:370,y:240,room:"CENTRALE"},{x:575,y:220,room:"SERVER / SOPPALCO"},
- {x:100,y:455,room:"ABA"},{x:95,y:620,room:"LOFT"},{x:495,y:535,room:"IT"},
- {x:1050,y:260,room:"CONTRATTI"},{x:1210,y:220,room:"PANTHEON"},{x:1020,y:505,room:"SPAZIO A"},
- {x:1050,y:625,room:"RIFUGIO DIGITALE"},{x:1380,y:520,room:"SALA CORTE"},
- {x:960,y:790,room:"CUCINA"},{x:1170,y:790,room:"STAMPANTI"}
-];
-let state={min:540,stress:0,rep:4,xp:0,incident:0,bossStarted:false,bossResolved:false,finished:false},player={x:465,y:535,r:9,s:185},tickets=[],last=performance.now(),spawn=0;
-function insideDoor(x,y){return doors.some(d=>x>d[0]&&x<d[0]+d[2]&&y>d[1]&&y<d[1]+d[3])}
-function inRoom(x,y,r){return x>r[1]&&x<r[1]+r[3]&&y>r[2]&&y<r[2]+r[4]}
-function legal(x,y){
- // corridoi sono sempre percorribili; se si attraversa il perimetro di una stanza deve esserci una porta.
- const rad=10;
- for(const r of rooms){
-   const [n,rx,ry,rw,rh]=r, was=inRoom(player.x,player.y,r), now=inRoom(x,y,r);
-   if(was!==now && !insideDoor(x,y) && !insideDoor(player.x,player.y)) return false;
-   // bordo solido
-   const near=(x>rx-rad&&x<rx+rw+rad&&y>ry-rad&&y<ry+rh+rad);
-   if(near&&!now&&!insideDoor(x,y)){
-     const onEdge=(Math.abs(x-rx)<rad||Math.abs(x-(rx+rw))<rad||Math.abs(y-ry)<rad||Math.abs(y-(ry+rh))<rad);
-     if(onEdge)return false;
-   }
- }
- return x>10&&x<W-10&&y>70&&y<H-10;
+const points=[
+{x:155,y:205,room:"GRAFICA",kind:"PC"},{x:400,y:205,room:"CENTRALE",kind:"PC"},{x:640,y:205,room:"SERVER / SOPPALCO",kind:"SERVER"},{x:140,y:450,room:"ABA",kind:"PC"},{x:140,y:660,room:"LOFT",kind:"PC"},
+{x:535,y:560,room:"IT",kind:"PC"},{x:940,y:285,room:"SALA MEET",kind:"MEETING"},{x:1135,y:285,room:"CONTRATTI",kind:"PC"},{x:1345,y:285,room:"PANTHEON",kind:"PC"},{x:1010,y:520,room:"SPAZIO A",kind:"PC"},
+{x:1120,y:680,room:"RIFUGIO DIGITALE",kind:"PC"},{x:1430,y:650,room:"SALA CORTE",kind:"MEETING"},{x:1020,y:835,room:"CUCINA",kind:"COFFEE"},{x:1290,y:835,room:"STAMPANTI",kind:"PRINTER"}];
+const bosses=["DIREZIONE","PRESIDENZA","CAPO ASSOLUTO"];
+const questions={
+LOW:[
+["Un solo PC non naviga, mentre gli altri funzionano. Primo controllo sensato?",["Verificare IP, gateway e connettività del PC","Riavviare il domain controller","Formattare il PC","Disinstallare Revit"],0],
+["Un monitor è nero ma il PC sembra acceso. Cosa controlli prima?",["Alimentazione/input/cavo del monitor","DNS","Licenza Autodesk","GPO"],0],
+["Una stampante locale risulta offline. Primo passo?",["Controllare alimentazione, collegamento e coda","Reinstallare Windows","Spegnere lo switch core","Cambiare dominio"],0]
+],
+MEDIUM:[
+["Un nome server non risolve ma il ping all'IP funziona. Quale componente sospetti?",["DNS","GPU","HDMI","Bluetooth"],0],
+["Una share di rete non è raggiungibile da un solo utente. Cosa verifichi?",["Connettività, mapping e permessi dell'utente","Formatti il file server","Resetti tutti gli switch","Disinstalli Office"],0],
+["Desktop Connector non sincronizza correttamente. Quale approccio è più sensato?",["Verificare stato client/account/cache e log prima del reset","Cancellare il progetto BIM","Cambiare scheda video","Spegnere il server"],0]
+],
+HIGH:[
+["Più utenti perdono contemporaneamente accesso alle risorse di rete. Prima priorità?",["Determinare ampiezza incidente e verificare rete/servizi centrali","Formattare un client","Cambiare mouse","Riavviare ogni PC singolarmente"],0],
+["Un servizio critico è irraggiungibile. Qual è la diagnosi più corretta?",["Verificare host, rete, servizio e log prima di intervenire","Riavviare tutto senza verifiche","Eliminare DNS","Disabilitare antivirus ovunque"],0],
+["Problemi di autenticazione coinvolgono molti utenti. Cosa controlli?",["Servizi di dominio, DNS, connettività e log","Driver stampante","HDMI sala meeting","Luminosità monitor"],0]
+],
+CRITICAL:[
+["CRITICAL: «Il PDF non si apre». Qual è la prima verifica sensata?",["Capire file/app/errore e provare apertura controllata","Riavviare tutti i server","Resettare il dominio","Cambiare VLAN"],0],
+["CRITICAL: «Il mouse non va». Cosa fai?",["Controllo collegamento/batteria/porta e prova rapida","Riavvio hypervisor","Reset DNS aziendale","Formatto il PC"],0],
+["CRITICAL: «La TV non si vede». Primo controllo?",["Input, sorgente, cavo e stato display","Riavvio domain controller","Reset Autodesk Licensing","Elimino profilo Windows"],0]
+]};
+
+let state,player,tickets,last,spawnTimer,anomTimer,debug=false,keys={};
+function reset(){state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;newTicket("LOW");hud()}
+function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
+function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x-7&&x<o.x+o.w+7&&y>o.y-7&&y<o.y+o.h+7)}
+function fmt(m){m=Math.max(START,Math.min(END,m));return String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.floor(m%60)).padStart(2,"0")}
+function anomalyLevel(){return Math.max(0,Math.min(1,(state.min-START)/(BOSS-START)))}
+function levelForTime(){let a=Math.random();if(state.min<720)return a<.75?"LOW":"MEDIUM";if(state.min<900)return a<.45?"LOW":a<.88?"MEDIUM":"HIGH";return a<.2?"LOW":a<.65?"MEDIUM":"HIGH"}
+function farthestPoint(){return [...points].sort((a,b)=>Math.hypot(player.x-b.x,player.y-b.y)-Math.hypot(player.x-a.x,player.y-a.y))[0]}
+function newTicket(force){
+ if(state.phase!=="shift"||tickets.length>=4)return;
+ let level=force||levelForTime(),p;
+ if(level==="CRITICAL")p=farthestPoint();else p=points[Math.floor(Math.random()*points.length)];
+ let mins={LOW:55,MEDIUM:38,HIGH:27,CRITICAL:12}[level];
+ tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:questions[level][Math.floor(Math.random()*questions[level].length)],criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
+ renderTickets();
 }
-addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=1;if(e.key.toLowerCase()=="e")interact()});addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
-function fmt(m){return String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.floor(m%60)).padStart(2,"0")}
-const probs=["Revit non apre il modello","Stampante bloccata","Wi-Fi senza accesso ai server","Monitor nero","Licenza Autodesk non disponibile","Sala meeting senza segnale","Desktop Connector offline"];
-function newTicket(){
- if(state.bossStarted || state.finished || tickets.length>=3)return;
- const p=special[Math.floor(Math.random()*special.length)];
- tickets.push({p,txt:probs[Math.floor(Math.random()*probs.length)],due:state.min+28+Math.random()*18});
- showTicket();
+function renderTickets(){
+ $("#ticketText").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket ${t.level.toLowerCase()}"><b>${t.level}${t.criticalFrom?" // "+t.criticalFrom:""}</b><br>${t.p.room} — ${t.p.kind}<br>deadline ${fmt(t.due)}</div>`).join(""):"Nessun ticket aperto.";
 }
-function showTicket(){let t=tickets[0];$("#open").textContent=tickets.length;$("#ticketText").innerHTML=t?`<b>${t.p.room}</b><br><br>${t.txt}<br><br><span class="urgent">Scadenza ${fmt(t.due)}</span>`:"Nessun ticket aperto."}
 function interact(){
- if(!tickets.length){toast("Nessuna task attiva.");return}
- let i=tickets.findIndex(t=>Math.hypot(player.x-t.p.x,player.y-t.p.y)<55);if(i<0){toast("Qui non c'è nessuna task.");return}
- let t=tickets[i];$("#modalBody").innerHTML=`<h2>${t.p.room}</h2><p>${t.txt}</p><button class=choice data-ok=1>Diagnostica il problema e applica la soluzione corretta</button><button class=choice data-ok=0>Riavvia tutto senza controllare</button>`;
- $("#modal").classList.remove("hidden");document.querySelectorAll(".choice").forEach(b=>b.onclick=()=>resolve(i,b.dataset.ok=="1"));
+ if(state.phase!=="shift")return;
+ let i=tickets.findIndex(t=>Math.hypot(player.x-t.p.x,player.y-t.p.y)<75);
+ if(i<0){toast("Nessuna task in questo punto.");return}
+ let t=tickets[i],q=t.q;
+ $("#modalBody").innerHTML=`<h2 class="${t.level.toLowerCase()}">${t.level}${t.criticalFrom?" // "+t.criticalFrom:""}</h2><p><b>${t.p.room}</b></p><p>${q[0]}</p>${q[1].map((a,n)=>`<button class="choice answer" data-n="${n}">${String.fromCharCode(65+n)}. ${a}</button>`).join("")}`;
+ $("#modal").classList.remove("hidden");document.querySelectorAll(".answer").forEach(b=>b.onclick=()=>answer(i,+b.dataset.n));
 }
-function resolve(i,ok){$("#modal").classList.add("hidden");tickets.splice(i,1);if(ok){state.xp+=150;state.stress=Math.max(0,state.stress-5);state.incident=Math.max(0,state.incident-5);toast("TASK RISOLTA +150 XP")}else{state.stress+=12;state.incident+=10;state.rep--;toast("INTERVENTO ERRATO")}showTicket()}
-$("#x").onclick=()=>{
- if(state.bossStarted && !state.bossResolved && !state.finished){
-   toast("Devi gestire l'incidente ARCH-VOID.");
-   return;
- }
- $("#modal").classList.add("hidden");
-};
-function toast(s){let t=$("#toast");t.textContent=s;t.classList.add("on");clearTimeout(t.q);t.q=setTimeout(()=>t.classList.remove("on"),1500)}
-
-const BOSS_TIME=18*60+52; // 18:52, trigger obbligatorio
-const END_TIME=19*60;
-
+function answer(i,n){
+ let t=tickets[i],ok=n===t.q[2],xp={LOW:100,MEDIUM:250,HIGH:500,CRITICAL:750}[t.level];
+ tickets.splice(i,1);$("#modal").classList.add("hidden");
+ if(ok){state.xp+=xp;state.solved++;state.incident-=({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]);state.stress-=4;toast(`${t.level} RISOLTO +${xp} XP`)}
+ else{state.strikes++;state.stress+=({LOW:7,MEDIUM:12,HIGH:18,CRITICAL:20}[t.level]);state.incident+=({LOW:5,MEDIUM:9,HIGH:15,CRITICAL:18}[t.level]);state.rep-=t.level==="CRITICAL"?2:1;toast("RISPOSTA ERRATA // STRIKE +1")}
+ clamp();renderTickets();checkEarlyEnd();
+}
+function expireTickets(){for(const t of tickets)if(!t.expired&&state.min>=t.due){t.expired=true;state.strikes++;state.incident+=t.level==="CRITICAL"?22:({LOW:7,MEDIUM:12,HIGH:18}[t.level]);state.stress+=10;state.rep-=t.level==="CRITICAL"?2:1;toast(`${t.level} SCADUTO // STRIKE +1`) }checkEarlyEnd()}
+function checkEarlyEnd(){clamp();if(state.strikes>=3)return ending("IMPOSTORE","Troppi interventi errati. Le tue credenziali IT vengono revocate.");if(state.rep<=0)return ending("LICENZIATO","La reputazione è crollata. ACCESS REVOKED.");if(state.incident>=100)return ending("MAJOR INCIDENT","L'infrastruttura dello studio è offline.");if(state.stress>=100)return ending("BURNOUT","Non riesci più a gestire il turno.")}
+function anomalyEvent(){
+ let a=anomalyLevel(),r=Math.random(),msg;
+ if(a<.2)msg=["Un monitor lampeggia per un istante.","Il telefono squilla una sola volta.","Compare un ticket duplicato e poi scompare."][Math.floor(r*3)];
+ else if(a<.45)msg=["Una stampante espelle una pagina vuota.","Un PC senza utente si accende.","Dal server arriva un rumore secco."][Math.floor(r*3)];
+ else if(a<.7)msg=["Una sessione senza proprietario compare nei log.","Le luci del corridoio tremano.","Un ticket arriva da un utente che non è alla postazione."][Math.floor(r*3)];
+ else msg=["19:03 compare per un frame su più monitor.","Qualcosa attraversa il corridoio e scompare.","ARCH-VOID appare per un istante nei log.","Tutti i telefoni mostrano INTERNO 000."][Math.floor(r*4)];
+ toast("ANOMALIA // "+msg);
+ if(a>.55&&Math.random()<.25){state.anomalyPenalty++;state.stress+=3}
+}
+function maybeCritical(){if(state.min>600&&Math.random()<.13)newTicket("CRITICAL")}
 function startBoss(){
- if(state.bossStarted || state.finished) return;
- state.bossStarted=true;
- state.min=BOSS_TIME;              // il tempo si ferma qui finché il boss non viene gestito
- tickets=[]; showTicket();
- toast("18:52 // CHIAMATA IN ARRIVO");
- $("#modalBody").innerHTML=`
-   <h2 class="urgent">18:52 — INCOMING CALL // INTERNO 000</h2>
-   <p>«Ciao, scusa l'orario. Hai un secondo?»</p>
-   <p>Tutti i monitor dello studio si accendono insieme. Compare una sessione sconosciuta: <b>ARCH-VOID</b>.</p>
-   <p>Sul server appare <b>\\\\ARCHEA\\\\Projects\\\\_DO_NOT_OPEN\\\\19_03</b>.</p>
-   <button class="choice boss-choice" data-i="0">Apri la cartella per capire cosa contiene</button>
-   <button class="choice boss-choice" data-i="1">Isola la sessione, blocca l'account e controlla i log</button>
-   <button class="choice boss-choice" data-i="2">Riavvia immediatamente tutti i server</button>`;
- $("#modal").classList.remove("hidden");
- document.querySelectorAll(".boss-choice").forEach(b=>b.onclick=()=>resolveBoss(+b.dataset.i));
+ state.phase="boss";state.min=BOSS;tickets=[];renderTickets();state.bossPhase=1;bossModal();
 }
-
-function resolveBoss(choice){
- if(state.bossResolved) return;
- state.bossResolved=true;
- $("#modal").classList.add("hidden");
- if(choice===1){
-   state.xp+=1000;
-   state.incident=Math.max(0,state.incident-30);
-   state.stress=Math.max(0,state.stress-10);
-   toast("ARCH-VOID ISOLATO // +1000 XP");
-   finishGame(true);
- } else {
-   state.incident=Math.min(100,state.incident+35);
-   state.stress=Math.min(100,state.stress+25);
-   state.rep=Math.max(0,state.rep-1);
-   toast("ARCH-VOID SI È PROPAGATO");
-   finishGame(state.incident<100 && state.rep>0);
- }
+const bossQs=[
+["FASE 1 // IDENTIFICAZIONE","ARCH-VOID sta aprendo sessioni anomale. Qual è il primo approccio?",["Isolare e raccogliere evidenze/log","Aprire la cartella 19_03","Spegnere tutto"],0],
+["FASE 2 // CONTENIMENTO","La sessione si propaga. Cosa fai?",["Bloccare account/sessione e segmentare il problema","Ignorare gli alert","Cancellare i log"],0],
+["FASE 3 // ERADICAZIONE","Hai isolato la sorgente. Ultima azione?",["Rimuovere persistenza, verificare sistemi e ripristinare controllato","Riattivare subito tutto senza test","Dare privilegi admin ad ARCH-VOID"],0]
+];
+function bossModal(){
+ let q=bossQs[state.bossPhase-1];
+ $("#modalBody").innerHTML=`<h2 class="critical">18:52 // INTERNO 000</h2><p>«Ciao, scusa l'orario. Hai un secondo?»</p><h3>${q[0]}</h3><p>${q[1]}</p>${q[2].map((a,n)=>`<button class="choice bossans" data-n="${n}">${a}</button>`).join("")}`;
+ $("#modal").classList.remove("hidden");document.querySelectorAll(".bossans").forEach(b=>b.onclick=()=>bossAnswer(+b.dataset.n));
 }
-
-function finishGame(win){
- state.finished=true;
- state.min=END_TIME;
- $("#modalBody").innerHTML=`
-   <h2 class="${win?'good':'urgent'}">${win?'SHIFT COMPLETE // 19:00':'BAD ENDING // INCIDENT CRITICO'}</h2>
-   <p>${win
-     ? 'Hai contenuto l’incidente e lo studio è ancora operativo. La porta d’uscita si sblocca.'
-     : 'La rete non risponde più. Il tuo account viene disconnesso dal dominio.'}</p>
-   <p>XP: <b>${state.xp}</b><br>Stress: <b>${Math.round(state.stress)}%</b><br>Incident: <b>${Math.round(state.incident)}%</b></p>
-   <button class="choice" onclick="location.reload()">NUOVO TURNO</button>`;
- $("#modal").classList.remove("hidden");
+function bossAnswer(n){
+ let q=bossQs[state.bossPhase-1];
+ if(n!==q[3]){state.incident+=28+state.anomalyPenalty*2;state.stress+=15;clamp();if(state.incident>=100||state.bossPhase===3)return ending("ARCH-VOID","ARCH-VOID ottiene privilegi amministrativi. YOU HAVE BEEN REPLACED.");}
+ else state.xp+=500;
+ if(state.bossPhase<3){state.bossPhase++;bossModal()}else ending("WIN","ARCH-VOID // SESSION TERMINATED",true);
 }
-
+function ending(type,text,win=false){state.phase="ended";state.min=END;clamp();$("#modalBody").innerHTML=`<h2 class="${win?"low":"critical"}">${win?"SHIFT COMPLETE // 19:00":"BAD ENDING // "+type}</h2><p>${text}</p><p>XP <b>${state.xp}</b> · ERRORI <b>${state.strikes}/3</b> · INCIDENT <b>${Math.round(state.incident)}%</b></p>${win?'<p>New login detected... <b>ARCH-VOID // 19:03</b></p>':""}<button class="choice" onclick="location.reload()">NUOVA PARTITA</button>`;$("#modal").classList.remove("hidden")}
+function clamp(){state.incident=Math.max(0,Math.min(100,state.incident));state.stress=Math.max(0,Math.min(100,state.stress));state.rep=Math.max(0,Math.min(5,state.rep))}
+$("#x").onclick=()=>{if(state&&state.phase!=="shift"){toast("Questo evento non può essere ignorato.");return}$("#modal").classList.add("hidden")};
+function hud(){clamp();$("#clock").textContent=fmt(state.min);$("#stress").textContent=Math.round(state.stress)+"%";$("#rep").textContent="★".repeat(state.rep)+"☆".repeat(5-state.rep);$("#strikes").textContent=state.strikes+"/3";$("#xp").textContent=state.xp;$("#incident").textContent=Math.round(state.incident)+"%"}
 function update(dt){
- if(state.finished){
-   $("#clock").textContent=fmt(state.min);
-   return;
- }
-
- let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),
-     dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
-
- if(dx||dy){
-   let l=Math.hypot(dx,dy),
-       nx=player.x+dx/l*player.s*dt,
-       ny=player.y+dy/l*player.s*dt;
-   if(legal(nx,player.y))player.x=nx;
-   if(legal(player.x,ny))player.y=ny;
- }
-
- // Il turno non può più andare oltre il boss.
- if(!state.bossStarted){
-   state.min += dt*2.2;
-   if(state.min >= BOSS_TIME){
-     startBoss();
-   } else {
-     spawn+=dt;
-     if(spawn>10){spawn=0;newTicket()}
-     for(let t of tickets){
-       if(!t.dead && state.min>t.due){
-         t.dead=1;
-         state.incident=Math.min(100,state.incident+15);
-         state.stress=Math.min(100,state.stress+8);
-         state.rep=Math.max(0,state.rep-1);
-         toast("TASK SCADUTA: INCIDENT +15");
-       }
-     }
-   }
- } else {
-   state.min=BOSS_TIME; // resta 18:52 mentre il popup boss è aperto
- }
-
- // Clamp globale: mai più 115%, 26:08 ecc.
- state.incident=Math.max(0,Math.min(100,state.incident));
- state.stress=Math.max(0,Math.min(100,state.stress));
- state.rep=Math.max(0,Math.min(5,state.rep));
-
- if(!state.bossStarted && (state.incident>=100 || state.stress>=100 || state.rep<=0)){
-   finishGame(false);
- }
-
- $("#clock").textContent=fmt(state.min);
- $("#stress").textContent=Math.round(state.stress)+"%";
- $("#rep").textContent="★".repeat(state.rep)+"☆".repeat(5-state.rep);
- $("#xp").textContent=state.xp;
- $("#incident").textContent=Math.round(state.incident)+"%";
+ if(state.phase==="shift"){
+  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
+  if(dx||dy){let l=Math.hypot(dx,dy),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(walkable(player.x+vx,player.y))player.x+=vx;if(walkable(player.x,player.y+vy))player.y+=vy}
+  state.min=Math.min(BOSS,state.min+dt*TIME_SPEED);if(state.min>=BOSS){startBoss();hud();return}
+  spawnTimer+=dt;anomTimer+=dt;if(spawnTimer>11){spawnTimer=0;newTicket();maybeCritical()}if(anomTimer>Math.max(5,14-anomalyLevel()*8)){anomTimer=0;anomalyEvent()}
+  expireTickets();
+ } else if(state.phase==="boss")state.min=BOSS;else state.min=END;
+ hud();
 }
+function floor(r){let a={stone:["#1b201d","#252b27"],wood:["#261910","#342116"],tile:["#19201d","#252d28"],server:["#101614","#18231e"]}[r.f];g.fillStyle=a[0];g.fillRect(r.x,r.y,r.w,r.h);g.strokeStyle=a[1];g.lineWidth=1;for(let y=r.y+10;y<r.y+r.h;y+=16){g.beginPath();g.moveTo(r.x,y);g.lineTo(r.x+r.w,y);g.stroke()}if(r.f==="wood")for(let x=r.x+10;x<r.x+r.w;x+=28){g.beginPath();g.moveTo(x,r.y);g.lineTo(x,r.y+r.h);g.stroke()}}
+function desk(x,y,w){g.fillStyle="#5a3b22";g.fillRect(x,y,w,25);for(let i=8;i<w-25;i+=45){g.fillStyle="#26332d";g.fillRect(x+i,y-25,32,20);g.fillStyle="#4b8cac";g.fillRect(x+i+4,y-21,24,12)}}
 function draw(){
- g.fillStyle="#080a09";g.fillRect(0,0,W,H);
- // corridoio centrale
- g.fillStyle="#19130e";g.fillRect(700,70,75,780);g.fillRect(215,290,560,28);g.fillRect(215,695,1120,15);g.fillRect(1160,340,55,370);
- rooms.forEach(r=>{let[n,x,y,w,h]=r;g.fillStyle=n=="IT"?"#151917":"#111412";g.fillRect(x,y,w,h);g.strokeStyle="#69716b";g.lineWidth=6;g.strokeRect(x,y,w,h);g.fillStyle="#c7b99d";g.font="bold 14px monospace";g.fillText(n,x+12,y+24);
-   // arredi sintetici
-   g.fillStyle="#4a3522";g.fillRect(x+w*.2,y+h*.45,w*.6,24);g.fillStyle="#202824";for(let k=0;k<3;k++)g.fillRect(x+w*.25+k*42,y+h*.38,28,18);
- });
- // porte sopra i muri
- doors.forEach(d=>{g.fillStyle="#6b4426";g.fillRect(...d);g.strokeStyle="#a26b36";g.lineWidth=2;g.strokeRect(...d)});
- // task random
- tickets.forEach(t=>{let blink=Math.sin(performance.now()/130)>0;g.fillStyle=blink?"#ffd447":"#b52222";g.beginPath();g.arc(t.p.x,t.p.y,10,0,Math.PI*2);g.fill();g.fillStyle="#111";g.font="bold 14px monospace";g.fillText("!",t.p.x-4,t.p.y+5)});
- // spawn/player
- g.fillStyle="#222";g.fillRect(player.x-9,player.y-12,18,24);g.fillStyle="#b7ff4a";g.beginPath();g.arc(player.x,player.y+14,13,0,Math.PI*2);g.strokeStyle="#63e356";g.lineWidth=3;g.stroke();
+ g.fillStyle="#050706";g.fillRect(0,0,W,H);
+ walkZones.slice(rooms.length).forEach(z=>{g.fillStyle="#2b1c12";g.fillRect(z.x,z.y,z.w,z.h)});
+ rooms.forEach(r=>{floor(r);g.strokeStyle="#707970";g.lineWidth=9;g.strokeRect(r.x,r.y,r.w,r.h);g.fillStyle="#0b0e0c";g.fillRect(r.x+12,r.y+10,Math.min(r.w-24,r.name.length*9+24),24);g.fillStyle="#d3c5aa";g.font="bold 13px monospace";g.fillText(r.name,r.x+19,r.y+27)});
+ // porte: cancellano VISIVAMENTE il muro, coerenti con la navigation layer
+ walkZones.slice(rooms.length+7).forEach(z=>{g.fillStyle="#2b1c12";g.fillRect(z.x,z.y,z.w,z.h)});
+ desk(80,185,150);desk(340,185,120);desk(390,455,280);desk(390,380,240);desk(890,470,180);desk(1090,200,100);desk(1280,200,125);desk(1340,540,180);desk(890,810,170);desk(1190,810,190);
+ for(let x=565;x<710;x+=42){g.fillStyle="#17231e";g.fillRect(x,115,34,92);g.strokeStyle="#40534a";g.strokeRect(x,115,34,92)}
+ tickets.forEach(t=>{let b=Math.sin(performance.now()/120)>0;g.fillStyle=t.level==="CRITICAL"?"#ff3131":b?"#ffd447":"#c43d35";g.beginPath();g.arc(t.p.x,t.p.y,11,0,Math.PI*2);g.fill();g.fillStyle="#111";g.fillText("!",t.p.x-4,t.p.y+5)});
+ let a=anomalyLevel();if(a>.15){g.fillStyle=`rgba(20,0,18,${a*.14})`;g.fillRect(0,0,W,H)}if(a>.55&&Math.random()<.02){g.fillStyle="#b4002a18";g.fillRect(0,Math.random()*H,W,4)}
+ g.fillStyle="#1b1e1c";g.fillRect(player.x-9,player.y-14,18,26);g.fillStyle="#d0a887";g.fillRect(player.x-6,player.y-19,12,8);g.strokeStyle="#62e568";g.lineWidth=3;g.beginPath();g.ellipse(player.x,player.y+15,14,7,0,0,Math.PI*2);g.stroke();
+ if(debug){g.globalAlpha=.25;g.fillStyle="#37ff82";walkZones.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));g.fillStyle="#ff3040";obstacles.forEach(o=>g.fillRect(o.x,o.y,o.w,o.h));g.globalAlpha=1}
 }
-function loop(n){let dt=Math.min(.05,(n-last)/1000);last=n;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
-// touch
-let joy=$("#joy"),stick=joy.querySelector("i"),jid=null,cx=0,cy=0;
-joy.addEventListener("touchstart",e=>{let t=e.changedTouches[0],r=joy.getBoundingClientRect();jid=t.identifier;cx=r.left+r.width/2;cy=r.top+r.height/2;moveJoy(e)},{passive:false});
-function moveJoy(e){let t=[...e.changedTouches].find(t=>t.identifier==jid);if(!t)return;let x=t.clientX-cx,y=t.clientY-cy,l=Math.hypot(x,y),m=36;if(l>m){x*=m/l;y*=m/l}stick.style.transform=`translate(${x}px,${y}px)`;keys.a=x<-8;keys.d=x>8;keys.w=y<-8;keys.s=y>8;e.preventDefault()}
-joy.addEventListener("touchmove",moveJoy,{passive:false});joy.addEventListener("touchend",()=>{jid=null;stick.style.transform="";keys.a=keys.d=keys.w=keys.s=0},{passive:false});$("#act").addEventListener("touchstart",e=>{e.preventDefault();interact()},{passive:false});$("#act").onclick=interact;
-newTicket();
+function loop(n){let dt=Math.min(.05,(n-last)/1000);last=n;update(dt);draw();requestAnimationFrame(loop)}
+function toast(s){let t=$("#toast");t.textContent=s;t.classList.add("on");clearTimeout(t.q);t.q=setTimeout(()=>t.classList.remove("on"),1800)}
+addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=1;if(e.key.toLowerCase()==="e")interact();if(e.key==="F2"){debug=!debug;toast("DEBUG COLLISIONI "+(debug?"ON":"OFF"))}});addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
+let joy=$("#joy"),stick=joy.querySelector("i"),jid=null,cx=0,cy=0;joy.addEventListener("touchstart",e=>{let t=e.changedTouches[0],r=joy.getBoundingClientRect();jid=t.identifier;cx=r.left+r.width/2;cy=r.top+r.height/2;mv(e)},{passive:false});function mv(e){let t=[...e.changedTouches].find(x=>x.identifier===jid);if(!t)return;let x=t.clientX-cx,y=t.clientY-cy,l=Math.hypot(x,y),m=36;if(l>m){x*=m/l;y*=m/l}stick.style.transform=`translate(${x}px,${y}px)`;keys.a=x<-8;keys.d=x>8;keys.w=y<-8;keys.s=y>8;e.preventDefault()}joy.addEventListener("touchmove",mv,{passive:false});joy.addEventListener("touchend",()=>{jid=null;stick.style.transform="";keys.a=keys.d=keys.w=keys.s=0},{passive:false});$("#act").addEventListener("touchstart",e=>{e.preventDefault();interact()},{passive:false});$("#act").onclick=interact;

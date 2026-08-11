@@ -1,25 +1,26 @@
-# IT NIGHTMARE — ARCHEA // After Hours — Map Prototype V1
+# IT NIGHTMARE V2 — ARCHEA // AFTER HOURS
 
-Versione pronta per GitHub Pages.
+Baseline: ZIP legacy fornito dall'utente.
 
-## Questa build include
-- mappa ricostruita dalla planimetria + annotazione muri/porte
-- spawn principale nel reparto IT
-- muri solidi e porte attraversabili
-- PC: WASD/frecce + E
-- mobile/tablet: joystick + E
-- task generate casualmente in diversi punti della mappa
-- deadline, Stress, Reputazione, XP e Incident Level
-- nessun NPC ancora: verranno aggiunti sulla base di questa geometria
+## V2
+- Boot + pagina Lore ripristinati.
+- Turno 09:00 → 18:52 → boss → 19:00.
+- Tempo centralizzato: non può superare 19:00.
+- Ticket LOW / MEDIUM / HIGH.
+- CRITICAL esclusivi dei capi, con deadline breve e spawn nel punto più lontano dal giocatore.
+- Vere domande IT a risposta multipla.
+- XP: LOW 100, MEDIUM 250, HIGH 500, CRITICAL 750.
+- 3 errori/strike = Bad Ending anticipato.
+- Bad Ending anche per reputazione 0, Incident 100, Stress 100.
+- Anomaly System attivo fin dalla mattina e crescente, invisibile nell'HUD.
+- Anomalie atmosferiche casuali.
+- Le anomalie possono aumentare la difficoltà del boss.
+- Boss ARCH-VOID in 3 fasi.
+- Good Ending + teaser 19:03.
+- Navigation layer separato dalla grafica.
+- Corridoi e porte volutamente molto larghi.
+- F2: debug aree percorribili/ostacoli.
+- PC + mobile.
 
-## GitHub
-Caricare `index.html`, `style.css`, `game.js` nella root del repository.
-
-
-## V1.1 — controllo turno e boss
-- Boss ARCH-VOID obbligatorio alle 18:52.
-- Il timer si blocca alle 18:52 finché il boss non viene affrontato.
-- Dopo il boss il turno termina alle 19:00.
-- Incident Level e Stress sono limitati a 0–100%.
-- Non è più possibile lasciare il gioco aperto e arrivare a orari come 26:08.
-- I ticket normali smettono di generarsi quando parte il boss.
+## Regola V2
+Nessun nuovo sviluppo deve eliminare funzioni approvate in questa build senza decisione esplicita.
