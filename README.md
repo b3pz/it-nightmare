@@ -225,3 +225,9 @@ Nessuna modifica a gameplay, mappa, NPC, bilanciamento, F2 o collisioni.
 - Spawn giocatore nel vero reparto IT.
 - Scaffale IT SUPPLIES sempre visibile.
 - Versione V2.7.2.1 visibile nel footer.
+
+## V2.7.2.2 — MOBILE FIX
+- Corretto il crash runtime della 2.7.2.1: `stations` veniva inizializzato troppo tardi rispetto a `reset/spawnNPCs`.
+- Pulsante DEBUG touch equivalente a F2.
+- Badge V2.7.2.2 visibile.
+- Diagnostica JS ERROR visibile anche da Safari/iPhone.

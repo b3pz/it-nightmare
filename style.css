@@ -58,3 +58,8 @@ background:rgba(90,0,8,.82);pointer-events:none;animation:strikeIn .16s ease-out
 
 #missionPanel em{display:block;margin-top:7px;padding-top:6px;border-top:1px solid #28434a;color:#6ee7ff;font-style:normal;font-size:8px}
 footer b{color:#6ee7ff}
+
+#debugTouch{position:fixed;right:10px;bottom:155px;z-index:90;border:1px solid #6ee7ff;background:rgba(3,8,7,.9);color:#6ee7ff;font:700 10px monospace;padding:9px 11px}
+#debugTouch.on{background:#6ee7ff;color:#03100d}
+#runtimeError{position:fixed;left:8px;right:8px;top:210px;z-index:99999;background:#280404;border:2px solid #ff3d3d;color:#fff;padding:12px;font:700 11px monospace}
+footer b{color:#6ee7ff}

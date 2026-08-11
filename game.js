@@ -107,26 +107,7 @@ function drawQuestion(category){
    NPC + physical workstation layer.
    Navigation/F2 base remains unchanged apart from LEFT SPINE above.
 */
-const stations=[
- ...[[405,405],[455,405],[505,405],[555,405],[605,405],[655,405],
-     [405,480],[455,480],[505,480],[555,480],[605,480],[655,480]].map((p,i)=>({id:"C"+String(i+1).padStart(2,"0"),room:"CENTRALE",type:"HP Z",x:p[0],y:p[1]})),
- ...[[95,155],[145,155],[195,155],[120,205]].map((p,i)=>({id:"G"+String(i+1).padStart(2,"0"),room:"GRAFICA",type:"MAC",x:p[0],y:p[1]})),
- ...[[1080,170],[1130,170],[1170,220]].map((p,i)=>({id:"B"+String(i+1).padStart(2,"0"),room:"THE BUNKER",type:"MAC",x:p[0],y:p[1]})),
- ...[[350,155],[405,155],[455,205]].map((p,i)=>({id:"L"+String(i+1).padStart(2,"0"),room:"LOFT",type:"HP Z",x:p[0],y:p[1]})),
- ...[[110,385],[165,385],[135,450]].map((p,i)=>({id:"A"+String(i+1).padStart(2,"0"),room:"ABA",type:"HP Z",x:p[0],y:p[1]})),
- ...[[1300,165],[1360,165],[1415,215]].map((p,i)=>({id:"P"+String(i+1).padStart(2,"0"),room:"PANTHEON",type:"HP Z",x:p[0],y:p[1]})),
- ...[[95,600],[150,600],[195,650]].map((p,i)=>({id:"IT"+String(i+1).padStart(2,"0"),room:"IT",type:"HP Z",x:p[0],y:p[1]})),
- {id:"MEET-TV",room:"SALA MEET",type:"AV",x:925,y:205},
- {id:"SPAZIO-TV",room:"SPAZIO A",type:"AV",x:1030,y:480},
- {id:"CORTE-TV",room:"SALA CORTE",type:"AV",x:1395,y:535},
- {id:"PIX-01",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1080,y:635},
- {id:"PIX-02",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1130,y:635},
- {id:"SRV-01",room:"SERVER",type:"SERVER",x:610,y:145},
- {id:"SRV-02",room:"SERVER",type:"SERVER",x:665,y:145},
- {id:"PRN-01",room:"STAMPANTI",type:"PRINTER",x:1210,y:805},
- {id:"PRN-02",room:"STAMPANTI",type:"PRINTER",x:1260,y:805},
- {id:"PRN-03",room:"STAMPANTI",type:"PRINTER",x:1310,y:805}
-];
+
 
 const npcDefs=[
  {id:"pao",name:"PAO",role:"BIMER",x:250,y:620,tone:"mixed",shirt:"#536f8b",hunter:true},
@@ -463,6 +444,27 @@ function validateMap(){
  console.log("V2.1 MAP CHECK:",bad.length?"UNREACHABLE":"ALL TASK ZONES REACHABLE",bad);
  return bad;
 }
+const stations=[
+ ...[[405,405],[455,405],[505,405],[555,405],[605,405],[655,405],
+     [405,480],[455,480],[505,480],[555,480],[605,480],[655,480]].map((p,i)=>({id:"C"+String(i+1).padStart(2,"0"),room:"CENTRALE",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[95,155],[145,155],[195,155],[120,205]].map((p,i)=>({id:"G"+String(i+1).padStart(2,"0"),room:"GRAFICA",type:"MAC",x:p[0],y:p[1]})),
+ ...[[1080,170],[1130,170],[1170,220]].map((p,i)=>({id:"B"+String(i+1).padStart(2,"0"),room:"THE BUNKER",type:"MAC",x:p[0],y:p[1]})),
+ ...[[350,155],[405,155],[455,205]].map((p,i)=>({id:"L"+String(i+1).padStart(2,"0"),room:"LOFT",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[110,385],[165,385],[135,450]].map((p,i)=>({id:"A"+String(i+1).padStart(2,"0"),room:"ABA",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[1300,165],[1360,165],[1415,215]].map((p,i)=>({id:"P"+String(i+1).padStart(2,"0"),room:"PANTHEON",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[95,600],[150,600],[195,650]].map((p,i)=>({id:"IT"+String(i+1).padStart(2,"0"),room:"IT",type:"HP Z",x:p[0],y:p[1]})),
+ {id:"MEET-TV",room:"SALA MEET",type:"AV",x:925,y:205},
+ {id:"SPAZIO-TV",room:"SPAZIO A",type:"AV",x:1030,y:480},
+ {id:"CORTE-TV",room:"SALA CORTE",type:"AV",x:1395,y:535},
+ {id:"PIX-01",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1080,y:635},
+ {id:"PIX-02",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1130,y:635},
+ {id:"SRV-01",room:"SERVER",type:"SERVER",x:610,y:145},
+ {id:"SRV-02",room:"SERVER",type:"SERVER",x:665,y:145},
+ {id:"PRN-01",room:"STAMPANTI",type:"PRINTER",x:1210,y:805},
+ {id:"PRN-02",room:"STAMPANTI",type:"PRINTER",x:1260,y:805},
+ {id:"PRN-03",room:"STAMPANTI",type:"PRINTER",x:1310,y:805}
+];
+
 function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:150,y:640,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=false;encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x+5&&x<o.x+o.w-5&&y>o.y+5&&y<o.y+o.h-5)}
@@ -948,4 +950,14 @@ function draw(){
 function loop(n){let dt=Math.min(.05,(n-last)/1000);last=n;update(dt);draw();requestAnimationFrame(loop)}
 function toast(s){let t=$("#toast");t.textContent=s;t.classList.add("on");clearTimeout(t.q);t.q=setTimeout(()=>t.classList.remove("on"),1800)}
 addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=1;if(e.key.toLowerCase()==="e")interact();if(e.key==="F2"){debug=!debug;toast("DEBUG COLLISIONI "+(debug?"ON":"OFF"))}});addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
+const debugTouch=$("#debugTouch");
+if(debugTouch)debugTouch.addEventListener("click",()=>{debug=!debug;debugTouch.classList.toggle("on",debug);toast("DEBUG COLLISIONI "+(debug?"ON":"OFF"))});
 let joy=$("#joy"),stick=joy.querySelector("i"),jid=null,cx=0,cy=0;joy.addEventListener("touchstart",e=>{let t=e.changedTouches[0],r=joy.getBoundingClientRect();jid=t.identifier;cx=r.left+r.width/2;cy=r.top+r.height/2;mv(e)},{passive:false});function mv(e){let t=[...e.changedTouches].find(x=>x.identifier===jid);if(!t)return;let x=t.clientX-cx,y=t.clientY-cy,l=Math.hypot(x,y),m=36;if(l>m){x*=m/l;y*=m/l}stick.style.transform=`translate(${x}px,${y}px)`;keys.a=x<-8;keys.d=x>8;keys.w=y<-8;keys.s=y>8;e.preventDefault()}joy.addEventListener("touchmove",mv,{passive:false});joy.addEventListener("touchend",()=>{jid=null;stick.style.transform="";keys.a=keys.d=keys.w=keys.s=0},{passive:false});$("#act").addEventListener("touchstart",e=>{e.preventDefault();interact()},{passive:false});$("#act").onclick=interact;
+
+window.addEventListener("error",function(ev){
+ let old=document.getElementById("runtimeError");
+ if(old)return;
+ let d=document.createElement("div");d.id="runtimeError";
+ d.textContent="JS ERROR V2.7.2.2 // "+(ev.message||"errore sconosciuto");
+ document.body.appendChild(d);
+});
