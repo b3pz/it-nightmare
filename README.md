@@ -237,3 +237,20 @@ Nessuna modifica a gameplay, mappa, NPC, bilanciamento, F2 o collisioni.
 - Le risposte vengono realmente mescolate e l'indice della risposta corretta viene ricalcolato.
 - Nessuna modifica alle collisioni, mappa, NPC, inventario o difficoltà della 2.7.2.2.
 - Versione/cache-busting aggiornati a V2.7.2.3.
+
+## V2.7.2.4 — MOBILE & NPC NAVIGATION
+- Joypad mobile riscritto con Pointer Events e movimento analogico.
+- Interagisci touch usa pointerdown.
+- DON passeggia anche senza encounter e può cercare il giocatore.
+- PAO molto meno invasivo: probabilità di ricerca ridotta e oltre 100 minuti-game tra incontri spontanei.
+- Un bonus telefonico di PAO non lo forza più a inseguirti.
+- NPC ambientali della CENTRALE escono tramite un percorso dedicato verso la porta in basso a destra.
+- NPC usano la stessa logica muro/porta del giocatore durante gli spostamenti.
+- Recovery automatico se restano bloccati su un waypoint.
+
+## V2.7.2.5 — MOBILE CONTROLS HARD FIX
+- Joypad analogico mantiene touch + pointer.
+- Aggiunto D-PAD fisico ▲ ▼ ◀ ▶ come fallback affidabile su Safari/iPhone.
+- D-PAD controlla direttamente virtual WASD.
+- INTERAGISCI usa touchstart/pointerdown/click con anti-doppio tap.
+- Nessuna modifica a gameplay, NPC, collisioni, inventario o domande.

@@ -140,24 +140,74 @@ const officeWaypoints=[
  {x:900,y:800},{x:1000,y:815}
 ];
 function buildRoute(n,toKitchen){
- // Corridoi larghi e già percorribili: prima ci si porta sull'asse principale,
- // poi si attraversa lo studio, evitando la linea retta attraverso i muri.
+ const central=n.homeX>=360&&n.homeX<=690&&n.homeY>=380&&n.homeY<=590;
+ const left=n.homeX<300;
+
  if(toKitchen){
-   return [{x:n.x,y:700},{x:700,y:700},{x:900,y:700},{x:900,y:805},{x:990,y:815}];
+   if(central){
+     // Dentro CENTRALE: scendi sotto le scrivanie, raggiungi la porta in basso a destra,
+     // poi entra nel corridoio inferiore.
+     return [
+       {x:n.homeX,y:560},{x:670,y:560},{x:700,y:610},
+       {x:700,y:675},{x:780,y:705},{x:900,y:705},{x:900,y:805},{x:990,y:815}
+     ];
+   }
+   if(left){
+     return [
+       {x:250,y:n.homeY},{x:250,y:675},{x:350,y:705},
+       {x:700,y:705},{x:900,y:705},{x:900,y:805},{x:990,y:815}
+     ];
+   }
+   return [
+     {x:n.homeX,y:675},{x:1100,y:705},{x:900,y:705},{x:900,y:805},{x:990,y:815}
+   ];
  }
- return [{x:900,y:805},{x:900,y:700},{x:700,y:700},{x:n.homeX,y:700},{x:n.homeX,y:n.homeY}];
+
+ if(central){
+   return [
+     {x:900,y:805},{x:900,y:705},{x:780,y:705},{x:700,y:675},
+     {x:700,y:610},{x:670,y:560},{x:n.homeX,y:560},{x:n.homeX,y:n.homeY}
+   ];
+ }
+ if(left){
+   return [
+     {x:900,y:805},{x:900,y:705},{x:700,y:705},{x:350,y:705},
+     {x:250,y:675},{x:250,y:n.homeY},{x:n.homeX,y:n.homeY}
+   ];
+ }
+ return [
+   {x:900,y:805},{x:900,y:705},{x:1100,y:705},
+   {x:n.homeX,y:675},{x:n.homeX,y:n.homeY}
+ ];
 }
 function moveNpcRoute(n,dt){
  if(!n.route.length||n.routeIndex>=n.route.length)return true;
  const p=n.route[n.routeIndex],dx=p.x-n.x,dy=p.y-n.y,d=Math.hypot(dx,dy);
- if(d<7){n.x=p.x;n.y=p.y;n.routeIndex++;return n.routeIndex>=n.route.length}
- const step=n.speed*dt,nx=n.x+dx/d*step,ny=n.y+dy/d*step;
- // Axis-separated movement preserves wall collision.
- if(walkable(nx,n.y))n.x=nx;
- if(walkable(n.x,ny))n.y=ny;
- // If a waypoint is inaccessible, skip it instead of freezing forever.
- if(Math.hypot(p.x-n.x,p.y-n.y)>d+2)n.routeIndex++;
- return false;
+
+ if(d<9){
+   n.x=p.x;n.y=p.y;n.routeIndex++;n.blockedFor=0;
+   return n.routeIndex>=n.route.length;
+ }
+
+ const step=n.speed*dt;
+ let moved=false;
+ const tryX=()=>{
+   const sx=Math.sign(dx)*Math.min(Math.abs(dx),step);
+   if(playerCanMove(n.x,n.y,n.x+sx,n.y)){n.x+=sx;moved=true}
+ };
+ const tryY=()=>{
+   const sy=Math.sign(dy)*Math.min(Math.abs(dy),step);
+   if(playerCanMove(n.x,n.y,n.x,n.y+sy)){n.y+=sy;moved=true}
+ };
+ if(Math.abs(dx)>Math.abs(dy)){tryX();tryY()}else{tryY();tryX()}
+
+ if(!moved){
+   n.blockedFor=(n.blockedFor||0)+dt;
+   // non restare eternamente contro una parete
+   if(n.blockedFor>1.5){n.routeIndex++;n.blockedFor=0}
+ }else n.blockedFor=0;
+
+ return n.routeIndex>=n.route.length;
 }
 function updateAmbient(dt){
  for(const n of ambientNPCs){
@@ -362,7 +412,9 @@ function createPendingOffer(n){
  }else return;
  pendingOffers[n.id]=offer;
  phoneMessage(n.name,offer.text);
- if(n.hunter){n.seeking=true;n.seekFor=28}
+ if(n.id==="don"){
+   n.seeking=true;n.seekFor=16;n.lastHunt=state.min;
+ }
 }
 function consumePendingOffer(n){
  const o=pendingOffers[n.id];if(!o)return false;
@@ -642,8 +694,9 @@ $("#x").onclick=()=>{if(state&&state.phase!=="shift"){toast("Questo evento non p
 function hud(){clamp();$("#clock").textContent=fmt(state.min);$("#stress").textContent=Math.round(state.stress)+"%";$("#rep").textContent="★".repeat(state.rep)+"☆".repeat(5-state.rep);$("#strikes").textContent=state.strikes+"/"+state.maxStrikes;$("#xp").textContent=state.xp;$("#incident").textContent=Math.round(state.incident)+"%"}
 function update(dt){
  if(state.phase==="shift"){
-  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
-  if(dx||dy){let l=Math.hypot(dx,dy),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(playerCanMove(player.x,player.y,player.x+vx,player.y))player.x+=vx;if(playerCanMove(player.x,player.y,player.x,player.y+vy))player.y+=vy}
+  let dx=(keys.d||keys.arrowright||virtualKeys.right?1:0)-(keys.a||keys.arrowleft||virtualKeys.left?1:0)+(joyActive?joyX:0),
+      dy=(keys.s||keys.arrowdown||virtualKeys.down?1:0)-(keys.w||keys.arrowup||virtualKeys.up?1:0)+(joyActive?joyY:0);
+  if(Math.abs(dx)>.04||Math.abs(dy)>.04){let l=Math.max(1,Math.hypot(dx,dy)),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(playerCanMove(player.x,player.y,player.x+vx,player.y))player.x+=vx;if(playerCanMove(player.x,player.y,player.x,player.y+vy))player.y+=vy}
   state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed);if(state.min>=BOSS){startBoss();hud();return}
   spawnTimer+=dt;anomTimer+=dt;
  if(!firstCarryTriggered && state.min>=START+3){
@@ -666,11 +719,44 @@ function update(dt){
  if(mokasa){mokasa.life-=dt*difficultyConfig[difficulty].timeSpeed;if(mokasa.life<=0)mokasa=null}
  updateAmbient(dt);
  for(const n of npcs.filter(x=>x.hunter)){
-   if(Math.random()<.006){n.seeking=true;n.seekFor=18}
+   // PAO deve essere un incontro occasionale, DON un po' più mobile.
+   const chance=n.id==="pao"?.00055:.0014;
+   const gap=n.id==="pao"?105:65;
+   if(!n.seeking && state.min-(n.lastHunt??-999)>gap && Math.random()<chance){
+     n.seeking=true;
+     n.seekFor=n.id==="pao"?9:15;
+     n.lastHunt=state.min;
+   }
+
+   // DON, quando non cerca il giocatore, passeggia tra Cucina e corridoio.
+   if(n.id==="don"&&!n.seeking){
+     n.wanderTimer=(n.wanderTimer??0)-dt;
+     if(n.wanderTimer<=0){
+       n.wanderTarget=(n.wanderTarget==="corridor")?"kitchen":"corridor";
+       n.wanderTimer=7+Math.random()*8;
+     }
+     const target=n.wanderTarget==="corridor"?{x:900,y:700}:{x:895,y:815};
+     const wx=target.x-n.x,wy=target.y-n.y,wd=Math.hypot(wx,wy);
+     if(wd>8){
+       const step=38*dt;
+       const nx=n.x+wx/wd*step,ny=n.y+wy/wd*step;
+       if(playerCanMove(n.x,n.y,nx,n.y))n.x=nx;
+       if(playerCanMove(n.x,n.y,n.x,ny))n.y=ny;
+     }
+   }
+
    if(n.seeking){
-     n.seekFor-=dt;let dx=player.x-n.x,dy=player.y-n.y,d=Math.hypot(dx,dy);
-     if(d>55){let nx=n.x+dx/d*55*dt,ny=n.y+dy/d*55*dt;if(walkable(nx,n.y))n.x=nx;if(walkable(n.x,ny))n.y=ny}
-     if(d<72&&!encounterLock){ pokemonEncounter(n); }
+     n.seekFor-=dt;
+     // Hunter segue il corridoio: evita di tagliare le pareti.
+     const dx=player.x-n.x,dy=player.y-n.y,d=Math.hypot(dx,dy);
+     if(d>55){
+       const step=48*dt;
+       const nx=n.x+Math.sign(dx)*Math.min(Math.abs(dx),step);
+       const ny=n.y+Math.sign(dy)*Math.min(Math.abs(dy),step);
+       if(playerCanMove(n.x,n.y,nx,n.y))n.x=nx;
+       else if(playerCanMove(n.x,n.y,n.x,ny))n.y=ny;
+     }
+     if(d<72&&!encounterLock){pokemonEncounter(n)}
      if(n.seekFor<=0)n.seeking=false;
    }
  }
@@ -963,8 +1049,89 @@ function toast(s){let t=$("#toast");t.textContent=s;t.classList.add("on");clearT
 addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=1;if(e.key.toLowerCase()==="e")interact();if(e.key==="F2"){debug=!debug;toast("DEBUG COLLISIONI "+(debug?"ON":"OFF"))}});addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
 const debugTouch=$("#debugTouch");
 if(debugTouch)debugTouch.addEventListener("click",()=>{debug=!debug;debugTouch.classList.toggle("on",debug);toast("DEBUG COLLISIONI "+(debug?"ON":"OFF"))});
-let joy=$("#joy"),stick=joy.querySelector("i"),jid=null,cx=0,cy=0;joy.addEventListener("touchstart",e=>{let t=e.changedTouches[0],r=joy.getBoundingClientRect();jid=t.identifier;cx=r.left+r.width/2;cy=r.top+r.height/2;mv(e)},{passive:false});function mv(e){let t=[...e.changedTouches].find(x=>x.identifier===jid);if(!t)return;let x=t.clientX-cx,y=t.clientY-cy,l=Math.hypot(x,y),m=36;if(l>m){x*=m/l;y*=m/l}stick.style.transform=`translate(${x}px,${y}px)`;keys.a=x<-8;keys.d=x>8;keys.w=y<-8;keys.s=y>8;e.preventDefault()}joy.addEventListener("touchmove",mv,{passive:false});joy.addEventListener("touchend",()=>{jid=null;stick.style.transform="";keys.a=keys.d=keys.w=keys.s=0},{passive:false});$("#act").addEventListener("touchstart",e=>{e.preventDefault();interact()},{passive:false});$("#act").onclick=interact;
 
+let joy=$("#joy"),stick=joy?joy.querySelector("i"):null;
+let joyX=0,joyY=0,joyActive=false;
+
+function joySet(x,y){
+ joyX=Math.max(-1,Math.min(1,x));
+ joyY=Math.max(-1,Math.min(1,y));
+ joyActive=Math.abs(joyX)>.03||Math.abs(joyY)>.03;
+ if(stick){
+   const px=joyX*34,py=joyY*34;
+   stick.style.transform=`translate3d(${px}px,${py}px,0)`;
+ }
+}
+function joyStop(){joySet(0,0)}
+
+if(joy){
+ joy.style.touchAction="none";
+
+ const moveFromTouch=e=>{
+   const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0]);
+   if(!t)return;
+   const r=joy.getBoundingClientRect();
+   let x=(t.clientX-(r.left+r.width/2))/(r.width*.32);
+   let y=(t.clientY-(r.top+r.height/2))/(r.height*.32);
+   const l=Math.hypot(x,y);
+   if(l>1){x/=l;y/=l}
+   joySet(x,y);
+   e.preventDefault();
+ };
+
+ joy.addEventListener("touchstart",moveFromTouch,{passive:false});
+ joy.addEventListener("touchmove",moveFromTouch,{passive:false});
+ joy.addEventListener("touchend",e=>{joyStop();e.preventDefault()},{passive:false});
+ joy.addEventListener("touchcancel",e=>{joyStop();e.preventDefault()},{passive:false});
+
+ joy.addEventListener("pointerdown",e=>{
+   const r=joy.getBoundingClientRect();
+   let x=(e.clientX-(r.left+r.width/2))/(r.width*.32);
+   let y=(e.clientY-(r.top+r.height/2))/(r.height*.32);
+   const l=Math.hypot(x,y);if(l>1){x/=l;y/=l}
+   joySet(x,y);e.preventDefault();
+ },{passive:false});
+ joy.addEventListener("pointermove",e=>{
+   if(!(e.buttons||e.pointerType==="touch"))return;
+   const r=joy.getBoundingClientRect();
+   let x=(e.clientX-(r.left+r.width/2))/(r.width*.32);
+   let y=(e.clientY-(r.top+r.height/2))/(r.height*.32);
+   const l=Math.hypot(x,y);if(l>1){x/=l;y/=l}
+   joySet(x,y);e.preventDefault();
+ },{passive:false});
+ joy.addEventListener("pointerup",e=>{joyStop();e.preventDefault()},{passive:false});
+ joy.addEventListener("pointercancel",e=>{joyStop();e.preventDefault()},{passive:false});
+}
+
+// Fallback D-PAD: direct virtual WASD, deliberately simple for iOS Safari.
+const virtualKeys={up:false,down:false,left:false,right:false};
+function bindDir(id,key){
+ const el=$(id);if(!el)return;
+ const on=e=>{virtualKeys[key]=true;if(e)e.preventDefault()};
+ const off=e=>{virtualKeys[key]=false;if(e)e.preventDefault()};
+ el.addEventListener("touchstart",on,{passive:false});
+ el.addEventListener("touchend",off,{passive:false});
+ el.addEventListener("touchcancel",off,{passive:false});
+ el.addEventListener("pointerdown",on,{passive:false});
+ el.addEventListener("pointerup",off,{passive:false});
+ el.addEventListener("pointercancel",off,{passive:false});
+}
+bindDir("#mUp","up");bindDir("#mDown","down");bindDir("#mLeft","left");bindDir("#mRight","right");
+
+const actBtn=$("#act");
+if(actBtn){
+ let lastAct=0;
+ const fire=e=>{
+   const now=performance.now();
+   if(now-lastAct<250)return;
+   lastAct=now;
+   if(e)e.preventDefault();
+   interact();
+ };
+ actBtn.addEventListener("touchstart",fire,{passive:false});
+ actBtn.addEventListener("pointerdown",fire,{passive:false});
+ actBtn.addEventListener("click",fire);
+}
 window.addEventListener("error",function(ev){
  let old=document.getElementById("runtimeError");
  if(old)return;

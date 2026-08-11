@@ -63,3 +63,22 @@ footer b{color:#6ee7ff}
 #debugTouch.on{background:#6ee7ff;color:#03100d}
 #runtimeError{position:fixed;left:8px;right:8px;top:210px;z-index:99999;background:#280404;border:2px solid #ff3d3d;color:#fff;padding:12px;font:700 11px monospace}
 footer b{color:#6ee7ff}
+
+#joy{touch-action:none!important;-webkit-user-select:none;user-select:none}
+#joy i{pointer-events:none;will-change:transform}
+
+#joy,#dpad button,#act,#debugTouch{
+ touch-action:none!important;
+ -webkit-user-select:none!important;
+ user-select:none!important;
+ -webkit-touch-callout:none!important;
+}
+#dpad{position:absolute;left:150px;bottom:25px;width:112px;height:112px;pointer-events:auto}
+#dpad button{position:absolute;width:42px;height:42px;border:1px solid #6f856f;background:#07100bdc;color:#cce9cf;font:bold 20px monospace;border-radius:9px}
+#mUp{left:35px;top:0}#mDown{left:35px;bottom:0}#mLeft{left:0;top:35px}#mRight{right:0;top:35px}
+#dpad button:active{background:#b7ff4a;color:#07100b}
+@media(max-width:430px){
+ #joy{left:12px;bottom:18px;width:106px;height:106px}
+ #dpad{left:125px;bottom:18px;transform:scale(.9);transform-origin:bottom left}
+ #act{right:14px;bottom:22px;width:90px;height:90px}
+}
