@@ -179,3 +179,39 @@ Nessuna modifica a gameplay, mappa, NPC, bilanciamento, F2 o collisioni.
 - MoKasa può comparire in Sala Corte come incontro EXTREME opzionale.
 - Finale positivo: HAI VINTO, poi falsa chiusura e CMD ARC_VOID_00 LOGIN 19:05.
 - Collisioni, F2 e geometria della V2.6.4.1 mantenute.
+
+## V2.7.1 — LIVING OFFICE / ENCOUNTER FIX
+- DILIK rimosso: DON è il nome definitivo del Jolly.
+- DON eredita ricerca giocatore e notifiche.
+- NPC ambientali ora usano waypoint/corridoi invece di tentare una linea retta attraverso i muri.
+- 14 colleghi occupano postazioni; molti si alzano, vanno in cucina, sostano e tornano.
+- Encounter stile Pokémon reso esplicito: grande !, blocco movimento, nome NPC, “ORA CHE TI VEDO...”, poi interazione automatica.
+- Pao e Don cercano il giocatore con frequenza aumentata.
+- Nessuna modifica a mappa, F2, ticket contestuali, inventario, anomalie o finale.
+
+## V2.7.2 — STABILIZATION & INVENTORY
+
+### Collisioni
+- Il giocatore ha ora una collisione separata e più rigorosa rispetto agli NPC.
+- Attraversare il bordo di una stanza è consentito soltanto dentro una doorZone.
+- Gli NPC continuano a usare il loro sistema walkable/waypoint.
+- F2 invariato.
+
+### Inventario
+- 3 slot reali.
+- Oggetti fisici visibili sulla mappa.
+- Prompt contestuali: E — RACCOGLI / E — CONSEGNA.
+- Mission panel sempre chiaro con oggetto e destinazione.
+- Prime missioni:
+  - TONER → stampante.
+  - CHIAVETTA USB → NPC specifico.
+  - CUFFIE → NPC specifico.
+  - ADATTATORE USB-C/HDMI → Sala Meet.
+  - MOUSE USB → NPC specifico.
+- Se il destinatario si sposta, la consegna segue fisicamente l'NPC.
+
+### Pao / Zia Ale / Don
+- Le telefonate positive creano ora un bonus PENDENTE reale.
+- Il bonus ignora il cooldown quando raggiungi l'NPC.
+- Il cooldown parte solo DOPO aver riscosso il bonus.
+- Non può più succedere: “ho una cosa per te” → “ci siamo già parlati”.

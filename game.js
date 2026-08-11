@@ -131,32 +131,62 @@ const stations=[
 const npcDefs=[
  {id:"pao",name:"PAO",role:"BIMER",x:250,y:620,tone:"mixed",shirt:"#536f8b",hunter:true},
  {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,tone:"good",shirt:"#765d78"},
- {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51"},
- {id:"dilik",name:"DILIK",role:"JOLLY",x:460,y:430,tone:"good",shirt:"#496b75",hunter:true}
+ {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51",hunter:true}
 ];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
 let ambientNPCs=[];
 function spawnAmbient(){
  const seats=stations.filter(s=>["HP Z","MAC"].includes(s.type));
- ambientNPCs=seats.slice(0,14).map((s,i)=>({name:ambientNames[i%ambientNames.length],homeX:s.x,homeY:s.y+24,x:s.x,y:s.y+24,state:"work",timer:35+Math.random()*90,speed:42,shirt:["#4f6259","#665747","#4d596b","#6b4e57"][i%4]}));
+ ambientNPCs=seats.slice(0,14).map((s,i)=>({
+   name:ambientNames[i%ambientNames.length],homeX:s.x,homeY:s.y+24,x:s.x,y:s.y+24,
+   state:"work",timer:12+Math.random()*32,speed:52,shirt:["#4f6259","#665747","#4d596b","#6b4e57"][i%4],
+   route:[],routeIndex:0
+ }));
+}
+const officeWaypoints=[
+ {x:330,y:300},{x:330,y:700},{x:700,y:700},{x:900,y:700},{x:1050,y:700},
+ {x:900,y:800},{x:1000,y:815}
+];
+function buildRoute(n,toKitchen){
+ // Corridoi larghi e già percorribili: prima ci si porta sull'asse principale,
+ // poi si attraversa lo studio, evitando la linea retta attraverso i muri.
+ if(toKitchen){
+   return [{x:n.x,y:700},{x:700,y:700},{x:900,y:700},{x:900,y:805},{x:990,y:815}];
+ }
+ return [{x:900,y:805},{x:900,y:700},{x:700,y:700},{x:n.homeX,y:700},{x:n.homeX,y:n.homeY}];
+}
+function moveNpcRoute(n,dt){
+ if(!n.route.length||n.routeIndex>=n.route.length)return true;
+ const p=n.route[n.routeIndex],dx=p.x-n.x,dy=p.y-n.y,d=Math.hypot(dx,dy);
+ if(d<7){n.x=p.x;n.y=p.y;n.routeIndex++;return n.routeIndex>=n.route.length}
+ const step=n.speed*dt,nx=n.x+dx/d*step,ny=n.y+dy/d*step;
+ // Axis-separated movement preserves wall collision.
+ if(walkable(nx,n.y))n.x=nx;
+ if(walkable(n.x,ny))n.y=ny;
+ // If a waypoint is inaccessible, skip it instead of freezing forever.
+ if(Math.hypot(p.x-n.x,p.y-n.y)>d+2)n.routeIndex++;
+ return false;
 }
 function updateAmbient(dt){
  for(const n of ambientNPCs){
-  n.timer-=dt;
-  if(n.state==="work"&&n.timer<=0&&Math.random()<.55){n.state="kitchen";n.tx=900+Math.random()*150;n.ty=800+Math.random()*35;n.timer=18+Math.random()*18}
-  if(n.state==="kitchen"){
-    let dx=n.tx-n.x,dy=n.ty-n.y,d=Math.hypot(dx,dy);
-    if(d>8){let nx=n.x+dx/d*n.speed*dt,ny=n.y+dy/d*n.speed*dt;if(walkable(nx,n.y))n.x=nx;if(walkable(n.x,ny))n.y=ny}
-    else if(n.timer<=0){n.state="return";n.tx=n.homeX;n.ty=n.homeY}
-  } else if(n.state==="return"){
-    let dx=n.tx-n.x,dy=n.ty-n.y,d=Math.hypot(dx,dy);
-    if(d>8){let nx=n.x+dx/d*n.speed*dt,ny=n.y+dy/d*n.speed*dt;if(walkable(nx,n.y))n.x=nx;if(walkable(n.x,ny))n.y=ny}
-    else {n.x=n.homeX;n.y=n.homeY;n.state="work";n.timer=45+Math.random()*100}
-  }
+   n.timer-=dt;
+   if(n.state==="work"&&n.timer<=0){
+     if(Math.random()<.72){
+       n.state="toKitchen";n.route=buildRoute(n,true);n.routeIndex=0;
+     }else n.timer=10+Math.random()*25;
+   }else if(n.state==="toKitchen"){
+     if(moveNpcRoute(n,dt)){n.state="kitchen";n.timer=8+Math.random()*10}
+   }else if(n.state==="kitchen"&&n.timer<=0){
+     n.state="return";n.route=buildRoute(n,false);n.routeIndex=0;
+   }else if(n.state==="return"){
+     if(moveNpcRoute(n,dt)){n.x=n.homeX;n.y=n.homeY;n.state="work";n.timer=18+Math.random()*40}
+   }
  }
 }
 let npcs=[],mokasa=null,npcCooldown={},mokasaTimer=0,lastZiaHour=-1,idleMinutes=0,lastPlayerPos={x:0,y:0};
 let phoneQueue=[],visualAnomaly=null,inventory=[],carryMission=null,encounterLock=false;
+let pendingOffers={};
+
 function phoneMessage(sender,text){
  const box=$("#phoneNotification"); if(!box)return;
  $("#phoneSender").textContent=sender;$("#phoneText").textContent=text;
@@ -164,39 +194,100 @@ function phoneMessage(sender,text){
 }
 function updateInventoryUI(){
  const el=$("#inventory");if(!el)return;
- el.innerHTML=[0,1,2].map(i=>`<div class="slot">${inventory[i]||"—"}</div>`).join("");
+ el.innerHTML=[0,1,2].map(i=>`<div class="slot ${inventory[i]?"filled":""}">${inventory[i]||"—"}</div>`).join("");
+ const mission=$("#missionPanel");
+ if(mission){
+   if(!carryMission){mission.classList.add("hidden");mission.innerHTML="";}
+   else{
+     mission.classList.remove("hidden");
+     const dest=carryMission.stage==="pickup"
+       ? `RITIRO: ${carryMission.pickup.room}`
+       : `CONSEGNA: ${carryMission.recipient ? carryMission.recipient.name+" — "+carryMission.to.room : carryMission.to.room}`;
+     mission.innerHTML=`<b>${carryMission.label}</b><span>${carryMission.item}</span><small>${dest}</small>`;
+   }
+ }
+}
+function availableRecipient(room=null){
+ let list=ambientNPCs.filter(n=>n.state==="work");
+ if(room){
+   const stationIds=stations.filter(s=>s.room===room&&["HP Z","MAC"].includes(s.type));
+   if(stationIds.length){
+     list=list.filter(n=>stationIds.some(s=>Math.hypot(s.x-n.homeX,s.y+24-n.homeY)<40));
+   }
+ }
+ return list.length?list[Math.floor(Math.random()*list.length)]:ambientNPCs[Math.floor(Math.random()*ambientNPCs.length)];
+}
+function makeCarryMission(){
+ if(carryMission||ambientNPCs.length===0)return false;
+ const r=Math.random();
+ let m;
+ if(r<.20){
+   m={label:"CONSEGNA",item:"TONER",pickup:{x:1210,y:805,room:"STAMPANTI"},to:{x:1260,y:805,room:"STAMPANTI"},targetType:"printer"};
+ }else if(r<.40){
+   const rec=availableRecipient("CENTRALE");
+   m={label:"CONSEGNA",item:"CHIAVETTA USB",pickup:{x:160,y:640,room:"IT"},to:{x:rec.x,y:rec.y,room:"CENTRALE"},recipient:rec,targetType:"npc"};
+ }else if(r<.60){
+   const rec=availableRecipient();
+   m={label:"ASSEGNAZIONE",item:"CUFFIE",pickup:{x:115,y:640,room:"IT"},to:{x:rec.x,y:rec.y,room:"POSTAZIONE"},recipient:rec,targetType:"npc"};
+ }else if(r<.80){
+   m={label:"CONSEGNA",item:"ADATTATORE USB-C / HDMI",pickup:{x:200,y:640,room:"IT"},to:{x:925,y:205,room:"SALA MEET"},targetType:"meeting"};
+ }else{
+   const rec=availableRecipient("CENTRALE");
+   m={label:"CONSEGNA",item:"MOUSE USB",pickup:{x:185,y:640,room:"IT"},to:{x:rec.x,y:rec.y,room:"CENTRALE"},recipient:rec,targetType:"npc"};
+ }
+ m.stage="pickup";
+ return m;
 }
 function startCarryMission(){
- if(carryMission||Math.random()>.20)return;
- const missions=[
-  {item:"ADATTATORE HDMI",from:{x:170,y:640,room:"IT"},to:{x:925,y:205,room:"SALA MEET"}},
-  {item:"TONER",from:{x:1210,y:805,room:"STAMPANTI"},to:{x:1310,y:805,room:"STAMPANTI"}},
-  {item:"CAVO ETHERNET",from:{x:640,y:190,room:"SERVER"},to:{x:520,y:480,room:"CENTRALE"}},
-  {item:"TELECOMANDO",from:{x:170,y:640,room:"IT"},to:{x:1395,y:535,room:"SALA CORTE"}}
- ];
- carryMission=missions[Math.floor(Math.random()*missions.length)];carryMission.stage="pickup";
- phoneMessage("IT TASK",`Recupera ${carryMission.item} in ${carryMission.from.room} e portalo in ${carryMission.to.room}.`);
+ if(carryMission||Math.random()>.38)return;
+ carryMission=makeCarryMission();
+ if(!carryMission)return;
+ const who=carryMission.recipient?` per ${carryMission.recipient.name}`:"";
+ phoneMessage("IT TASK",`${carryMission.item}${who}. Ritirala in ${carryMission.pickup.room}.`);
+ updateInventoryUI();
+}
+function carryTarget(){
+ if(!carryMission)return null;
+ if(carryMission.stage==="pickup")return carryMission.pickup;
+ if(carryMission.recipient){
+   // Recipient may be walking: delivery follows the person.
+   return {x:carryMission.recipient.x,y:carryMission.recipient.y,room:carryMission.to.room};
+ }
+ return carryMission.to;
 }
 function interactCarry(){
  if(!carryMission)return false;
- const target=carryMission.stage==="pickup"?carryMission.from:carryMission.to;
- if(Math.hypot(player.x-target.x,player.y-target.y)>80)return false;
+ const target=carryTarget();
+ if(!target||Math.hypot(player.x-target.x,player.y-target.y)>72)return false;
+
  if(carryMission.stage==="pickup"){
-  if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
-  inventory.push(carryMission.item);carryMission.stage="deliver";updateInventoryUI();toast(`${carryMission.item} RACCOLTO`);
- }else{
-  inventory=inventory.filter(x=>x!==carryMission.item);state.xp+=180;state.solved++;state.stress=Math.max(0,state.stress-3);
-  toast(`CONSEGNA COMPLETATA +180 XP`);carryMission=null;updateInventoryUI();
+   if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
+   inventory.push(carryMission.item);
+   carryMission.stage="deliver";
+   updateInventoryUI();
+   const dest=carryMission.recipient?`${carryMission.recipient.name}`:carryMission.to.room;
+   phoneMessage("IT TASK",`${carryMission.item} raccolto. Consegnalo a ${dest}.`);
+   return true;
  }
+
+ const idx=inventory.indexOf(carryMission.item);
+ if(idx<0){toast("NON HAI L'OGGETTO RICHIESTO");return true}
+ inventory.splice(idx,1);
+ state.xp+=180;state.solved++;state.stress=Math.max(0,state.stress-3);
+ const recipient=carryMission.recipient?` A ${carryMission.recipient.name}`:"";
+ toast(`CONSEGNA COMPLETATA${recipient} // +180 XP`);
+ carryMission=null;
+ updateInventoryUI();
  return true;
 }
-
-
-function shuffledQuestion(q){
- const arr=q[1].map((text,i)=>({text,correct:i===q[2]}));
- for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
- return [q[0],arr.map(x=>x.text),arr.findIndex(x=>x.correct)];
+function carryPrompt(){
+ if(!carryMission)return null;
+ const target=carryTarget();
+ if(!target||Math.hypot(player.x-target.x,player.y-target.y)>95)return null;
+ if(carryMission.stage==="pickup")return `E — RACCOGLI ${carryMission.item}`;
+ return carryMission.recipient?`E — CONSEGNA ${carryMission.item} A ${carryMission.recipient.name}`:`E — CONSEGNA ${carryMission.item}`;
 }
+
 function spawnNPCs(){
  npcs=npcDefs.map(n=>({...n}));spawnAmbient();mokasa=null;npcCooldown={};mokasaTimer=0;lastZiaHour=-1;
  lastPlayerPos={x:player.x,y:player.y};idleMinutes=0;
@@ -222,8 +313,55 @@ function autoCloseModal(ms=2200){
    if(m&&!m.classList.contains("hidden"))m.classList.add("hidden");
  },ms);
 }
+function createPendingOffer(n){
+ if(pendingOffers[n.id])return;
+ let offer;
+ if(n.id==="pao"){
+   const opts=[
+    {title:"CAFFÈ",stress:-8,xp:4,text:"Ho un caffè e due minuti di tregua."},
+    {title:"CALCIO",stress:-6,xp:6,text:"Due chiacchiere sul calcio."},
+    {title:"RASSINA",stress:-7,xp:5,text:"Ti devo raccontare una cosa."}
+   ];
+   offer=opts[Math.floor(Math.random()*opts.length)];
+ }else if(n.id==="don"){
+   const opts=[
+    {title:"SIGARETTA",stress:-11,xp:3,text:"Ti porto fuori due minuti."},
+    {title:"CAFFÈ",stress:-8,xp:4,text:"Passa da me quando mi vedi."},
+    {title:"CHIACCHIERE",stress:-6,xp:5,text:"Ho una cosa da dirti."}
+   ];
+   offer=opts[Math.floor(Math.random()*opts.length)];
+ }else if(n.id==="zia"){
+   const opts=[
+    {title:"CAFFÈ",stress:-10,xp:2,text:"Quando puoi passa da me in Segreteria."},
+    {title:"PILLOLA DI SAGGEZZA",rep:1,text:"Quando puoi passa da me in Segreteria."},
+    {title:"TI COPRO IO",time:12,text:"Quando puoi passa da me in Segreteria."}
+   ];
+   offer=opts[Math.floor(Math.random()*opts.length)];
+ }else return;
+ pendingOffers[n.id]=offer;
+ phoneMessage(n.name,offer.text);
+ if(n.hunter){n.seeking=true;n.seekFor=28}
+}
+function consumePendingOffer(n){
+ const o=pendingOffers[n.id];if(!o)return false;
+ delete pendingOffers[n.id];
+ if(o.stress)state.stress=Math.max(0,state.stress+o.stress);
+ if(o.xp)state.xp+=o.xp;
+ if(o.rep)state.rep=Math.min(5,state.rep+o.rep);
+ if(o.time){
+   const t=[...tickets].sort((a,b)=>a.due-b.due)[0];
+   if(t)t.due+=o.time;
+ }
+ clamp();hud();renderTickets();
+ $("#modalBody").innerHTML=`<h2 class="low">${n.name} // ${o.title}</h2><p>${o.text}</p><p>BONUS RICEVUTO.</p>`;
+ $("#modal").classList.remove("hidden");
+ autoCloseModal(2100);
+ npcCooldown[n.id]=state.min;
+ return true;
+}
 function npcTalk(n){
  const now=state.min;
+ if(consumePendingOffer(n))return;
  if((npcCooldown[n.id]??-999)+35>now){toast(`${n.name}: ci siamo già parlati.`);return}
  npcCooldown[n.id]=now;
  let title="",desc="",good=true;
@@ -243,13 +381,10 @@ function npcTalk(n){
    else if(r<.7){title="PILLOLA DI SAGGEZZA";state.rep=Math.min(5,state.rep+1);desc="REPUTAZIONE +1";}
    else{title="TI COPRO IO";let t=[...tickets].sort((a,b)=>a.due-b.due)[0];if(t)t.due+=12;desc="+12 MINUTI AL TICKET PIÙ URGENTE";}
   }else{title="PROBLEMA DA BOOMER";good=false;newTicket("LOW");desc="Nuova task LOW."}
- }else if(n.id==="dilik"){
+ }else if(n.id==="don"){
   title=["CAFFÈ","DRITTA","PAUSA TATTICA"][Math.floor(Math.random()*3)];
   state.stress=Math.max(0,state.stress-8);state.xp+=6;desc="STRESS -8 · XP +6";
- }else if(n.id==="don"){
-  const ev=[["CAFFÈ",-8],["SIGARETTA",-11],["CHIACCHIERE",-6]][Math.floor(Math.random()*3)];
-  title=ev[0];state.stress=Math.max(0,state.stress+ev[1]);desc=`STRESS ${ev[1]}`;
-  }else if(n.id==="mokasa"&&n.court){
+   }else if(n.id==="mokasa"&&n.court){
   title="RICHIESTA DIREZIONE // EXTREME";good=false;
   const ok=Math.random()<.38;
   if(ok){state.xp+=900;state.rep=Math.min(5,state.rep+1);desc="Hai gestito una richiesta impossibile. XP +900 · REPUTAZIONE +1";}
@@ -298,9 +433,31 @@ function validateMap(){
  console.log("V2.1 MAP CHECK:",bad.length?"UNREACHABLE":"ALL TASK ZONES REACHABLE",bad);
  return bad;
 }
-function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");hud()}
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x+5&&x<o.x+o.w-5&&y>o.y+5&&y<o.y+o.h-5)}
+function roomAt(x,y){
+ return rooms.find(r=>inside({x:r.x+8,y:r.y+8,w:r.w-16,h:r.h-16},x,y))||null;
+}
+function inDoorZone(x,y){
+ return doors.some(d=>inside(d,x,y));
+}
+/*
+ Player collision is stricter than NPC navigation:
+ - destination must be walkable
+ - crossing a room wall is allowed only inside a door zone
+ This prevents "walking through the wall" while preserving wide, forgiving doors.
+*/
+function playerCanMove(ox,oy,nx,ny){
+ if(!walkable(nx,ny))return false;
+ const a=roomAt(ox,oy),b=roomAt(nx,ny);
+ if(a===b)return true;
+ if(inDoorZone(ox,oy)||inDoorZone(nx,ny))return true;
+ // corridor -> corridor / outside room is fine
+ if(!a&&!b)return true;
+ return false;
+}
+
 function fmt(m){m=Math.max(START,Math.min(END,m));return String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.floor(m%60)).padStart(2,"0")}
 function anomalyLevel(){return Math.max(0,Math.min(1,(state.min-START)/(BOSS-START)))}
 function levelForTime(){let a=Math.random();if(state.min<720)return a<.75?"LOW":"MEDIUM";if(state.min<900)return a<.45?"LOW":a<.88?"MEDIUM":"HIGH";return a<.2?"LOW":a<.65?"MEDIUM":"HIGH"}
@@ -443,14 +600,18 @@ function hud(){clamp();$("#clock").textContent=fmt(state.min);$("#stress").textC
 function update(dt){
  if(state.phase==="shift"){
   let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
-  if(dx||dy){let l=Math.hypot(dx,dy),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(walkable(player.x+vx,player.y))player.x+=vx;if(walkable(player.x,player.y+vy))player.y+=vy}
+  if(dx||dy){let l=Math.hypot(dx,dy),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(playerCanMove(player.x,player.y,player.x+vx,player.y))player.x+=vx;if(playerCanMove(player.x,player.y,player.x,player.y+vy))player.y+=vy}
   state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed);if(state.min>=BOSS){startBoss();hud();return}
   spawnTimer+=dt;anomTimer+=dt;
  const hr=Math.floor(state.min/60);
  if(hr!==lastZiaHour){
    lastZiaHour=hr;
-   if(state.min>START+10&&Math.random()<.78)phoneMessage("ZIA ALE","Quando puoi passa da me in Segreteria.");
-   if(Math.random()<.32)phoneMessage(Math.random()<.5?"PAO":"DILIK","Ti sto cercando. Se ci incrociamo ho una cosa per te.");
+   const zia=npcs.find(n=>n.id==="zia"),pao=npcs.find(n=>n.id==="pao"),don=npcs.find(n=>n.id==="don");
+   if(state.min>START+10&&zia&&Math.random()<.72)createPendingOffer(zia);
+   if(Math.random()<.38){
+     const n=Math.random()<.5?pao:don;
+     if(n)createPendingOffer(n);
+   }
    startCarryMission();
  }
  mokasaTimer+=dt*difficultyConfig[difficulty].timeSpeed;
@@ -458,14 +619,11 @@ function update(dt){
  if(mokasa){mokasa.life-=dt*difficultyConfig[difficulty].timeSpeed;if(mokasa.life<=0)mokasa=null}
  updateAmbient(dt);
  for(const n of npcs.filter(x=>x.hunter)){
-   if(Math.random()<.0025){n.seeking=true;n.seekFor=12}
+   if(Math.random()<.006){n.seeking=true;n.seekFor=18}
    if(n.seeking){
      n.seekFor-=dt;let dx=player.x-n.x,dy=player.y-n.y,d=Math.hypot(dx,dy);
      if(d>55){let nx=n.x+dx/d*55*dt,ny=n.y+dy/d*55*dt;if(walkable(nx,n.y))n.x=nx;if(walkable(n.x,ny))n.y=ny}
-     if(d<72&&!encounterLock){
-       encounterLock=true;n.seeking=false;n.exclaimUntil=performance.now()+650;
-       setTimeout(()=>{npcTalk(n);encounterLock=false},650);
-     }
+     if(d<72&&!encounterLock){ pokemonEncounter(n); }
      if(n.seekFor<=0)n.seeking=false;
    }
  }
