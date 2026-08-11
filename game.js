@@ -104,6 +104,26 @@ function shuffledQuestion(entry){
  return [question,answers,answers.indexOf(correctAnswer)];
 }
 
+
+/* V3.1 — balanced IT question expansion.
+   Distractors deliberately have comparable length/detail to reduce answer-length tells. */
+(function expandQuestionPool(){
+ const extra=[
+  {c:"WORKSTATION",q:"Un PC riceve un indirizzo 169.254.x.x. Qual è il primo controllo più utile?",a:["Verificare collegamento di rete e raggiungibilità del servizio DHCP","Forzare subito la reinstallazione completa del driver della scheda","Cambiare manualmente il DNS mantenendo invariato l'indirizzo IP","Eliminare il profilo utente e ricreare la configurazione Windows"],ok:0},
+  {c:"NETWORK",q:"Vero o falso: un ping riuscito al gateway dimostra anche che il DNS funziona correttamente.",a:["Vero","Falso"],ok:1},
+  {c:"SERVER",q:"Un servizio dipendente non parte dopo un riavvio. Qual è il controllo iniziale più sensato?",a:["Controllare stato, dipendenze e log del servizio prima di modificarne la configurazione","Disabilitare le dipendenze per permettere al servizio di avviarsi autonomamente","Cambiare l'account del servizio senza verificare gli eventi registrati","Riavviare ripetutamente il server finché il servizio torna disponibile"],ok:0},
+  {c:"MEETING",q:"Il display della sala è acceso ma mostra NO SIGNAL. Quale verifica viene prima?",a:["Controllare sorgente selezionata, percorso del segnale e collegamento fisico","Aggiornare il firmware del display prima di verificare la sorgente selezionata","Sostituire il monitor con uno funzionante mantenendo lo stesso cablaggio","Ripristinare le impostazioni di fabbrica senza controllare gli ingressi video"],ok:0},
+  {c:"PRINT",q:"Vero o falso: una stampante raggiungibile via rete può comunque avere la coda di stampa Windows bloccata.",a:["Vero","Falso"],ok:0},
+  {c:"PIXERA",q:"Più display risultano online ma uno mostra contenuto fuori sincronizzazione. Quale controllo è più mirato?",a:["Verificare output, mapping e stato della timeline associati a quel display","Riavviare contemporaneamente tutti i client anche se gli altri output sono corretti","Cambiare l'indirizzo IP del display senza verificare il mapping del progetto","Disattivare la rete dello studio per escludere interferenze con altri dispositivi"],ok:0},
+  {c:"MAC_ADOBE",q:"In un progetto Adobe compare un media offline. Qual è l'azione meno distruttiva da tentare per prima?",a:["Verificare il percorso del file e usare il relink verso la risorsa corretta","Eliminare il media offline e ricreare da zero l'intero progetto Adobe","Spostare tutte le risorse in una nuova cartella senza aggiornare i collegamenti","Convertire il progetto in un altro formato prima di cercare il file originale"],ok:0},
+  {c:"IT",q:"Un utente segnala 'Internet non funziona'. Quale approccio diagnostico è più corretto?",a:["Definire il sintomo e verificare progressivamente client, rete locale e servizi esterni","Riavviare subito tutti gli apparati di rete per escludere qualsiasi problema temporaneo","Cambiare DNS e indirizzo IP contemporaneamente per ridurre i tempi di diagnosi","Reinstallare il browser perché rappresenta il punto principale di accesso a Internet"],ok:0}
+ ];
+ if(typeof questions!=="undefined"&&Array.isArray(questions)){
+   extra.forEach(x=>questions.push(x));
+ } else if(typeof QUESTION_BANK!=="undefined"&&Array.isArray(QUESTION_BANK)){
+   extra.forEach(x=>QUESTION_BANK.push(x));
+ }
+})();
 function drawQuestion(category){
  const bank=questionBanks[category]||questionBanks.WORKSTATION;
  if(!questionDecks[category]||!questionDecks[category].length){
@@ -533,7 +553,15 @@ function safePlayerSpawn(){
  const candidates=[{x:150,y:680},{x:215,y:680},{x:260,y:710},{x:420,y:710}];
  return candidates.find(p=>walkable(p.x,p.y))||{x:420,y:710};
 }
-function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};const spawn=safePlayerSpawn();player={x:spawn.x,y:spawn.y,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=false;encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");updateTaskProgress();hud()}
+
+function setupCompactHUD(){
+ const p=$("#ticketPanel"),btn=$("#ticketToggle");
+ if(p&&btn){
+   p.classList.add("collapsed");
+   btn.onclick=()=>p.classList.toggle("collapsed");
+ }
+}
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};const spawn=safePlayerSpawn();player={x:spawn.x,y:spawn.y,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=false;encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");updateTaskProgress();setupCompactHUD();hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x, y) {
   if (!walkZones.some(z => inside(z, x, y))) {
@@ -748,6 +776,8 @@ function newTicket(force){
  renderTickets();
 }
 function renderTickets(){
+ const tc=$("#ticketCount");if(tc)tc.textContent=tickets.length;
+
  $("#ticketText").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket ${t.level.toLowerCase()}"><b>${t.level}${t.criticalFrom?" // "+t.criticalFrom:""}</b><br>${t.p.room} — ${t.p.id||t.p.kind||t.p.type}<br>${t.taskType?`<br><span class="taskKind">MINIGAME // ${t.taskType}</span>`:`<br><span class="taskKind">DIAGNOSI</span>`}<br>deadline ${fmt(t.due)}</div>`).join(""):"Nessun ticket aperto.";
 }
 function interact(){
@@ -1245,7 +1275,58 @@ function draw(){
 }
 function loop(n){let dt=Math.min(.05,(n-last)/1000);last=n;update(dt);draw();requestAnimationFrame(loop)}
 function toast(s){let t=$("#toast");t.textContent=s;t.classList.add("on");clearTimeout(t.q);t.q=setTimeout(()=>t.classList.remove("on"),1800)}
-addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=1;if(e.key.toLowerCase()==="e")interact();if(e.key==="F2"){debug=!debug;toast("DEBUG COLLISIONI "+(debug?"ON":"OFF"))}});addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
+
+function visibleAnswerButtons(){
+ return [...document.querySelectorAll("#answers button")].filter(b=>b.offsetParent!==null&&!b.disabled);
+}
+function handleQuizShortcut(e){
+ const modal=$("#modal");
+ if(!modal||modal.classList.contains("hidden"))return false;
+ const buttons=visibleAnswerButtons();
+ if(!buttons.length)return false;
+ const k=e.key.toLowerCase();
+ if(k==="v"||k==="f"){
+   const wanted=k==="v"?"vero":"falso";
+   const idx=buttons.findIndex(b=>b.textContent.toLowerCase().includes(wanted));
+   if(idx>=0){buttons[idx].click();return true}
+ }
+ if(/^[0-9]$/.test(k)){
+   const n=+k;
+   if(n>=1&&n<=buttons.length){buttons[n-1].click();return true}
+ }
+ // For 10+ answers: type multi-digit index quickly, e.g. 1 then 2 => answer 12.
+ if(/^[0-9]$/.test(k)){
+   return true;
+ }
+ return false;
+}
+let answerDigits="",answerDigitTimer=null;
+function handleDynamicNumberAnswer(e){
+ const modal=$("#modal");
+ if(!modal||modal.classList.contains("hidden"))return false;
+ const buttons=visibleAnswerButtons();
+ if(!buttons.length||!/^[0-9]$/.test(e.key))return false;
+ answerDigits+=e.key;
+ clearTimeout(answerDigitTimer);
+ answerDigitTimer=setTimeout(()=>{
+   const n=parseInt(answerDigits,10);answerDigits="";
+   if(n>=1&&n<=buttons.length)buttons[n-1].click();
+ },260);
+ // Immediate for a digit that cannot be a prefix of another valid answer.
+ const n=parseInt(answerDigits,10);
+ const couldExtend=(n*10)<=buttons.length;
+ if(n>=1&&n<=buttons.length&&!couldExtend){
+   clearTimeout(answerDigitTimer);answerDigits="";buttons[n-1].click();
+ }
+ return true;
+}
+addEventListener("keydown",e=>{
+ if(handleDynamicNumberAnswer(e)){e.preventDefault();return}
+ if(handleQuizShortcut(e)){e.preventDefault();return}
+ if(e.key==="Enter"){
+   const startBtn=$("#startBtn")||document.querySelector(".start button")||document.querySelector("#intro button");
+   if(startBtn&&startBtn.offsetParent!==null){e.preventDefault();startBtn.click();return}
+ }keys[e.key.toLowerCase()]=1;if(e.key.toLowerCase()==="e")interact();if(e.key==="F2"){debug=!debug;toast("DEBUG COLLISIONI "+(debug?"ON":"OFF"))}});addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
 const debugTouch=$("#debugTouch");
 if(debugTouch)debugTouch.addEventListener("click",()=>{debug=!debug;debugTouch.classList.toggle("on",debug);toast("DEBUG COLLISIONI "+(debug?"ON":"OFF"))});
 

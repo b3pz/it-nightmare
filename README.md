@@ -278,3 +278,12 @@ Questa build parte dallo ZIP utente corrente e mantiene la struttura della mappa
 ## Filosofia V3
 Le task non sono più soltanto quiz: una parte richiede un intervento rapido fisico/visivo,
 una parte diagnosi, una parte consegna tramite inventario.
+
+## V3.1
+- ENTER avvia il gioco dalle schermate iniziali.
+- Risposte quiz selezionabili da tastiera con numero dinamico.
+- Supporto V/F.
+- Etichette numeriche visibili sulle risposte.
+- Ticket Queue compatta e richiudibile, per non coprire la mappa.
+- Pool domande ampliato con distrattori di lunghezza e plausibilità simili.
+- Renderer pixel, minigiochi, NPC, inventario e F2 preservati.
