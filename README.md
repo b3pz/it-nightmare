@@ -47,3 +47,9 @@ Nessun nuovo sviluppo deve eliminare funzioni approvate in questa build senza de
 - Pavimenti pietra/legno/tile/server.
 - Migliorati scrivanie, monitor, rack, stampanti, piante, luci e dettagli.
 - Migliorata atmosfera horror progressiva.
+
+## V2.2.1 — MAP RENDER HOTFIX
+Corretto un errore nel Visual Map Pass V2.2: il renderer usava `ctx` mentre
+il contesto Canvas del gioco è definito come `g`. Questo interrompeva `draw()`
+e lasciava visibili HUD e Ticket Queue ma non la mappa.
+Nessuna modifica a collisioni, F2, ticket, tempo, anomalie o boss.
