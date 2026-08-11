@@ -10,3 +10,8 @@
   #gameScreen main{padding-right:0}
   #ticketPanel{right:18px;top:18px}
 }
+
+/* V2.2 Visual Map Pass */
+#ticketPanel{backdrop-filter:blur(3px);background:rgba(5,8,7,.92);border-color:#465047}
+#hud{background:linear-gradient(to bottom,#070909,#050706)}
+canvas{border:1px solid #1c241f}

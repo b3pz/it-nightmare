@@ -38,3 +38,12 @@ Nessun nuovo sviluppo deve eliminare funzioni approvate in questa build senza de
 - CRITICAL sceglie il punto più lontano solo tra quelli raggiungibili.
 - Deadline temporaneamente più generose: LOW 75m, MEDIUM 55m, HIGH 40m, CRITICAL 20m.
 - F2: verde=stanze, blu=corridoi, giallo=porte, rosso=ostacoli.
+
+## V2.2 — VISUAL MAP PASS
+- F2 e navigation layer mantenuti.
+- Corridoi visivi più stretti delle collisioni reali.
+- Muri con spessore e ombre.
+- Porte grafiche più credibili, collisioni ancora permissive.
+- Pavimenti pietra/legno/tile/server.
+- Migliorati scrivanie, monitor, rack, stampanti, piante, luci e dettagli.
+- Migliorata atmosfera horror progressiva.
