@@ -254,3 +254,27 @@ Nessuna modifica a gameplay, mappa, NPC, bilanciamento, F2 o collisioni.
 - D-PAD controlla direttamente virtual WASD.
 - INTERAGISCI usa touchstart/pointerdown/click con anti-doppio tap.
 - Nessuna modifica a gameplay, NPC, collisioni, inventario o domande.
+
+# V3.0 — PIXEL OFFICE / IT TASKS
+
+Questa build parte dallo ZIP utente corrente e mantiene la struttura della mappa.
+
+## Nuovo
+- Pixel-art pass procedurale per personaggi, scrivanie, pavimenti e UI.
+- Task Progress bar.
+- I ticket possono essere QUIZ oppure MINIGAME contestuali.
+- 6 famiglie di minigiochi:
+  - TONER: inserimento cartuccia.
+  - CABLE: patch LAN / USB-C / HDMI.
+  - SERVICES: recovery DNS → AUTH → FILES.
+  - AV: routing USB-C/HDMI verso display.
+  - PIXERA: sync display in sequenza.
+  - RELINK / PROCESS: media Adobe mancanti e processi bloccati.
+- Minigiochi assegnati in base alla stanza/postazione.
+- Quiz IT, inventario fisico, NPC, anomalie, difficoltà, boss e finale ARC_VOID restano attivi.
+- Safe spawn ripristinato per evitare il blocco dentro le scrivanie.
+- F2/DEBUG mantenuto.
+
+## Filosofia V3
+Le task non sono più soltanto quiz: una parte richiede un intervento rapido fisico/visivo,
+una parte diagnosi, una parte consegna tramite inventario.

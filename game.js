@@ -528,7 +528,12 @@ const stations=[
  {id:"PRN-03",room:"STAMPANTI",type:"PRINTER",x:1310,y:805}
 ];
 
-function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:150,y:640,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=false;encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");hud()}
+
+function safePlayerSpawn(){
+ const candidates=[{x:150,y:680},{x:215,y:680},{x:260,y:710},{x:420,y:710}];
+ return candidates.find(p=>walkable(p.x,p.y))||{x:420,y:710};
+}
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};const spawn=safePlayerSpawn();player={x:spawn.x,y:spawn.y,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=false;encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");updateTaskProgress();hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x, y) {
   if (!walkZones.some(z => inside(z, x, y))) {
@@ -564,6 +569,171 @@ function anomalyLevel(){return Math.max(0,Math.min(1,(state.min-START)/(BOSS-STA
 function levelForTime(){let a=Math.random();if(state.min<720)return a<.75?"LOW":"MEDIUM";if(state.min<900)return a<.45?"LOW":a<.88?"MEDIUM":"HIGH";return a<.2?"LOW":a<.65?"MEDIUM":"HIGH"}
 function reachablePoints(){const R=reachableSet();return points.filter(p=>pointReachable(p,R))}
 function farthestPoint(){let ps=reachablePoints();return [...ps].sort((a,b)=>Math.hypot(player.x-b.x,player.y-b.y)-Math.hypot(player.x-a.x,player.y-a.y))[0]}
+
+/* ============================================================
+   V3 — IT TASK MINIGAMES
+   Original IT-themed task panels inspired by quick maintenance
+   interactions, while keeping the existing quiz system.
+   ============================================================ */
+let activeMiniGame=null;
+
+function taskTypeForStation(s){
+ const c=categoryForStation(s);
+ const options={
+  MAC_ADOBE:["RELINK","RELINK","PROCESS"],
+  WORKSTATION:["CABLE","PROCESS","CABLE"],
+  NETWORK:["CABLE","SERVICES"],
+  MEETING:["AV","CABLE"],
+  SERVER:["SERVICES","CABLE"],
+  PRINT:["TONER","TONER","PROCESS"],
+  PIXERA:["PIXERA","AV"],
+  IT:["PROCESS","CABLE","SERVICES"]
+ }[c]||["PROCESS"];
+ return options[Math.floor(Math.random()*options.length)];
+}
+
+function shouldUseMiniGame(level){
+ const chance={LOW:.48,MEDIUM:.68,HIGH:.78,CRITICAL:.50}[level]||.6;
+ return Math.random()<chance;
+}
+
+function updateTaskProgress(){
+ const target=18;
+ const pct=Math.max(0,Math.min(100,Math.round((state?.solved||0)/target*100)));
+ const fill=$("#taskProgressFill"),txt=$("#taskProgressText");
+ if(fill)fill.style.width=pct+"%";
+ if(txt)txt.textContent=pct+"%";
+}
+
+function miniHeader(t,title,subtitle){
+ return `<div class="pixelTaskHead">
+   <span>${t.level} // ${t.p.room}</span>
+   <h2>${title}</h2>
+   <p>${subtitle}</p>
+ </div>`;
+}
+
+function miniSuccess(i,label){
+ if(i<0||i>=tickets.length)return;
+ const t=tickets[i];
+ const xp={LOW:120,MEDIUM:290,HIGH:560,CRITICAL:820}[t.level];
+ tickets.splice(i,1);
+ activeMiniGame=null;
+ $("#modal").classList.add("hidden");
+ state.xp+=xp;state.solved++;state.stress=Math.max(0,state.stress-4);
+ state.incident=Math.max(0,state.incident-({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]));
+ toast(`${label} // TASK COMPLETE +${xp} XP`);
+ renderTickets();updateTaskProgress();hud();
+}
+
+function miniMistake(text="ERRORE"){
+ if(!activeMiniGame)return;
+ activeMiniGame.errors=(activeMiniGame.errors||0)+1;
+ state.stress+=2*difficultyConfig[difficulty].stressMult;
+ const e=$("#miniError");if(e){e.textContent=text;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),550)}
+ if(activeMiniGame.errors>=3){
+   state.incident+=4*difficultyConfig[difficulty].incidentMult;
+   activeMiniGame.errors=0;
+ }
+ clamp();hud();
+}
+
+function startMiniGame(i){
+ const t=tickets[i];
+ if(!t)return;
+ const type=t.taskType||taskTypeForStation(t.p);
+ activeMiniGame={ticketId:t.id,index:i,type,errors:0,step:0};
+ const body=$("#modalBody");
+ $("#modal").classList.remove("hidden");
+
+ if(type==="TONER"){
+  body.innerHTML=miniHeader(t,"SOSTITUZIONE TONER","Inserisci la cartuccia nel vano corretto.")+
+  `<div class="miniGame tonerGame">
+    <div id="tonerCart" class="pixelItem toner">TONER</div>
+    <div class="arrowPixel">→</div>
+    <button id="tonerSlot" class="pixelSlot">VANO<br>STAMPANTE</button>
+   </div><div id="miniError"></div>`;
+  let picked=false;
+  $("#tonerCart").onclick=()=>{picked=true;$("#tonerCart").classList.add("selected")};
+  $("#tonerSlot").onclick=()=>picked?miniSuccess(i,"TONER INSTALLATO"):miniMistake("PRENDI PRIMA IL TONER");
+ }
+
+ else if(type==="CABLE"){
+  const order=["LAN","USB-C","HDMI"];
+  body.innerHTML=miniHeader(t,"PATCH PANEL","Collega le tre linee nell'ordine indicato: LAN → USB-C → HDMI.")+
+  `<div class="miniGame cableGame">
+   ${["HDMI","LAN","USB-C"].map(x=>`<button class="cablePlug" data-v="${x}">${x}</button>`).join("")}
+   </div><div class="pixelSequence">LAN → USB-C → HDMI</div><div id="miniError"></div>`;
+  let step=0;
+  document.querySelectorAll(".cablePlug").forEach(b=>b.onclick=()=>{
+   if(b.dataset.v===order[step]){b.classList.add("done");b.disabled=true;step++;if(step===order.length)miniSuccess(i,"CABLAGGIO OK")}
+   else miniMistake("PORTA SBAGLIATA");
+  });
+ }
+
+ else if(type==="SERVICES"){
+  const seq=["DNS","AUTH","FILES"];
+  body.innerHTML=miniHeader(t,"SERVICE RECOVERY","Riavvia i servizi nella sequenza corretta.")+
+  `<div class="miniGame serviceGame">
+   ${["FILES","AUTH","DNS"].map(x=>`<button class="serviceNode" data-v="${x}"><i></i>${x}</button>`).join("")}
+   </div><div class="pixelSequence">01 DNS · 02 AUTH · 03 FILES</div><div id="miniError"></div>`;
+  let step=0;
+  document.querySelectorAll(".serviceNode").forEach(b=>b.onclick=()=>{
+   if(b.dataset.v===seq[step]){b.classList.add("online");b.disabled=true;step++;if(step===3)miniSuccess(i,"SERVIZI ONLINE")}
+   else miniMistake("SEQUENZA ERRATA");
+  });
+ }
+
+ else if(type==="AV"){
+  body.innerHTML=miniHeader(t,"SIGNAL ROUTING","Imposta la catena video corretta.")+
+  `<div class="miniGame avGame">
+    <div class="avNode">LAPTOP</div>
+    <button class="avChoice" data-ok="0">→ VGA</button>
+    <button class="avChoice" data-ok="1">→ USB-C / HDMI</button>
+    <button class="avChoice" data-ok="0">→ AUDIO ONLY</button>
+    <div class="avNode">DISPLAY</div>
+   </div><div id="miniError"></div>`;
+  document.querySelectorAll(".avChoice").forEach(b=>b.onclick=()=>{
+   if(b.dataset.ok==="1"){b.classList.add("done");setTimeout(()=>miniSuccess(i,"SEGNALE RIPRISTINATO"),260)}
+   else miniMistake("NESSUN SEGNALE");
+  });
+ }
+
+ else if(type==="PIXERA"){
+  const order=[1,2,3,4];
+  const shuffled=[3,1,4,2];
+  body.innerHTML=miniHeader(t,"PIXERA SYNC","Sincronizza i display in ordine 1 → 4.")+
+  `<div class="miniGame pixeraGame">
+   ${shuffled.map(n=>`<button class="pixScreen" data-n="${n}"><span>${n}</span><i>NO SYNC</i></button>`).join("")}
+   </div><div id="miniError"></div>`;
+  let step=0;
+  document.querySelectorAll(".pixScreen").forEach(b=>b.onclick=()=>{
+   if(+b.dataset.n===order[step]){b.classList.add("synced");b.querySelector("i").textContent="SYNC";b.disabled=true;step++;if(step===4)miniSuccess(i,"PIXERA SYNC OK")}
+   else miniMistake("DISPLAY FUORI SEQUENZA");
+  });
+ }
+
+ else { // RELINK / PROCESS
+  if(type==="RELINK"){
+   body.innerHTML=miniHeader(t,"MEDIA RELINK","Trova il collegamento mancante e ricollegalo.")+
+   `<div class="miniGame relinkGame">
+    <button class="fileRow">cover_final.psd <i>OK</i></button>
+    <button id="missingFile" class="fileRow missing">render_07.tif <i>MISSING</i></button>
+    <button class="fileRow">logo.ai <i>OK</i></button>
+    <button id="relinkBtn" class="pixelAction" disabled>RELINK SELECTED</button>
+   </div><div id="miniError"></div>`;
+   $("#missingFile").onclick=()=>{$("#missingFile").classList.add("selected");$("#relinkBtn").disabled=false};
+   $("#relinkBtn").onclick=()=>miniSuccess(i,"MEDIA RELINKED");
+  } else {
+   const bad=Math.floor(Math.random()*3);
+   body.innerHTML=miniHeader(t,"PROCESS CHECK","Termina solo il processo bloccato.")+
+   `<div class="miniGame processGame">
+   ${["DesktopConnector.exe","Revit.exe","SyncAgent.exe"].map((x,n)=>`<button class="processRow" data-ok="${n===bad?1:0}">${x}<i>${n===bad?"NOT RESPONDING":"RUNNING"}</i></button>`).join("")}
+   </div><div id="miniError"></div>`;
+   document.querySelectorAll(".processRow").forEach(b=>b.onclick=()=>b.dataset.ok==="1"?miniSuccess(i,"PROCESSO RIPRISTINATO"):miniMistake("PROCESSO SANO"));
+  }
+ }
+}
 function newTicket(force){
  if(state.phase!=="shift"||tickets.length>=difficultyConfig[difficulty].maxTickets)return;
  let level=force||levelForTime(),p;
@@ -573,11 +743,12 @@ function newTicket(force){
  if(level==="CRITICAL")p=[...valid].sort((a,b)=>Math.hypot(player.x-b.x,player.y-b.y)-Math.hypot(player.x-a.x,player.y-a.y))[0];
  else p=weighted[Math.floor(Math.random()*weighted.length)];
  let mins={LOW:110,MEDIUM:90,HIGH:70,CRITICAL:42}[level]*difficultyConfig[difficulty].timeMult;
- tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:drawQuestion(categoryForStation(p)),criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
+ const useMini=shouldUseMiniGame(level);
+ tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:drawQuestion(categoryForStation(p)),taskType:useMini?taskTypeForStation(p):null,criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
  renderTickets();
 }
 function renderTickets(){
- $("#ticketText").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket ${t.level.toLowerCase()}"><b>${t.level}${t.criticalFrom?" // "+t.criticalFrom:""}</b><br>${t.p.room} — ${t.p.id||t.p.kind||t.p.type}<br>deadline ${fmt(t.due)}</div>`).join(""):"Nessun ticket aperto.";
+ $("#ticketText").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket ${t.level.toLowerCase()}"><b>${t.level}${t.criticalFrom?" // "+t.criticalFrom:""}</b><br>${t.p.room} — ${t.p.id||t.p.kind||t.p.type}<br>${t.taskType?`<br><span class="taskKind">MINIGAME // ${t.taskType}</span>`:`<br><span class="taskKind">DIAGNOSI</span>`}<br>deadline ${fmt(t.due)}</div>`).join(""):"Nessun ticket aperto.";
 }
 function interact(){
  if(state.phase!=="shift")return;
@@ -589,6 +760,7 @@ function interact(){
  toast("Nessuna task o NPC in questo punto.");return
 }
  let t=tickets[i],q=t.q;
+ if(t.taskType){startMiniGame(i);return}
  $("#modalBody").innerHTML=`<h2 class="${t.level.toLowerCase()}">${t.level}${t.criticalFrom?" // "+t.criticalFrom:""}</h2><p><b>${t.p.room}</b></p><p>${q[0]}</p>${q[1].map((a,n)=>`<button class="choice answer" data-n="${n}">${String.fromCharCode(65+n)}. ${a}</button>`).join("")}`;
  $("#modal").classList.remove("hidden");document.querySelectorAll(".answer").forEach(b=>b.onclick=()=>answer(i,+b.dataset.n));
 }
@@ -597,7 +769,7 @@ function answer(i,n){
  tickets.splice(i,1);$("#modal").classList.add("hidden");
  if(ok){state.xp+=xp;state.solved++;state.incident-=({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]);state.stress-=4;toast(`${t.level} RISOLTO +${xp} XP`)}
  else{state.strikes++;state.stress+=({LOW:7,MEDIUM:12,HIGH:18,CRITICAL:20}[t.level])*difficultyConfig[difficulty].stressMult;state.incident+=({LOW:5,MEDIUM:9,HIGH:15,CRITICAL:18}[t.level])*difficultyConfig[difficulty].incidentMult;state.rep-=t.level==="CRITICAL"?2:1;toast("RISPOSTA ERRATA // STRIKE +1")}
- clamp();renderTickets();checkEarlyEnd();
+ clamp();renderTickets();updateTaskProgress();checkEarlyEnd();
 }
 function expireTickets(){
  for(const t of tickets){
@@ -882,16 +1054,7 @@ function visualDoor(z){
    }
  });
 }
-function desk(x,y,w){
- g.fillStyle="rgba(0,0,0,.25)";g.fillRect(x+4,y+5,w,30);
- g.fillStyle="#5b3a20";g.fillRect(x,y,w,27);
- g.fillStyle="#7b4d27";g.fillRect(x,y,w,4);
- for(let i=8;i<w-28;i+=45){
-  g.fillStyle="#26312c";g.fillRect(x+i,y-25,32,21);
-  g.fillStyle="#4d94b3";g.fillRect(x+i+4,y-21,24,13);
-  g.fillStyle="#111512";g.fillRect(x+i+5,y+32,24,16);
- }
-}
+function desk(x,y,w){pixelDesk(x,y,w)}
 function plant(x,y){
  g.fillStyle="#4d321d";g.fillRect(x,y,14,16);
  g.fillStyle="#276c3c";g.beginPath();g.arc(x+7,y-7,12,0,Math.PI*2);g.fill();
@@ -925,10 +1088,44 @@ function label(r){
  g.strokeStyle="#252c27";g.strokeRect(r.x+12,r.y+10,w,24);
  g.fillStyle="#d5c7ac";g.font="bold 13px monospace";g.fillText(r.name,r.x+19,r.y+27);
 }
+
+/* ---------------- V3 PIXEL ART RENDER HELPERS ---------------- */
+function px(v){return Math.round(v/4)*4}
+function drawPixelPerson(x,y,shirt="#536f8b",skin="#c89e7d",accent="#222"){
+ x=px(x);y=px(y);
+ g.fillStyle="rgba(0,0,0,.35)";g.fillRect(x-8,y+12,16,4);
+ g.fillStyle=accent;g.fillRect(x-8,y-5,16,20);
+ g.fillStyle=shirt;g.fillRect(x-8,y-8,16,15);
+ g.fillStyle=skin;g.fillRect(x-6,y-18,12,10);
+ g.fillStyle="#241c18";g.fillRect(x-6,y-18,12,3);
+ g.fillStyle="#111";g.fillRect(x-4,y-14,2,2);g.fillRect(x+2,y-14,2,2);
+ g.fillStyle="#202522";g.fillRect(x-8,y+12,6,7);g.fillRect(x+2,y+12,6,7);
+}
+function pixelDesk(x,y,w){
+ x=px(x);y=px(y);w=px(w);
+ g.fillStyle="#171311";g.fillRect(x+4,y+5,w,28);
+ g.fillStyle="#6b4224";g.fillRect(x,y,w,24);
+ g.fillStyle="#8a5a31";g.fillRect(x,y,w,4);
+ for(let i=8;i<w-25;i+=44){
+  g.fillStyle="#111815";g.fillRect(x+i,y-24,32,20);
+  g.fillStyle="#58a0b8";g.fillRect(x+i+4,y-20,24,12);
+  g.fillStyle="#0a0d0c";g.fillRect(x+i+14,y-4,4,7);
+ }
+}
+function pixelFloorOverlay(r){
+ g.globalAlpha=.18;g.fillStyle="#000";
+ const step=16;
+ for(let yy=r.y+8;yy<r.y+r.h;yy+=step){
+  for(let xx=r.x+8;xx<r.x+r.w;xx+=step){
+   if(((xx+yy)/step)%2<1)g.fillRect(px(xx),px(yy),4,4);
+  }
+ }
+ g.globalAlpha=1;
+}
 function draw(){
  g.fillStyle="#050706";g.fillRect(0,0,W,H);
  corridors.forEach(visualCorridor);
- rooms.forEach(floor);
+ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  rooms.forEach(drawRoomWalls);
  doors.forEach(visualDoor);
  furniture();
@@ -941,20 +1138,16 @@ function draw(){
    else if(s.type==="AV"||s.type==="PIXERA"){g.fillStyle="#151a18";g.fillRect(s.x-18,s.y-13,36,22);g.fillStyle=s.type==="PIXERA"?"#725b96":"#3d778e";g.fillRect(s.x-14,s.y-9,28,14)}
  });
  [...npcs,...(mokasa?[mokasa]:[])].forEach(n=>{
-   g.fillStyle="rgba(0,0,0,.3)";g.beginPath();g.ellipse(n.x,n.y+14,11,5,0,0,Math.PI*2);g.fill();
-   g.fillStyle=n.shirt;g.fillRect(n.x-8,n.y-12,16,22);g.fillStyle="#d0a887";g.fillRect(n.x-6,n.y-19,12,8);
-   g.fillStyle="#050706";g.fillRect(n.x-30,n.y-39,60,13);
+   drawPixelPerson(n.x,n.y,n.shirt,"#d0a887",n.tone==="bad"?"#3a1717":"#202522");
+   g.fillStyle="#050706";g.fillRect(px(n.x)-30,px(n.y)-39,60,13);
    g.fillStyle=n.tone==="bad"?"#ff6262":n.tone==="good"?"#62e568":"#ffd447";
-   g.font="bold 9px monospace";g.textAlign="center";g.fillText(n.name,n.x,n.y-30);g.textAlign="left";
+   g.font="bold 9px monospace";g.textAlign="center";g.fillText(n.name,px(n.x),px(n.y)-30);g.textAlign="left";
  });
  // V2.7.2.1 — Living Office visible layer
  // NPC ambientali
  ambientNPCs.forEach(n=>{
-   if(n.state==="work"){g.fillStyle="#202622";g.fillRect(n.x-8,n.y+7,16,7)}
-   g.fillStyle="rgba(0,0,0,.28)";g.fillRect(n.x-7,n.y+10,14,4);
-   g.fillStyle=n.shirt;g.fillRect(n.x-7,n.y-10,14,21);
-   g.fillStyle="#c89e7d";g.fillRect(n.x-5,n.y-17,10,8);
-   if(n.state!=="work"){g.fillStyle="#d8e1dc";g.font="bold 7px monospace";g.fillText(n.name,n.x-9,n.y-23)}
+   drawPixelPerson(n.x,n.y,n.shirt,"#c89e7d","#202522");
+   if(n.state!=="work"){g.fillStyle="#d8e1dc";g.font="bold 7px monospace";g.fillText(n.name,px(n.x)-9,px(n.y)-26)}
  });
 
  // Scaffale fisico IT SUPPLIES
@@ -1038,10 +1231,8 @@ function draw(){
    g.fillStyle="#dff8ff";g.font="bold 10px monospace";g.textAlign="center";g.fillText(cp,player.x,y+16);g.textAlign="left";
  }
 
- g.fillStyle="rgba(0,0,0,.28)";g.beginPath();g.ellipse(player.x,player.y+17,13,6,0,0,Math.PI*2);g.fill();
- g.fillStyle="#1b1e1c";g.fillRect(player.x-9,player.y-14,18,26);
- g.fillStyle="#d0a887";g.fillRect(player.x-6,player.y-19,12,8);
- g.strokeStyle="#62e568";g.lineWidth=3;g.beginPath();g.ellipse(player.x,player.y+15,14,7,0,0,Math.PI*2);g.stroke();
+ drawPixelPerson(player.x,player.y,"#284f3a","#d0a887","#17231d");
+ g.strokeStyle="#62e568";g.lineWidth=2;g.strokeRect(px(player.x)-12,px(player.y)-22,24,44);
 
  if(debug){
   g.globalAlpha=.24;

@@ -82,3 +82,36 @@ footer b{color:#6ee7ff}
  #dpad{left:125px;bottom:18px;transform:scale(.9);transform-origin:bottom left}
  #act{right:14px;bottom:22px;width:90px;height:90px}
 }
+
+/* ==========================================================
+   V3 — PIXEL OFFICE
+   ========================================================== */
+:root{--pixel:#b7ff4a;--cyan:#6ee7ff;--danger:#ff4d57;--panel:#080c0a}
+body{background:#020403}
+canvas{image-rendering:pixelated!important;image-rendering:crisp-edges!important;border:4px solid #151d18;box-shadow:0 0 0 2px #000,0 18px 80px #000}
+#hud,#ticketPanel,#inventoryWrap,#missionPanel,#phoneNotification,#modal section{border-radius:0!important;box-shadow:4px 4px 0 #000!important}
+#taskProgressWrap{height:24px;display:flex;align-items:center;gap:8px;padding:4px 12px;background:#050806;border-bottom:1px solid #28342d;font-size:8px;letter-spacing:1px;z-index:4}
+#taskProgressWrap span{color:#87958d}#taskProgress{height:10px;flex:1;background:#111713;border:1px solid #39473f;padding:1px}
+#taskProgressFill{display:block;width:0;height:100%;background:repeating-linear-gradient(90deg,#72d83c 0 9px,#95f54d 9px 12px);transition:width .2s}
+#taskProgressText{color:#b7ff4a;font-size:9px}
+.taskKind{color:#6ee7ff;font-size:8px;letter-spacing:1px}
+.pixelTaskHead{border-bottom:3px solid #2b3a31;padding-bottom:10px;margin-bottom:18px}.pixelTaskHead span{font-size:9px;color:#6ee7ff;letter-spacing:2px}.pixelTaskHead h2{font-size:24px;margin:6px 0;color:#e9f3ec;text-shadow:3px 3px #111}.pixelTaskHead p{color:#a8b5ad}
+.miniGame{min-height:190px;padding:22px;background:#050806;border:4px solid #27342d;box-shadow:inset 0 0 0 3px #0d1510;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.miniGame button,.pixelItem,.pixelSlot{font:700 12px Consolas,monospace;border-radius:0}
+.pixelItem{padding:18px;background:#222;border:3px solid #6ee7ff;color:#fff;cursor:pointer}.pixelItem.selected{outline:4px solid #b7ff4a}
+.pixelSlot,.cablePlug,.serviceNode,.avChoice,.pixScreen,.processRow,.fileRow,.pixelAction{padding:14px;border:3px solid #435248;background:#101712;color:#dfeae3;cursor:pointer;box-shadow:4px 4px #000}
+.pixelSlot:active,.cablePlug:active,.serviceNode:active,.avChoice:active,.pixScreen:active,.processRow:active,.fileRow:active,.pixelAction:active{transform:translate(3px,3px);box-shadow:1px 1px #000}
+.cablePlug.done,.serviceNode.online,.avChoice.done,.pixScreen.synced{border-color:#82ee4b;color:#b7ff4a;background:#10210f}
+.serviceNode i{display:inline-block;width:8px;height:8px;background:#ff4d57;margin-right:8px}.serviceNode.online i{background:#82ee4b}
+.pixScreen{width:120px;height:80px;background:#10212a;color:#87e7ff}.pixScreen span{font-size:28px;display:block}.pixScreen i{font-size:8px}
+.fileRow,.processRow{display:flex;width:90%;justify-content:space-between}.fileRow.missing{border-color:#ff4d57}.fileRow.selected{border-color:#b7ff4a}.fileRow i,.processRow i{font-size:9px;color:#99aaa1}
+.pixelSequence{margin-top:12px;color:#ffd447;text-align:center;font-size:11px;letter-spacing:2px}.arrowPixel{font-size:30px;color:#6ee7ff}
+#miniError{height:22px;margin-top:10px;color:#ff4d57;font-weight:bold;text-align:center;opacity:0}#miniError.on{opacity:1;animation:pixelShake .12s linear 2}
+@keyframes pixelShake{50%{transform:translateX(5px)}}
+.arc-cmd{background:#020402;border:3px solid #18331e;padding:18px;box-shadow:inset 0 0 35px #001a06}
+.screen:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px);z-index:99;mix-blend-mode:screen}
+@media(max-width:700px){
+ .miniGame{min-height:150px;padding:12px;gap:8px}.pixelTaskHead h2{font-size:19px}
+ .pixelSlot,.cablePlug,.serviceNode,.avChoice,.pixScreen,.processRow,.fileRow,.pixelAction{padding:11px;font-size:10px}
+ #taskProgressWrap{height:21px}
+}
