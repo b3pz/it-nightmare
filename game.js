@@ -1,8 +1,16 @@
 const $=s=>document.querySelector(s),C=$("#game"),g=C.getContext("2d");g.imageSmoothingEnabled=false;
 const W=C.width,H=C.height,START=540,BOSS=1132,END=1140,TIME_SPEED=5.2;
+const difficultyConfig={
+ easy:{name:"EASY",maxStrikes:5,timeMult:1.55,stressMult:.75,incidentMult:.75,criticalChance:.08},
+ normal:{name:"NORMAL",maxStrikes:3,timeMult:1.25,stressMult:1,incidentMult:1,criticalChance:.13},
+ hard:{name:"HARD",maxStrikes:2,timeMult:1.00,stressMult:1.15,incidentMult:1.15,criticalChance:.17},
+ nightmare:{name:"NIGHTMARE",maxStrikes:1,timeMult:.82,stressMult:1.3,incidentMult:1.3,criticalChance:.22}
+};
+let difficulty="normal";
+
 const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
 const boot=["[BOOT] ARCHEA IT SERVICES","[OK] Domain reachable","[OK] Autodesk licensing","[OK] File servers","[WARN] Orphan session detected","[USER] ARCH-VOID","[LAST LOGIN] 19:03"];
-let bl=0;(function b(){if(bl<boot.length){$("#bootlog").innerHTML+=boot[bl++]+"<br>";setTimeout(b,280)}else $("#toLore").classList.remove("hidden")})();$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{show("game");reset();requestAnimationFrame(loop)};
+let bl=0;(function b(){if(bl<boot.length){$("#bootlog").innerHTML+=boot[bl++]+"<br>";setTimeout(b,280)}else $("#toLore").classList.remove("hidden")})();$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{difficulty=$("#difficulty")?.value||"normal";show("game");reset();requestAnimationFrame(loop)};
 
 const rooms=[
 {name:"GRAFICA",x:30,y:55,w:250,h:210,f:"stone"},{name:"CENTRALE",x:300,y:55,w:205,h:210,f:"stone"},{name:"SERVER / SOPPALCO",x:525,y:55,w:230,h:210,f:"server"},
@@ -112,7 +120,7 @@ function validateMap(){
  console.log("V2.1 MAP CHECK:",bad.length?"UNREACHABLE":"ALL TASK ZONES REACHABLE",bad);
  return bad;
 }
-function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;newTicket("LOW");hud()}
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;newTicket("LOW");hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x+5&&x<o.x+o.w-5&&y>o.y+5&&y<o.y+o.h-5)}
 function fmt(m){m=Math.max(START,Math.min(END,m));return String(Math.floor(m/60)).padStart(2,"0")+":"+String(Math.floor(m%60)).padStart(2,"0")}
@@ -124,7 +132,7 @@ function newTicket(force){
  if(state.phase!=="shift"||tickets.length>=4)return;
  let level=force||levelForTime(),p;
  let valid=reachablePoints();if(!valid.length)return;if(level==="CRITICAL")p=farthestPoint();else p=valid[Math.floor(Math.random()*valid.length)];
- let mins={LOW:75,MEDIUM:55,HIGH:40,CRITICAL:20}[level];
+ let mins={LOW:95,MEDIUM:75,HIGH:55,CRITICAL:30}[level]*difficultyConfig[difficulty].timeMult;
  tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:questions[level][Math.floor(Math.random()*questions[level].length)],criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
  renderTickets();
 }
@@ -143,21 +151,28 @@ function answer(i,n){
  let t=tickets[i],ok=n===t.q[2],xp={LOW:100,MEDIUM:250,HIGH:500,CRITICAL:750}[t.level];
  tickets.splice(i,1);$("#modal").classList.add("hidden");
  if(ok){state.xp+=xp;state.solved++;state.incident-=({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]);state.stress-=4;toast(`${t.level} RISOLTO +${xp} XP`)}
- else{state.strikes++;state.stress+=({LOW:7,MEDIUM:12,HIGH:18,CRITICAL:20}[t.level]);state.incident+=({LOW:5,MEDIUM:9,HIGH:15,CRITICAL:18}[t.level]);state.rep-=t.level==="CRITICAL"?2:1;toast("RISPOSTA ERRATA // STRIKE +1")}
+ else{state.strikes++;state.stress+=({LOW:7,MEDIUM:12,HIGH:18,CRITICAL:20}[t.level])*difficultyConfig[difficulty].stressMult;state.incident+=({LOW:5,MEDIUM:9,HIGH:15,CRITICAL:18}[t.level])*difficultyConfig[difficulty].incidentMult;state.rep-=t.level==="CRITICAL"?2:1;toast("RISPOSTA ERRATA // STRIKE +1")}
  clamp();renderTickets();checkEarlyEnd();
 }
-function expireTickets(){for(const t of tickets)if(!t.expired&&state.min>=t.due){t.expired=true;state.strikes++;state.incident+=t.level==="CRITICAL"?22:({LOW:7,MEDIUM:12,HIGH:18}[t.level]);state.stress+=10;state.rep-=t.level==="CRITICAL"?2:1;toast(`${t.level} SCADUTO // STRIKE +1`) }checkEarlyEnd()}
-function checkEarlyEnd(){clamp();if(state.strikes>=3)return ending("IMPOSTORE","Troppi interventi errati. Le tue credenziali IT vengono revocate.");if(state.rep<=0)return ending("LICENZIATO","La reputazione è crollata. ACCESS REVOKED.");if(state.incident>=100)return ending("MAJOR INCIDENT","L'infrastruttura dello studio è offline.");if(state.stress>=100)return ending("BURNOUT","Non riesci più a gestire il turno.")}
+function expireTickets(){for(const t of tickets)if(!t.expired&&state.min>=t.due){t.expired=true;state.strikes++;state.incident+=(t.level==="CRITICAL"?22:({LOW:7,MEDIUM:12,HIGH:18}[t.level]))*difficultyConfig[difficulty].incidentMult;state.stress+=10*difficultyConfig[difficulty].stressMult;state.rep-=t.level==="CRITICAL"?2:1;toast(`${t.level} SCADUTO // STRIKE +1`) }checkEarlyEnd()}
+function checkEarlyEnd(){clamp();if(state.strikes>=state.maxStrikes)return ending("IMPOSTORE","Troppi interventi errati. Le tue credenziali IT vengono revocate.");if(state.rep<=0)return ending("LICENZIATO","La reputazione è crollata. ACCESS REVOKED.");if(state.incident>=100)return ending("MAJOR INCIDENT","L'infrastruttura dello studio è offline.");if(state.stress>=100)return ending("BURNOUT","Non riesci più a gestire il turno.")}
+function showAnomaly(text,duration=2600){
+ const o=$("#anomalyOverlay"),t=$("#anomalyText");
+ t.textContent=text;
+ o.classList.remove("hidden");
+ clearTimeout(o._timer);
+ o._timer=setTimeout(()=>o.classList.add("hidden"),duration);
+}
 function anomalyEvent(){
  let a=anomalyLevel(),r=Math.random(),msg;
- if(a<.2)msg=["Un monitor lampeggia per un istante.","Il telefono squilla una sola volta.","Compare un ticket duplicato e poi scompare."][Math.floor(r*3)];
- else if(a<.45)msg=["Una stampante espelle una pagina vuota.","Un PC senza utente si accende.","Dal server arriva un rumore secco."][Math.floor(r*3)];
- else if(a<.7)msg=["Una sessione senza proprietario compare nei log.","Le luci del corridoio tremano.","Un ticket arriva da un utente che non è alla postazione."][Math.floor(r*3)];
- else msg=["19:03 compare per un frame su più monitor.","Qualcosa attraversa il corridoio e scompare.","ARCH-VOID appare per un istante nei log.","Tutti i telefoni mostrano INTERNO 000."][Math.floor(r*4)];
- toast("ANOMALIA // "+msg);
- if(a>.55&&Math.random()<.25){state.anomalyPenalty++;state.stress+=3}
+ if(a<.2)msg=["UN MONITOR SI ACCENDE PER UN ISTANTE.","IL TELEFONO SQUILLA. UNA SOLA VOLTA.","UN TICKET DUPLICATO COMPARE E SCOMPARE."][Math.floor(r*3)];
+ else if(a<.45)msg=["LA STAMPANTE PRODUCE UNA PAGINA VUOTA.","UN PC SENZA UTENTE SI ACCENDE.","QUALCOSA BATTE DENTRO IL SERVER RACK."][Math.floor(r*3)];
+ else if(a<.7)msg=["SESSIONE SENZA PROPRIETARIO RILEVATA.","LE LUCI DEL CORRIDOIO TREMANO.","ARRIVA UN TICKET DA UN UTENTE ASSENTE."][Math.floor(r*3)];
+ else msg=["19:03 COMPARE SU TUTTI I MONITOR.","QUALCOSA ATTRAVERSA IL CORRIDOIO.","ARCH-VOID COMPARE NEI LOG.","TUTTI I TELEFONI MOSTRANO INTERNO 000."][Math.floor(r*4)];
+ showAnomaly(msg,a>.7?3300:2500);
+ if(a>.55&&Math.random()<.25){state.anomalyPenalty++;state.stress+=3*difficultyConfig[difficulty].stressMult}
 }
-function maybeCritical(){if(state.min>600&&Math.random()<.13)newTicket("CRITICAL")}
+function maybeCritical(){if(state.min>600&&Math.random()<difficultyConfig[difficulty].criticalChance)newTicket("CRITICAL")}
 function startBoss(){
  state.phase="boss";state.min=BOSS;tickets=[];renderTickets();state.bossPhase=1;bossModal();
 }
@@ -177,10 +192,10 @@ function bossAnswer(n){
  else state.xp+=500;
  if(state.bossPhase<3){state.bossPhase++;bossModal()}else ending("WIN","ARCH-VOID // SESSION TERMINATED",true);
 }
-function ending(type,text,win=false){state.phase="ended";state.min=END;clamp();$("#modalBody").innerHTML=`<h2 class="${win?"low":"critical"}">${win?"SHIFT COMPLETE // 19:00":"BAD ENDING // "+type}</h2><p>${text}</p><p>XP <b>${state.xp}</b> · ERRORI <b>${state.strikes}/3</b> · INCIDENT <b>${Math.round(state.incident)}%</b></p>${win?'<p>New login detected... <b>ARCH-VOID // 19:03</b></p>':""}<button class="choice" onclick="location.reload()">NUOVA PARTITA</button>`;$("#modal").classList.remove("hidden")}
+function ending(type,text,win=false){state.phase="ended";state.min=END;clamp();$("#modalBody").innerHTML=`<h2 class="${win?"low":"critical"}">${win?"SHIFT COMPLETE // 19:00":"BAD ENDING // "+type}</h2><p>${text}</p><p>XP <b>${state.xp}</b> · ERRORI <b>${state.strikes}/${state.maxStrikes}</b> · INCIDENT <b>${Math.round(state.incident)}%</b></p>${win?'<p>New login detected... <b>ARCH-VOID // 19:03</b></p>':""}<button class="choice" onclick="location.reload()">NUOVA PARTITA</button>`;$("#modal").classList.remove("hidden")}
 function clamp(){state.incident=Math.max(0,Math.min(100,state.incident));state.stress=Math.max(0,Math.min(100,state.stress));state.rep=Math.max(0,Math.min(5,state.rep))}
 $("#x").onclick=()=>{if(state&&state.phase!=="shift"){toast("Questo evento non può essere ignorato.");return}$("#modal").classList.add("hidden")};
-function hud(){clamp();$("#clock").textContent=fmt(state.min);$("#stress").textContent=Math.round(state.stress)+"%";$("#rep").textContent="★".repeat(state.rep)+"☆".repeat(5-state.rep);$("#strikes").textContent=state.strikes+"/3";$("#xp").textContent=state.xp;$("#incident").textContent=Math.round(state.incident)+"%"}
+function hud(){clamp();$("#clock").textContent=fmt(state.min);$("#stress").textContent=Math.round(state.stress)+"%";$("#rep").textContent="★".repeat(state.rep)+"☆".repeat(5-state.rep);$("#strikes").textContent=state.strikes+"/"+state.maxStrikes;$("#xp").textContent=state.xp;$("#incident").textContent=Math.round(state.incident)+"%"}
 function update(dt){
  if(state.phase==="shift"){
   let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);

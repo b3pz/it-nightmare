@@ -15,3 +15,14 @@
 #ticketPanel{backdrop-filter:blur(3px);background:rgba(5,8,7,.92);border-color:#465047}
 #hud{background:linear-gradient(to bottom,#070909,#050706)}
 canvas{border:1px solid #1c241f}
+
+/* V2.3 — Difficulty + Anomaly Presentation */
+.difficulty-box{margin:22px 0 16px}
+.difficulty-box label{display:block;margin-bottom:7px;color:#7f9186;letter-spacing:2px;font-size:11px}
+.difficulty-box select{width:100%;padding:11px;background:#0b0f0d;color:#dce5df;border:1px solid #36463d;font:inherit}
+.anomaly-overlay{position:absolute;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;pointer-events:none;background:rgba(0,0,0,.54);animation:anomalyFlash .18s ease-out}
+.anomaly-overlay.hidden{display:none}
+.anomaly-inner{width:min(860px,88%);padding:42px 28px;text-align:center;border-top:1px solid #8c1f2b;border-bottom:1px solid #8c1f2b;background:rgba(5,4,5,.88);box-shadow:0 0 90px rgba(130,0,25,.2)}
+.anomaly-tag{font-size:12px;letter-spacing:5px;color:#c23b49;margin-bottom:18px}
+#anomalyText{font-size:clamp(24px,4vw,54px);font-weight:800;color:#e9e4e2;text-shadow:2px 0 #6b1722,-2px 0 #173c45;line-height:1.15}
+@keyframes anomalyFlash{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:scale(1)}}

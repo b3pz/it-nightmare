@@ -61,3 +61,14 @@ Nessuna modifica a collisioni, F2, ticket, tempo, anomalie o boss.
 - Aperture grafiche ricavate direttamente sui bordi delle stanze.
 - Aggiunti stipiti e soglie semplici in pixel-art.
 - L'apertura visiva è più stretta dell'area di collisione, quindi il passaggio rimane facile.
+
+## V2.3 — DIFFICULTY & ANOMALY PASS
+- Nuova selezione difficoltà prima del turno.
+- EASY: 5 errori, più tempo, malus ridotti.
+- NORMAL: 3 errori, più tempo rispetto alla V2.2.2.
+- HARD: 2 errori, tempi più stretti.
+- NIGHTMARE: 1 errore, massima pressione.
+- Deadline base aumentate: LOW 95, MEDIUM 75, HIGH 55, CRITICAL 30 minuti di gioco, poi moltiplicate dalla difficoltà.
+- Le anomalie non sono più semplici toast: appaiono come eventi grandi quasi full-screen.
+- Le anomalie avanzate rimangono più a lungo.
+- F2, mappa, porte e collisioni V2.2.2 inalterate.
