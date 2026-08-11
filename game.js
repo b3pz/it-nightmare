@@ -1,10 +1,50 @@
 const $=s=>document.querySelector(s),C=$("#game"),g=C.getContext("2d");g.imageSmoothingEnabled=false;
 const W=C.width,H=C.height,START=540,BOSS=1132,END=1140,TIME_SPEED=5.2;
 const difficultyConfig={
- easy:{name:"EASY",maxStrikes:5,timeMult:1.55,stressMult:.75,incidentMult:.75,criticalChance:.08},
- normal:{name:"NORMAL",maxStrikes:3,timeMult:1.25,stressMult:1,incidentMult:1,criticalChance:.13},
- hard:{name:"HARD",maxStrikes:2,timeMult:1.00,stressMult:1.15,incidentMult:1.15,criticalChance:.17},
- nightmare:{name:"NIGHTMARE",maxStrikes:1,timeMult:.82,stressMult:1.3,incidentMult:1.3,criticalChance:.22}
+ easy:{
+   name:"EASY",
+   maxStrikes:7,
+   timeMult:2.20,
+   stressMult:.50,
+   incidentMult:.50,
+   criticalChance:.03,
+   timeSpeed:1.30,
+   maxTickets:2,
+   spawnSeconds:19
+ },
+ normal:{
+   name:"NORMAL",
+   maxStrikes:4,
+   timeMult:1.55,
+   stressMult:.80,
+   incidentMult:.80,
+   criticalChance:.08,
+   timeSpeed:1.85,
+   maxTickets:3,
+   spawnSeconds:16
+ },
+ hard:{
+   name:"HARD",
+   maxStrikes:2,
+   timeMult:1.10,
+   stressMult:1.10,
+   incidentMult:1.10,
+   criticalChance:.15,
+   timeSpeed:2.55,
+   maxTickets:4,
+   spawnSeconds:12
+ },
+ nightmare:{
+   name:"NIGHTMARE",
+   maxStrikes:1,
+   timeMult:.90,
+   stressMult:1.30,
+   incidentMult:1.30,
+   criticalChance:.22,
+   timeSpeed:3.25,
+   maxTickets:4,
+   spawnSeconds:9
+ }
 };
 let difficulty="normal";
 
@@ -34,8 +74,8 @@ const corridors=[
  {x:1205,y:300,w:100,h:455},     // dorsale destra
  {x:1260,y:665,w:205,h:95}       // raccordo sala corte
 ,
- {x:165,y:235,w:95,h:525},        // V2.6.1 LEFT SPINE: Grafica / ABA / IT
- {x:165,y:685,w:175,h:95}         // raccordo sinistro verso corridoio basso
+ {x:245,y:265,w:58,h:430},        // V2.6.2 LEFT SPINE: black gap beside ABA / IT
+ {x:245,y:675,w:110,h:85}         // raccordo sinistro verso corridoio basso
 ];
 const doors=[
  // GRAFICA -> corridoio
@@ -65,10 +105,10 @@ const doors=[
  // CUCINA / STAMPANTI -> corridoio basso dx
  {x:805,y:720,w:120,h:140},{x:1080,y:710,w:120,h:150},{x:1370,y:710,w:100,h:150}
 ,
- {x:205,y:205,w:75,h:115},         // GRAFICA -> LEFT SPINE
- {x:190,y:345,w:110,h:110},        // ABA -> LEFT SPINE
- {x:190,y:575,w:110,h:130},        // IT -> LEFT SPINE
- {x:210,y:665,w:145,h:120}         // LEFT SPINE -> lower corridor
+ {x:235,y:245,w:80,h:85},          // GRAFICA / upper corridor -> LEFT SPINE
+ {x:215,y:345,w:95,h:105},         // ABA -> LEFT SPINE
+ {x:215,y:565,w:95,h:135},         // IT -> LEFT SPINE
+ {x:235,y:655,w:125,h:125}         // LEFT SPINE -> lower corridor
 ];
 const walkZones=[...roomFloors,...corridors,...doors];
 const obstacles=[
@@ -153,6 +193,13 @@ function spawnMokasa(){
  mokasa={id:"mokasa",name:"MOKASA",role:"CAPO",x:s.x+22,y:s.y+26,tone:"bad",shirt:"#75483d",life:45};
  showAnomaly("⚠ MOKASA È NELLO STUDIO",2300);
 }
+function autoCloseModal(ms=2200){
+ clearTimeout(window.__npcModalTimer);
+ window.__npcModalTimer=setTimeout(()=>{
+   const m=$("#modal");
+   if(m&&!m.classList.contains("hidden"))m.classList.add("hidden");
+ },ms);
+}
 function npcTalk(n){
  const now=state.min;
  if((npcCooldown[n.id]??-999)+35>now){toast(`${n.name}: ci siamo già parlati.`);return}
@@ -179,12 +226,13 @@ function npcTalk(n){
   title=ev[0];state.stress=Math.max(0,state.stress+ev[1]);desc=`STRESS ${ev[1]}`;
  }else if(n.id==="mokasa"){
   title="TI HA VISTO";good=false;
-  if(Math.random()<.90){state.stress+=12;state.rep-=1;if(Math.random()<.4)newTicket("CRITICAL");desc="«Qui bisogna lavorare.» STRESS +12 · REPUTAZIONE -1";}
+  if(Math.random()<.90){state.stress+=12*difficultyConfig[difficulty].stressMult;state.rep-=difficulty==='easy'?0:1;if(Math.random()<.4)newTicket("CRITICAL");desc="«Qui bisogna lavorare.» STRESS +12 · REPUTAZIONE -1";}
   else{state.rep=Math.min(5,state.rep+1);desc="Per una volta approva. REPUTAZIONE +1";}
  }
  clamp();hud();renderTickets();
  $("#modalBody").innerHTML=`<h2 class="${good?"low":"critical"}">${n.name} // ${title}</h2><p>${desc}</p>`;
  $("#modal").classList.remove("hidden");
+ autoCloseModal(n.id==="mokasa"?2600:2100);
 }
 function showStrike(level){
  const o=$("#strikeOverlay");
@@ -229,14 +277,14 @@ function levelForTime(){let a=Math.random();if(state.min<720)return a<.75?"LOW":
 function reachablePoints(){const R=reachableSet();return points.filter(p=>pointReachable(p,R))}
 function farthestPoint(){let ps=reachablePoints();return [...ps].sort((a,b)=>Math.hypot(player.x-b.x,player.y-b.y)-Math.hypot(player.x-a.x,player.y-a.y))[0]}
 function newTicket(force){
- if(state.phase!=="shift"||tickets.length>=4)return;
+ if(state.phase!=="shift"||tickets.length>=difficultyConfig[difficulty].maxTickets)return;
  let level=force||levelForTime(),p;
  let valid=stations.filter(s=>walkable(s.x,s.y)||reachablePoints().some(p=>Math.hypot(p.x-s.x,p.y-s.y)<95));
  if(!valid.length)valid=reachablePoints();
  const weighted=[...valid,...valid.filter(s=>s.room==="CENTRALE"),...valid.filter(s=>s.room==="CENTRALE")];
  if(level==="CRITICAL")p=[...valid].sort((a,b)=>Math.hypot(player.x-b.x,player.y-b.y)-Math.hypot(player.x-a.x,player.y-a.y))[0];
  else p=weighted[Math.floor(Math.random()*weighted.length)];
- let mins={LOW:95,MEDIUM:75,HIGH:55,CRITICAL:30}[level]*difficultyConfig[difficulty].timeMult;
+ let mins={LOW:110,MEDIUM:90,HIGH:70,CRITICAL:42}[level]*difficultyConfig[difficulty].timeMult;
  tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:shuffledQuestion(questions[level][Math.floor(Math.random()*questions[level].length)]),criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,expired:false});
  renderTickets();
 }
@@ -262,7 +310,15 @@ function answer(i,n){
  else{state.strikes++;state.stress+=({LOW:7,MEDIUM:12,HIGH:18,CRITICAL:20}[t.level])*difficultyConfig[difficulty].stressMult;state.incident+=({LOW:5,MEDIUM:9,HIGH:15,CRITICAL:18}[t.level])*difficultyConfig[difficulty].incidentMult;state.rep-=t.level==="CRITICAL"?2:1;toast("RISPOSTA ERRATA // STRIKE +1")}
  clamp();renderTickets();checkEarlyEnd();
 }
-function expireTickets(){for(const t of tickets)if(!t.expired&&state.min>=t.due){t.expired=true;state.strikes++;state.incident+=(t.level==="CRITICAL"?22:({LOW:7,MEDIUM:12,HIGH:18}[t.level]))*difficultyConfig[difficulty].incidentMult;state.stress+=10*difficultyConfig[difficulty].stressMult;state.rep-=t.level==="CRITICAL"?2:1;toast(`${t.level} SCADUTO // STRIKE +1`) }checkEarlyEnd()}
+function expireTickets(){for(const t of tickets)if(!t.expired&&state.min>=t.due){
+     t.expired=true;
+     const easyLow=(difficulty==="easy"&&t.level==="LOW");
+     if(!easyLow)state.strikes++;
+     state.incident+=(t.level==="CRITICAL"?18:({LOW:4,MEDIUM:9,HIGH:14}[t.level]))*difficultyConfig[difficulty].incidentMult;
+     state.stress+=6*difficultyConfig[difficulty].stressMult;
+     if(t.level==="CRITICAL")state.rep-=1;
+     showStrike(easyLow?"LOW SCADUTO — NESSUNO STRIKE":t.level);
+    }[t.level]))*difficultyConfig[difficulty].incidentMult;state.stress+=10*difficultyConfig[difficulty].stressMult;state.rep-=t.level==="CRITICAL"?2:1;toast(`${t.level} SCADUTO // STRIKE +1`) }checkEarlyEnd()}
 function checkEarlyEnd(){clamp();if(state.strikes>=state.maxStrikes)return ending("IMPOSTORE","Troppi interventi errati. Le tue credenziali IT vengono revocate.");if(state.rep<=0)return ending("LICENZIATO","La reputazione è crollata. ACCESS REVOKED.");if(state.incident>=100)return ending("MAJOR INCIDENT","L'infrastruttura dello studio è offline.");if(state.stress>=100)return ending("BURNOUT","Non riesci più a gestire il turno.")}
 function showAnomaly(text,duration=2600){
  const o=$("#anomalyOverlay"),t=$("#anomalyText");
@@ -312,13 +368,21 @@ function update(dt){
   spawnTimer+=dt;anomTimer+=dt;
  const hr=Math.floor(state.min/60);
  if(hr!==lastZiaHour){lastZiaHour=hr;if(state.min>START+10&&Math.random()<.80)toast("ZIA ALE // potresti passare dalla Segreteria.");}
- mokasaTimer+=dt*TIME_SPEED;
+ mokasaTimer+=dt*difficultyConfig[difficulty].timeSpeed;
  if(!mokasa&&state.min>620&&mokasaTimer>55&&Math.random()<.004){spawnMokasa();mokasaTimer=0}
- if(mokasa){mokasa.life-=dt*TIME_SPEED;if(mokasa.life<=0)mokasa=null}
+ if(mokasa){mokasa.life-=dt*difficultyConfig[difficulty].timeSpeed;if(mokasa.life<=0)mokasa=null}
  const moved=Math.hypot(player.x-lastPlayerPos.x,player.y-lastPlayerPos.y);
- if(moved<2)idleMinutes+=dt*TIME_SPEED;else{idleMinutes=0;lastPlayerPos={x:player.x,y:player.y}}
- if(mokasa&&Math.hypot(player.x-mokasa.x,player.y-mokasa.y)<90&&idleMinutes>4){npcTalk(mokasa);idleMinutes=0}
-if(spawnTimer>11){spawnTimer=0;newTicket();maybeCritical()}if(anomTimer>Math.max(5,14-anomalyLevel()*8)){anomTimer=0;anomalyEvent()}
+ if(moved<2)idleMinutes+=dt*difficultyConfig[difficulty].timeSpeed;else{idleMinutes=0;lastPlayerPos={x:player.x,y:player.y}}
+ if(mokasa&&Math.hypot(player.x-mokasa.x,player.y-mokasa.y)<92){
+   const last=npcCooldown.mokasa??-999;
+   if(state.min-last>20){
+     npcTalk(mokasa);
+     // Dopo l'interazione sparisce: non serve premere E e non può colpire due volte nello stesso spawn.
+     mokasa=null;
+     idleMinutes=0;
+   }
+ }
+if(spawnTimer>difficultyConfig[difficulty].spawnSeconds){spawnTimer=0;newTicket();maybeCritical()}if(anomTimer>Math.max(5,14-anomalyLevel()*8)){anomTimer=0;anomalyEvent()}
   expireTickets();
  } else if(state.phase==="boss")state.min=BOSS;else state.min=END;
  hud();

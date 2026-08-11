@@ -112,3 +112,50 @@ Base: V2.3 stabile, senza usare la V2.4 NPC difettosa.
 
 ## V2.6.1 TRUE BUILD
 Build verificata automaticamente prima della consegna. Include davvero corridoio sinistro, nuovi nomi stanze, postazioni, 4 NPC, risposte randomizzate, strike overlay e anomalie Bagni/Rifugio Digitale.
+
+## V2.6.2 — LEFT CORRIDOR GEOMETRY FIX
+- Spostata la dorsale sinistra fuori dalle stanze.
+- Ora occupa la fascia nera alla destra di ABA e IT.
+- Grafica si collega tramite il corridoio orizzontale superiore.
+- ABA e IT hanno bridge dedicati verso la dorsale.
+- F2, NPC, postazioni, ticket e gameplay invariati.
+
+## V2.6.3 — BALANCE PASS
+Correzione strutturale della difficoltà.
+
+Durata reale indicativa del turno 09:00 → 18:52:
+- EASY: circa 7,5 minuti reali
+- NORMAL: circa 5,3 minuti
+- HARD: circa 3,9 minuti
+- NIGHTMARE: circa 3 minuti
+
+EASY:
+- 7 strike
+- massimo 2 ticket contemporanei
+- ticket più distanziati
+- LOW scaduto non dà strike
+- stress/incident dimezzati
+- CRITICAL molto più rari
+
+NORMAL:
+- 4 strike
+- massimo 3 ticket
+- tempi più generosi e pressione ridotta
+
+HARD/NIGHTMARE:
+- restano modalità sfida.
+
+Deadline base aumentate:
+LOW 110, MEDIUM 90, HIGH 70, CRITICAL 42 minuti di gioco,
+moltiplicate poi dalla difficoltà.
+
+Mappa, corridoio sinistro, F2, NPC e Office Alive invariati.
+
+## V2.6.4 — NPC INTERACTION UX
+- MOKASA non richiede più E/tap: quando entra nel raggio del giocatore interagisce automaticamente.
+- Dopo l'interazione MOKASA sparisce per evitare colpi multipli nello stesso spawn.
+- Popup bonus/malus NPC si chiudono automaticamente.
+- Popup normali: circa 2,1 secondi.
+- Popup MOKASA: circa 2,6 secondi.
+- La X resta disponibile, ma non è più necessaria.
+- Bilanciamento V2.6.3, mappa, corridoio, F2 e collisioni invariati.
