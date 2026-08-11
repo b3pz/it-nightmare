@@ -73,7 +73,7 @@ const doors=[
 const walkZones=[...roomFloors,...corridors,...doors];
 const obstacles=[
 {x:385,y:420,w:290,h:42},{x:385,y:350,w:245,h:35},{x:75,y:145,w:155,h:45},{x:340,y:145,w:120,h:55},{x:565,y:115,w:150,h:90},
-{x:75,y:385,w:125,h:55},{x:75,y:600,w:125,h:55},{x:885,y:160,w:105,h:115},{x:1080,y:155,w:100,h:60},{x:1280,y:155,w:125,h:70},{x:890,y:435,w:190,h:60},{x:1330,y:495,w:185,h:85},{x:885,y:775,w:180,h:55},{x:1190,y:775,w:190,h:60}
+{x:75,y:385,w:125,h:55},{x:75,y:600,w:125,h:23},{x:885,y:160,w:105,h:115},{x:1080,y:155,w:100,h:60},{x:1280,y:155,w:125,h:70},{x:890,y:435,w:190,h:60},{x:1330,y:495,w:185,h:85},{x:885,y:775,w:180,h:55},{x:1190,y:775,w:190,h:60}
 ];
 const points=[
 {x:155,y:205,room:"GRAFICA",kind:"PC"},{x:400,y:205,room:"IT",kind:"PC"},{x:640,y:205,room:"SERVER",kind:"SERVER"},{x:140,y:450,room:"ABA",kind:"PC"},{x:140,y:660,room:"IT",kind:"PC"},
@@ -530,7 +530,13 @@ const stations=[
 
 function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:150,y:640,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=false;encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
-function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x+5&&x<o.x+o.w-5&&y>o.y+5&&y<o.y+o.h-5)}
+function walkable(x, y) {
+  if (!walkZones.some(z => inside(z, x, y))) {
+    // console.log("return false");
+    return false;
+  }
+  return !obstacles.some(o => x > o.x + 5 && x < o.x + o.w - 5 && y > o.y + 5 && y < o.y + o.h - 5)
+}
 function roomAt(x,y){
  return rooms.find(r=>inside({x:r.x+8,y:r.y+8,w:r.w-16,h:r.h-16},x,y))||null;
 }
@@ -692,7 +698,8 @@ _</pre><button class="choice" onclick="location.reload()">TORNA AL MENU</button>
 function clamp(){state.incident=Math.max(0,Math.min(100,state.incident));state.stress=Math.max(0,Math.min(100,state.stress));state.rep=Math.max(0,Math.min(5,state.rep))}
 $("#x").onclick=()=>{if(state&&state.phase!=="shift"){toast("Questo evento non può essere ignorato.");return}$("#modal").classList.add("hidden")};
 function hud(){clamp();$("#clock").textContent=fmt(state.min);$("#stress").textContent=Math.round(state.stress)+"%";$("#rep").textContent="★".repeat(state.rep)+"☆".repeat(5-state.rep);$("#strikes").textContent=state.strikes+"/"+state.maxStrikes;$("#xp").textContent=state.xp;$("#incident").textContent=Math.round(state.incident)+"%"}
-function update(dt){
+
+function update(dt) {
  if(state.phase==="shift"){
   let dx=(keys.d||keys.arrowright||virtualKeys.right?1:0)-(keys.a||keys.arrowleft||virtualKeys.left?1:0)+(joyActive?joyX:0),
       dy=(keys.s||keys.arrowdown||virtualKeys.down?1:0)-(keys.w||keys.arrowup||virtualKeys.up?1:0)+(joyActive?joyY:0);
@@ -703,6 +710,7 @@ function update(dt){
    firstCarryTriggered=true;
    startTutorialCarryMission();
  }
+   
  const hr=Math.floor(state.min/60);
  if(hr!==lastZiaHour){
    lastZiaHour=hr;
