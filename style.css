@@ -55,3 +55,6 @@ background:rgba(90,0,8,.82);pointer-events:none;animation:strikeIn .16s ease-out
 #missionPanel.hidden{display:none}#missionPanel b{display:block;color:#6ee7ff;font-size:10px;letter-spacing:2px}#missionPanel span{display:block;color:#fff;font-weight:900;margin:4px 0}#missionPanel small{color:#a8c5bb}
 .slot.filled{border-color:#6ee7ff;color:#dff8ff;background:#0b1718}
 @media(hover:none),(pointer:coarse){#missionPanel{left:6px;bottom:205px;width:230px;font-size:9px}}
+
+#missionPanel em{display:block;margin-top:7px;padding-top:6px;border-top:1px solid #28434a;color:#6ee7ff;font-style:normal;font-size:8px}
+footer b{color:#6ee7ff}

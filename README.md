@@ -215,3 +215,13 @@ Nessuna modifica a gameplay, mappa, NPC, bilanciamento, F2 o collisioni.
 - Il bonus ignora il cooldown quando raggiungi l'NPC.
 - Il cooldown parte solo DOPO aver riscosso il bonus.
 - Non può più succedere: “ho una cosa per te” → “ci siamo già parlati”.
+
+## V2.7.2.1 — VISIBLE HOTFIX
+- Ripristinata funzione Pokémon !.
+- NPC ambientali nuovamente renderizzati.
+- Anomalie fisiche nuovamente renderizzate.
+- Oggetti inventario e marker fisici nuovamente renderizzati.
+- Prima missione garantita alle 09:03: CUFFIE da IT a un NPC.
+- Spawn giocatore nel vero reparto IT.
+- Scaffale IT SUPPLIES sempre visibile.
+- Versione V2.7.2.1 visibile nel footer.

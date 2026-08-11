@@ -186,7 +186,21 @@ function updateAmbient(dt){
 let npcs=[],mokasa=null,npcCooldown={},mokasaTimer=0,lastZiaHour=-1,idleMinutes=0,lastPlayerPos={x:0,y:0};
 let phoneQueue=[],visualAnomaly=null,inventory=[],carryMission=null,encounterLock=false;
 let pendingOffers={};
+let firstCarryTriggered=false;
 
+function pokemonEncounter(n){
+ if(encounterLock)return;
+ encounterLock=true;
+ n.seeking=false;
+ n.exclaimUntil=performance.now()+1100;
+ const ov=$("#encounterOverlay");
+ if(ov){$("#encounterName").textContent=n.name;ov.classList.add("on")}
+ setTimeout(()=>{
+   if(ov)ov.classList.remove("on");
+   npcTalk(n);
+   setTimeout(()=>encounterLock=false,350);
+ },1100);
+}
 function phoneMessage(sender,text){
  const box=$("#phoneNotification"); if(!box)return;
  $("#phoneSender").textContent=sender;$("#phoneText").textContent=text;
@@ -203,7 +217,7 @@ function updateInventoryUI(){
      const dest=carryMission.stage==="pickup"
        ? `RITIRO: ${carryMission.pickup.room}`
        : `CONSEGNA: ${carryMission.recipient ? carryMission.recipient.name+" — "+carryMission.to.room : carryMission.to.room}`;
-     mission.innerHTML=`<b>${carryMission.label}</b><span>${carryMission.item}</span><small>${dest}</small>`;
+     mission.innerHTML=`<b>MISSIONE FISICA // ${carryMission.label}</b><span>${carryMission.item}</span><small>${dest}</small><em>${carryMission.stage==="pickup"?"CERCA IL MARKER AZZURRO E PREMI E":"RAGGIUNGI IL DESTINATARIO E PREMI E"}</em>`;
    }
  }
 }
@@ -237,6 +251,22 @@ function makeCarryMission(){
  }
  m.stage="pickup";
  return m;
+}
+function startTutorialCarryMission(){
+ if(carryMission||ambientNPCs.length===0)return;
+ const rec=ambientNPCs[0];
+ carryMission={
+   label:"ASSEGNAZIONE",
+   item:"CUFFIE",
+   pickup:{x:115,y:640,room:"IT"},
+   to:{x:rec.x,y:rec.y,room:"POSTAZIONE"},
+   recipient:rec,
+   targetType:"npc",
+   stage:"pickup",
+   tutorial:true
+ };
+ phoneMessage("IT TASK",`Prendi le CUFFIE nello scaffale IT e consegnale a ${rec.name}.`);
+ updateInventoryUI();
 }
 function startCarryMission(){
  if(carryMission||Math.random()>.38)return;
@@ -433,7 +463,7 @@ function validateMap(){
  console.log("V2.1 MAP CHECK:",bad.length?"UNREACHABLE":"ALL TASK ZONES REACHABLE",bad);
  return bad;
 }
-function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:535,y:610,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");hud()}
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:150,y:640,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=false;encounterLock=false;spawnNPCs();updateInventoryUI();newTicket("LOW");hud()}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x,y){if(!walkZones.some(z=>inside(z,x,y)))return false;return !obstacles.some(o=>x>o.x+5&&x<o.x+o.w-5&&y>o.y+5&&y<o.y+o.h-5)}
 function roomAt(x,y){
@@ -603,6 +633,10 @@ function update(dt){
   if(dx||dy){let l=Math.hypot(dx,dy),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(playerCanMove(player.x,player.y,player.x+vx,player.y))player.x+=vx;if(playerCanMove(player.x,player.y,player.x,player.y+vy))player.y+=vy}
   state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed);if(state.min>=BOSS){startBoss();hud();return}
   spawnTimer+=dt;anomTimer+=dt;
+ if(!firstCarryTriggered && state.min>=START+3){
+   firstCarryTriggered=true;
+   startTutorialCarryMission();
+ }
  const hr=Math.floor(state.min/60);
  if(hr!==lastZiaHour){
    lastZiaHour=hr;
@@ -806,6 +840,77 @@ function draw(){
    g.fillStyle=n.tone==="bad"?"#ff6262":n.tone==="good"?"#62e568":"#ffd447";
    g.font="bold 9px monospace";g.textAlign="center";g.fillText(n.name,n.x,n.y-30);g.textAlign="left";
  });
+ // V2.7.2.1 — Living Office visible layer
+ // NPC ambientali
+ ambientNPCs.forEach(n=>{
+   if(n.state==="work"){g.fillStyle="#202622";g.fillRect(n.x-8,n.y+7,16,7)}
+   g.fillStyle="rgba(0,0,0,.28)";g.fillRect(n.x-7,n.y+10,14,4);
+   g.fillStyle=n.shirt;g.fillRect(n.x-7,n.y-10,14,21);
+   g.fillStyle="#c89e7d";g.fillRect(n.x-5,n.y-17,10,8);
+   if(n.state!=="work"){g.fillStyle="#d8e1dc";g.font="bold 7px monospace";g.fillText(n.name,n.x-9,n.y-23)}
+ });
+
+ // Scaffale fisico IT SUPPLIES
+ g.fillStyle="#4b3423";g.fillRect(78,605,145,18);
+ g.fillStyle="#222a26";g.fillRect(82,578,137,27);
+ g.fillStyle="#c5eaff";g.font="bold 8px monospace";g.fillText("IT SUPPLIES",112,594);
+
+ // Marker missione inventario
+ if(carryMission){
+   const q=carryTarget();
+   if(q){
+     const pulse=4+Math.sin(performance.now()/130)*2;
+     g.strokeStyle="#6ee7ff";g.lineWidth=3;
+     g.strokeRect(q.x-12-pulse/2,q.y-12-pulse/2,24+pulse,24+pulse);
+     if(carryMission.stage==="pickup"){
+       g.fillStyle="#c5eaff";
+       if(carryMission.item.includes("CUFFIE")){
+         g.strokeStyle="#c5eaff";g.lineWidth=4;g.beginPath();g.arc(q.x,q.y,9,Math.PI,0);g.stroke();
+         g.fillRect(q.x-11,q.y,5,9);g.fillRect(q.x+6,q.y,5,9);
+       }else if(carryMission.item.includes("TONER")){
+         g.fillRect(q.x-9,q.y-6,18,12);g.fillStyle="#222";g.fillRect(q.x-5,q.y-3,10,6);
+       }else if(carryMission.item.includes("USB")){
+         g.fillRect(q.x-10,q.y-4,17,8);g.fillStyle="#777";g.fillRect(q.x+7,q.y-3,5,6);
+       }else g.fillRect(q.x-10,q.y-5,20,10);
+       g.fillStyle="#6ee7ff";g.font="bold 9px monospace";g.fillText(carryMission.item,q.x-28,q.y-20);
+     }else{
+       g.fillStyle="#6ee7ff";g.font="bold 9px monospace";
+       g.fillText(carryMission.recipient?carryMission.recipient.name:"CONSEGNA",q.x-20,q.y-20);
+     }
+   }
+ }
+
+ // ! stile Pokémon sopra Pao/Don
+ npcs.forEach(n=>{
+   if(n.exclaimUntil&&performance.now()<n.exclaimUntil){
+     g.fillStyle="#ffd447";g.font="bold 28px monospace";g.fillText("!",n.x-7,n.y-48);
+   }
+ });
+
+ // Anomalie fisiche
+ if(visualAnomaly&&performance.now()<visualAnomaly.until){
+   const k=visualAnomaly.kind,t=performance.now();
+   const desktops=stations.filter(x=>["HP Z","MAC"].includes(x.type));
+   if(k==="MONITOR"||k==="MONITOR1905"){
+     const s=desktops[Math.floor(visualAnomaly.seed*desktops.length)];
+     if(s){
+       g.fillStyle=k==="MONITOR1905"?"#8b001c":"#edf4f4";g.fillRect(s.x-9,s.y-9,18,12);
+       if(k==="MONITOR1905"){g.fillStyle="#fff";g.font="7px monospace";g.fillText("19:05",s.x-9,s.y)}
+     }
+   }
+   if(k==="PIXERA"||k==="PIXERA_ALL"){
+     stations.filter(x=>x.type==="PIXERA").forEach((s,i)=>{
+       g.fillStyle=(Math.floor(t/120)+i)%2?"#7d145c":"#13a5a5";g.fillRect(s.x-17,s.y-12,34,20);
+     });
+   }
+   if(k==="LIGHT"){g.fillStyle=`rgba(255,255,220,${Math.sin(t/55)>0?.15:.01})`;g.fillRect(0,0,W,H)}
+   if(k==="BLACKOUT"){g.fillStyle="rgba(0,0,0,.82)";g.fillRect(0,0,W,H)}
+   if(k==="RGB"){g.fillStyle="rgba(180,0,50,.08)";g.fillRect(8,0,W,H);g.fillStyle="rgba(0,160,180,.06)";g.fillRect(-8,0,W,H)}
+   if(k==="SHADOW"){g.fillStyle="#030303";g.fillRect(790,430,15,35)}
+   if(k==="BATHROOM"){g.fillStyle="#6b0f1e";g.fillRect(900,620,8,24)}
+ }
+ if(visualAnomaly&&performance.now()>=visualAnomaly.until)visualAnomaly=null;
+
  tickets.forEach(t=>{
   const b=Math.sin(performance.now()/120)>0;
   g.fillStyle=t.level==="CRITICAL"?"#ff3131":b?"#ffd447":"#c43d35";
@@ -817,6 +922,14 @@ function draw(){
  if(a>.12){g.fillStyle=`rgba(16,0,18,${a*.12})`;g.fillRect(0,0,W,H)}
  if(a>.55&&Math.random()<.018){g.fillStyle="#a0002518";g.fillRect(0,Math.random()*H,W,3)}
  if(a>.78&&Math.random()<.008){g.fillStyle="rgba(255,255,255,.035)";g.fillRect(0,0,W,H)}
+
+ const cp=carryPrompt();
+ if(cp){
+   const w=Math.min(390,cp.length*7+24),x=player.x-w/2,y=player.y-55;
+   g.fillStyle="rgba(5,8,7,.95)";g.fillRect(x,y,w,24);
+   g.strokeStyle="#6ee7ff";g.strokeRect(x,y,w,24);
+   g.fillStyle="#dff8ff";g.font="bold 10px monospace";g.textAlign="center";g.fillText(cp,player.x,y+16);g.textAlign="left";
+ }
 
  g.fillStyle="rgba(0,0,0,.28)";g.beginPath();g.ellipse(player.x,player.y+17,13,6,0,0,Math.PI*2);g.fill();
  g.fillStyle="#1b1e1c";g.fillRect(player.x-9,player.y-14,18,26);
