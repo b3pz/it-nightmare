@@ -310,15 +310,28 @@ function answer(i,n){
  else{state.strikes++;state.stress+=({LOW:7,MEDIUM:12,HIGH:18,CRITICAL:20}[t.level])*difficultyConfig[difficulty].stressMult;state.incident+=({LOW:5,MEDIUM:9,HIGH:15,CRITICAL:18}[t.level])*difficultyConfig[difficulty].incidentMult;state.rep-=t.level==="CRITICAL"?2:1;toast("RISPOSTA ERRATA // STRIKE +1")}
  clamp();renderTickets();checkEarlyEnd();
 }
-function expireTickets(){for(const t of tickets)if(!t.expired&&state.min>=t.due){
+function expireTickets(){
+ for(const t of tickets){
+   if(!t.expired && state.min>=t.due){
      t.expired=true;
-     const easyLow=(difficulty==="easy"&&t.level==="LOW");
-     if(!easyLow)state.strikes++;
-     state.incident+=(t.level==="CRITICAL"?18:({LOW:4,MEDIUM:9,HIGH:14}[t.level]))*difficultyConfig[difficulty].incidentMult;
-     state.stress+=6*difficultyConfig[difficulty].stressMult;
-     if(t.level==="CRITICAL")state.rep-=1;
-     showStrike(easyLow?"LOW SCADUTO — NESSUNO STRIKE":t.level);
-    }[t.level]))*difficultyConfig[difficulty].incidentMult;state.stress+=10*difficultyConfig[difficulty].stressMult;state.rep-=t.level==="CRITICAL"?2:1;toast(`${t.level} SCADUTO // STRIKE +1`) }checkEarlyEnd()}
+     const easyLow=(difficulty==="easy" && t.level==="LOW");
+
+     if(!easyLow) state.strikes++;
+
+     const incidentBase = t.level==="CRITICAL"
+       ? 18
+       : ({LOW:4,MEDIUM:9,HIGH:14}[t.level] ?? 6);
+
+     state.incident += incidentBase * difficultyConfig[difficulty].incidentMult;
+     state.stress += 6 * difficultyConfig[difficulty].stressMult;
+
+     if(t.level==="CRITICAL") state.rep -= 1;
+
+     showStrike(easyLow ? "LOW SCADUTO — NESSUNO STRIKE" : t.level);
+   }
+ }
+ checkEarlyEnd();
+}
 function checkEarlyEnd(){clamp();if(state.strikes>=state.maxStrikes)return ending("IMPOSTORE","Troppi interventi errati. Le tue credenziali IT vengono revocate.");if(state.rep<=0)return ending("LICENZIATO","La reputazione è crollata. ACCESS REVOKED.");if(state.incident>=100)return ending("MAJOR INCIDENT","L'infrastruttura dello studio è offline.");if(state.stress>=100)return ending("BURNOUT","Non riesci più a gestire il turno.")}
 function showAnomaly(text,duration=2600){
  const o=$("#anomalyOverlay"),t=$("#anomalyText");

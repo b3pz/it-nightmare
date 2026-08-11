@@ -159,3 +159,8 @@ Mappa, corridoio sinistro, F2, NPC e Office Alive invariati.
 - Popup MOKASA: circa 2,6 secondi.
 - La X resta disponibile, ma non è più necessaria.
 - Bilanciamento V2.6.3, mappa, corridoio, F2 e collisioni invariati.
+
+## V2.6.4.1 — STARTUP HOTFIX
+Corretto un errore di sintassi nella funzione `expireTickets()` introdotto dal Balance Pass.
+L'errore bloccava completamente l'esecuzione di `game.js`, quindi il pulsante INIZIA TURNO non rispondeva.
+Nessuna modifica a gameplay, mappa, NPC, bilanciamento, F2 o collisioni.
