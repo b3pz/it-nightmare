@@ -231,3 +231,9 @@ Nessuna modifica a gameplay, mappa, NPC, bilanciamento, F2 o collisioni.
 - Pulsante DEBUG touch equivalente a F2.
 - Badge V2.7.2.2 visibile.
 - Diagnostica JS ERROR visibile anche da Safari/iPhone.
+
+## V2.7.2.3 — QUESTION HOTFIX
+- Corretto `ReferenceError: shuffledQuestion is not defined`.
+- Le risposte vengono realmente mescolate e l'indice della risposta corretta viene ricalcolato.
+- Nessuna modifica alle collisioni, mappa, NPC, inventario o difficoltà della 2.7.2.2.
+- Versione/cache-busting aggiornati a V2.7.2.3.

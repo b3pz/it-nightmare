@@ -93,6 +93,17 @@ function categoryForStation(s){
  if(s.room==="CENTRALE")return Math.random()<.35?"NETWORK":"WORKSTATION";
  return Math.random()<.18?"NETWORK":"WORKSTATION";
 }
+function shuffledQuestion(entry){
+ const question=entry[0];
+ const answers=entry[1].slice();
+ const correctAnswer=answers[entry[2]];
+ for(let i=answers.length-1;i>0;i--){
+   const j=Math.floor(Math.random()*(i+1));
+   [answers[i],answers[j]]=[answers[j],answers[i]];
+ }
+ return [question,answers,answers.indexOf(correctAnswer)];
+}
+
 function drawQuestion(category){
  const bank=questionBanks[category]||questionBanks.WORKSTATION;
  if(!questionDecks[category]||!questionDecks[category].length){
@@ -958,6 +969,6 @@ window.addEventListener("error",function(ev){
  let old=document.getElementById("runtimeError");
  if(old)return;
  let d=document.createElement("div");d.id="runtimeError";
- d.textContent="JS ERROR V2.7.2.2 // "+(ev.message||"errore sconosciuto");
+ d.textContent="JS ERROR V2.7.2.3 // "+(ev.message||"errore sconosciuto");
  document.body.appendChild(d);
 });
