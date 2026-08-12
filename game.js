@@ -203,6 +203,27 @@ const npcDefs=[
  {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,tone:"good",shirt:"#765d78"},
  {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51",hunter:true},{id:"hr",name:"HR",role:"PEOPLE",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,state:"outside"}];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
+
+const npcRelations={};
+function ensureRelation(n){if(!n||!n.id)return 0;if(npcRelations[n.id]===undefined)npcRelations[n.id]=0;return npcRelations[n.id]}
+function relationTier(n){const v=ensureRelation(n);return v>=45?"friend":v<=-45?"enemy":"neutral"}
+function changeRelation(n,d){if(!n||!n.id)return;ensureRelation(n);npcRelations[n.id]=Math.max(-100,Math.min(100,npcRelations[n.id]+d));toast(`${n.name||"NPC"} // RAPPORTO ${d>0?"+":""}${d}`)}
+function relationTicketAdjust(n,level,mins){
+ const tier=relationTier(n);
+ if(tier==="friend")return {level,mins:Math.round(mins*1.22),stress:0};
+ if(tier==="enemy")return {level:level==="LOW"?"MEDIUM":level==="MEDIUM"?"HIGH":level,mins:Math.round(mins*.82),stress:2};
+ return {level,mins,stress:0};
+}
+function relationOpening(n){
+ const tier=relationTier(n);
+ const sets={
+  friend:["Oh, meno male che sei tu.","Quando puoi mi dai una mano?","Mi fido di te: guardi questa cosa?"],
+  neutral:["Hai un secondo?","Ti posso chiedere una cosa?","Quando puoi passa da me."],
+  enemy:["È da un po' che aspetto.","Questa cosa mi serve subito.","Puoi occupartene adesso?"]
+ };
+ const a=sets[tier];return a[Math.floor(Math.random()*a.length)];
+}
+
 let ambientNPCs=[];
 function spawnAmbient(){
  const seats=stations.filter(s=>["HP Z","MAC"].includes(s.type));
@@ -363,6 +384,7 @@ function ambientCorridorEncounter(n){
 function updateAmbient(dt){
  if(isLunch())return; // lunch positions are controlled absolutely by updateLunchState()
  for(const n of ambientNPCs){
+   if(n.id==="hr"){n.state="work";n.x=n.homeX;n.y=n.homeY;continue}
    n.timer-=dt;
    if(n.state==="work"&&n.timer<=0){
      const r=Math.random();
@@ -936,6 +958,27 @@ function togglePDA(force){
  refreshPDA();
  p.classList.toggle("hidden",!open);
 }
+
+function routeNpcHome(n){
+ const home={x:n.homeX,y:n.homeY,room:n.homeRoom||"HOME"};
+ return typeof routeViaHub==="function"?routeViaHub(n,home):[{x:home.x,y:home.y}];
+}
+function forceLunchReturn(){
+ [...ambientNPCs,...npcs].filter(Boolean).forEach(n=>{
+  if(n.id==="manager")return;
+  n.state="returnHomeAfterLunch";
+  n.route=routeNpcHome(n);n.routeIndex=0;n.timer=0;n.activity=null;n.activityTicket=false;
+ });
+}
+function updateLunchReturn(dt){
+ for(const n of [...ambientNPCs,...npcs].filter(Boolean)){
+  if(n.id==="manager"||n.state!=="returnHomeAfterLunch")continue;
+  if(!n.route||n.routeIndex>=n.route.length||moveNpcRoute(n,dt)){
+    n.x=n.homeX;n.y=n.homeY;n.state="work";n.timer=18+Math.random()*25;
+  }
+ }
+}
+
 function setLunchPositions(){
  ambientNPCs.forEach((n,i)=>{
    const s=KITCHEN_SPOTS[i%KITCHEN_SPOTS.length];
@@ -947,13 +990,7 @@ function setLunchPositions(){
  });
  mokasa=null;
 }
-function leaveLunch(){
- ambientNPCs.forEach(n=>{
-   n.state="return";n.route=buildRoute(n,false);n.routeIndex=0;n.timer=0;
- });
- const homes={pao:{x:250,y:620},zia:{x:685,y:815},don:{x:895,y:815}};
- npcs.forEach(n=>{if(homes[n.id]){n.x=homes[n.id].x;n.y=homes[n.id].y;n.seeking=false}});
-}
+function leaveLunch(){forceLunchReturn();}
 function updateLunchState(){ updateLunchMigration(1/60); }
 
 function beginEntranceWalk(){
@@ -967,6 +1004,8 @@ function beginEntranceWalk(){
 }
 
 function reset(){
+ Object.keys(npcRelations).forEach(k=>delete npcRelations[k]);
+
  introFreeWalk=false;entranceOpened=false;enteredStudio=false;window.__entranceDialogReady=false;
 const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio."),250));}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
@@ -1063,7 +1102,7 @@ function miniSuccess(i,label){
  $("#modal").classList.add("hidden");
  state.xp+=xp;state.solved++;state.stress=Math.max(0,state.stress-4);
  state.incident=Math.max(0,state.incident-({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]));
- toast(`${label} // TASK COMPLETE +${xp} XP`);
+ toast(`${label} // TASK COMPLETE +${xp} XP`);const srcNpc=[...ambientNPCs,...npcs].find(n=>n.name===t.source||n.id===t.source);if(srcNpc)changeRelation(srcNpc,6);
  renderTickets();updateTaskProgress();hud();updateTaskProgress();
 }
 
@@ -1240,7 +1279,17 @@ function tryStudioEntrance(){
  return true;
 }
 
+
+function hrAdvice(){
+ const hr=ambientNPCs.find(n=>n.id==="hr");
+ if(!hr||Math.hypot(player.x-hr.x,player.y-hr.y)>72)return false;
+ const tips=["Se hai tre cose insieme, parti da quella che blocca più persone.","Chiedi sempre quanto è urgente davvero.","Se una richiesta non è chiara, falla spiegare prima di correre.","Controlla il PDA: gli urgenti scadono più in fretta."];
+ changeRelation(hr,2);storyDialog("HR",tips[Math.floor(Math.random()*tips.length)]);return true;
+}
+
 function interact(){
+ if(hrAdvice())return;
+
  if(tryStudioEntrance())return;
 
  if(storyOpen){closeStory();return}
@@ -1381,6 +1430,8 @@ function monitorEntranceIntro(){
 }
 
 function update(dt) {
+ updateLunchReturn(dt);
+
  monitorEntranceIntro();
 
  if(state.phase==="shift"){
@@ -1593,7 +1644,7 @@ function printer(x,y){
 }
 function furniture(){
  // EDITORIA / BIM / HR / RENDERISTI: postazioni ordinate, non sovrapposte.
- desk(72,185,160); desk(338,185,125);
+ desk(72,185,160); desk(355,185,92); // HR: una sola postazione
  desk(70,405,135); desk(1280,205,135);
 
  // CENTRALE: due file pulite e distanziate.

@@ -185,3 +185,5 @@ body{background:#010201;overflow:hidden}
 .bootGame{display:grid;grid-template-columns:140px minmax(260px,1fr) 140px;gap:18px;align-items:center}
 .bootScreen{min-height:130px;padding:18px;background:#020705;border:3px solid #34463d;color:#9cff73;font:700 18px/1.7 monospace;box-shadow:inset 0 0 0 2px #101a15}
 @media(max-width:700px){.bootGame{grid-template-columns:1fr}.bootScreen{min-height:100px}}
+
+.relationshipFriend{color:#8cff7a}.relationshipEnemy{color:#ff6a64}

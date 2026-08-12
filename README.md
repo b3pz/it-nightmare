@@ -32,3 +32,9 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Unico percorso lavorativo: REPARTO IT <-> SERVER/CED.
 - Dopo una visita al SERVER torna automaticamente alla postazione.
 - Continua a ricevere e inoltrare ticket di qualsiasi reparto.
+
+## V5.3.3
+- Rientro post-pranzo obbligatorio alle postazioni.
+- Sistema relazioni AMICO / NEUTRALE / OSTILE con effetti su deadline e difficoltà.
+- Task completate migliorano il rapporto; task scadute lo peggiorano.
+- HR: un solo NPC, una sola postazione/PC, fisso nella stanza e con consigli utili.
