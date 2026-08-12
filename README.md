@@ -139,3 +139,74 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Result Popup 2.0: ENTER/E/click/auto-close 5.2s.
 - Minigiochi ridimensionati e griglia responsive; resta attiva la regola 3 errori = intervento fallito.
 - Pressione/stress più dinamici durante il turno.
+
+## V9.1 — ANIMATED HOME
+- Fix dell'overlay generico `Script error.`: gli errori reali restano visibili, quelli generici cross-origin non bloccano il gioco.
+- Nuova home animata in HTML/CSS: facciata dello studio, ingresso vetrato, porte scorrevoli, luci interne, NPC, auto, marciapiede e strada.
+- Data reale letta dal dispositivo/browser; l'orario narrativo rimane 08:58.
+- `ENTER`, `E` o click avviano la giornata.
+- Transizione animata home -> setup/gioco.
+- Credito visibile: `CREATO E SVILUPPATO DA B3pZ`.
+
+## V9.1.1 — STARTUP HOTFIX
+- Corretto il crash totale all'avvio: `V9_MEETINGS` veniva letto durante la creazione di `obstacles` prima della sua inizializzazione.
+- `V9_MEETINGS` viene ora dichiarato prima delle collisioni delle sale meeting.
+- Rimossi i listener JavaScript di errore duplicati che trasformavano gli errori reali nel generico `Script error.`.
+- Aggiunto startup self-test per meeting config, obstacles, draw/update/reset.
+
+## V9.1.2
+- Gara IT Manager avviata subito dopo il saluto di Zia Ale.
+- Manager su punto valido di corridoio, path verso IT e fallback sicuro.
+- Corridoio continuo davanti alla cucina ripristinato.
+- Tavoli spostati fuori dalla fascia di transito.
+- Uscita cucina riallineata.
+- Ritorno NPC post-pranzo via porta cucina + path verso homeRoom.
+- Re-route automatico senza teleport per NPC che tardano a rientrare.
+
+## V9.1.3 — INTRO SEQUENCE HOTFIX
+- Sequenza corretta: fumetto 08:58 -> TELEFONO -> porta sbloccata -> E sulla porta -> Zia Ale -> ! IT Manager -> gara.
+- Durante entrambi i dialoghi iniziali la porta resta bloccata.
+- `beginEntranceWalk()` viene eseguito solo alla chiusura del dialogo TELEFONO.
+- Rimosso l'ingresso automatico al contatto con la soglia.
+- Rimosso il vecchio ramo di apertura porta basato solo sulla prossimità.
+- `E` chiude prima i dialoghi; solo a dialoghi chiusi può interagire con la porta.
+
+## V9.1.4 — NPC TRAFFIC HOTFIX
+- Gli NPC ora evitano anche gli altri NPC, non solo muri e arredi.
+- Corsie di uscita dedicate per Cucina, Stampanti e Segreteria.
+- Rientro post-pranzo scaglionato: gli NPC non partono tutti nello stesso frame.
+- Recovery anti-incastro a tre livelli: side-step, rebuild route, free-node recovery.
+- Nessun teleport diretto alla homeRoom.
+- Disattivato il vecchio `updateLunchReturn()` che forzava coordinate e confliggeva con il pathfinding.
+- Debug F2 mostra anche lo stato `TRAFFIC` per distinguere blocchi da muri e blocchi da altri NPC.
+
+
+# IT SHIFT V10.0.0
+
+Build di consolidamento.
+
+## Fix principali
+- Intro mattutina riscritta: telefonata -> porta -> ingresso fisico -> Zia Ale -> ! Manager -> gara.
+- Nessun teleport del player all'ingresso.
+- Nessun teleport dell'IT Manager all'avvio della gara.
+- Manager parte dalla propria posizione reale e usa il pathfinding.
+- Nuovo corridoio strutturale:
+  BAGNI | RIFUGIO DIGITALE
+  ========================
+            CUCINA
+- Cucina spostata più in basso e ingrandita; tavoli/sedute interamente dentro la stanza.
+- Bagni e Rifugio Digitale aprono direttamente sul corridoio.
+- Cucina e Stampanti aprono dal corridoio senza bloccarlo.
+- Corsie NPC riallineate al nuovo layout.
+- Betty: messaggi Support Bonus più evidenti.
+- Audit V10 per geometria, Centrale 12 PC, cucina senza PC e connettività dei nuovi passaggi.
+- Creato e sviluppato da B3pZ.
+
+## V10.1.0
+- World map estesa verso il basso: parete inferiore, marciapiede e strada visibili.
+- Ingresso esterno spostato sulla vera porta in basso.
+- Nuova stanza STAMPA 3D con due stampanti 3D e workstation.
+- Pranzo route-only: rimossi i teleport diretti degli NPC in cucina.
+- Gara IT Manager su route dedicata validata, senza fallback attraverso i muri.
+- Room labels rese più compatte per non coprire NPC e nomi.
+- Fine giornata con riepilogo e restart completo: RIPROVA SUBITO / NUOVA GIORNATA.

@@ -279,3 +279,96 @@ body{background:#010201;overflow:hidden}
 #studioEventHud.hidden{display:none}#studioEventHud b{display:block;color:#ffd65a;font:900 10px monospace;letter-spacing:1px}#studioEventHud span{display:block;color:#fff;font:700 9px/1.4 monospace;margin-top:4px}
 @media(max-width:720px){#missionBanner{top:14%;padding:15px;width:86vw}#missionBanner b{font-size:24px}#studioEventHud{left:6px;top:88px;width:220px}}
 \n/* ================= V9 — STUDIO CONSOLIDATION ================= */\n.v7Home{background:linear-gradient(#9eada6 0 48%,#d8d1b9 48% 62%,#272b29 62% 100%)!important;border:3px solid #63756c!important;overflow:hidden}\n.v7HomeWorld{position:absolute!important;inset:0!important;width:auto!important;height:auto!important;background:none!important}\n.v9Facade{position:absolute;right:5%;top:12%;width:51%;height:50%;background:#26322d;border:8px solid #35423c;box-shadow:12px 12px #1b211e}\n.v9Sign{position:absolute;left:20px;top:18px;color:#dbe4dd;font:700 12px monospace;letter-spacing:5px}.v9Glass{position:absolute;top:28%;width:20%;height:25%;background:#8aa6ae;border:7px solid #18211d;box-shadow:inset 0 0 0 3px #a8bec3}.v9Glass.g1{left:8%}.v9Glass.g2{left:39%}.v9Glass.g3{left:70%}.v9Entrance{position:absolute;left:42%;bottom:0;width:18%;height:36%;background:#49301f;border:7px solid #171d1a}.v9Entrance i{position:absolute;right:9px;top:48%;width:5px;height:5px;background:#e1c56e}.v9Sidewalk{position:absolute;right:0;left:50%;top:62%;height:13%;background:#c9c5b2;border-top:7px solid #e3dfc9;border-bottom:6px solid #8d8b7e}.v9Road{position:absolute;right:0;left:50%;top:75%;bottom:0;background:#272b29}.v9Road i{position:relative;display:inline-block;width:15%;height:5px;background:#d7d0aa;margin:10% 8%}.v9Tree{position:absolute;left:9%;bottom:5px;width:14px;height:45px;background:#6d5030}.v9Tree:before{content:"";position:absolute;width:50px;height:50px;border-radius:50%;background:#315f3e;left:-18px;top:-28px}.v9Bike{position:absolute;right:18%;bottom:9px;width:48px;height:20px;border-bottom:3px solid #3c4742}.v9Lamp{position:absolute;right:7%;bottom:0;width:6px;height:75px;background:#444f49}.v9Person{position:absolute;width:14px;height:26px;background:#55675d;top:67%;right:28%;box-shadow:0 10px #222}.v9Person:before{content:"";position:absolute;left:2px;top:-10px;width:10px;height:10px;background:#c99d7d}.v9Person.p2{right:38%;background:#6b5262}.v9Person.p3{right:12%;background:#536f8b}.v7HomeCard{z-index:5!important;background:rgba(5,12,9,.94)!important;box-shadow:12px 0 rgba(0,0,0,.25);width:45%!important}.b3pzCredit{margin-top:18px;padding-top:12px;border-top:1px solid #34463c;color:#7e9287;font:700 9px monospace;letter-spacing:2px}.b3pzCredit b{color:#b7ff4a}\n#rewardOverlay{background:rgba(1,5,3,.68)!important;backdrop-filter:blur(2px)}#rewardOverlay .rewardCard{width:min(560px,82vw)!important;padding:28px!important;border:3px solid #6b8275!important;box-shadow:10px 10px #000!important;background:linear-gradient(135deg,#07110b,#0b1811)!important}#rewardTitle{font-size:25px!important;letter-spacing:2px!important;margin-bottom:18px!important}#rewardRows{display:grid!important;gap:8px!important}#rewardRows>div{display:flex!important;align-items:center!important;gap:12px!important;padding:12px 14px!important;background:#0d1a12!important;border-left:4px solid #6ee7ff!important}#rewardRows span{display:grid;place-items:center;width:24px;height:24px;background:#173326;color:#b7ff4a;font-weight:900}#rewardRows b{color:#e8f0eb}#rewardContinue:after{content:"  ·  ENTER / E  ·  AUTO 5s";color:#81938a;font-size:8px}\n#modal section{width:min(760px,90vw)!important;max-height:78vh!important;overflow:auto!important}.miniGame{min-height:150px!important;max-height:42vh!important;overflow:auto!important;padding:16px!important}.v7MiniGrid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))!important;align-items:stretch!important}.processRow,.fileRow{width:auto!important;min-width:0!important;overflow:hidden}.processRow span,.processRow i{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pixelTaskHead h2{font-size:clamp(18px,3vw,25px)!important}\n@media(max-width:700px){.v7HomeCard{width:100%!important;height:48%!important;top:auto!important;bottom:0!important}.v9Facade{left:6%;right:6%;width:auto;height:42%;top:4%}.v9Sidewalk,.v9Road{left:0}.v9Person{top:45%}#rewardOverlay .rewardCard{width:84vw!important;padding:18px!important}.miniGame{max-height:36vh!important}.v7HomeCard h1{font-size:42px!important}}\n
+/* =============================================================
+   V9.1 — ANIMATED STUDIO HOME
+   ============================================================= */
+#boot{background:#08100c;overflow:hidden}
+.v91Home{position:relative;width:min(1240px,96vw);height:min(730px,90vh);margin:auto;overflow:hidden;border:3px solid #53675b;box-shadow:14px 14px #000;background:#1b2620;image-rendering:pixelated}
+.v91Scene{position:absolute;inset:0;background:#a9b8a8;overflow:hidden}
+.v91SkyGlow{position:absolute;left:0;right:0;top:0;height:34%;background:linear-gradient(#849ca0,#d7b27e);animation:v91Sky 7s ease-in-out infinite alternate}
+@keyframes v91Sky{from{filter:brightness(.92)}to{filter:brightness(1.08)}}
+
+.v91Facade{position:absolute;left:34%;right:4%;top:8%;height:62%;background:#334039;border:8px solid #18211c;box-shadow:10px 10px #111}
+.v91Sign{position:absolute;left:24px;top:17px;color:#d8dfd6;font:900 16px monospace;letter-spacing:4px}
+.v91Glass{position:absolute;top:72px;width:20%;height:32%;background:#7fa1ad;border:7px solid #17201c;box-shadow:inset 0 0 0 4px #9eb4b8}
+.v91Glass:after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 0 45%,#d4eef044 46% 53%,transparent 54%);animation:v91Glass 5s linear infinite}
+@keyframes v91Glass{from{transform:translateX(-100%)}to{transform:translateX(130%)}}
+.v91Glass.g1{left:6%}.v91Glass.g2{left:30%}.v91Glass.g3{right:6%}
+
+.v91Entrance{position:absolute;left:38%;bottom:0;width:22%;height:42%;background:#111a16;border:6px solid #1a211d;overflow:hidden}
+.v91DoorPanel{position:absolute;top:0;bottom:0;width:50%;background:#6d8a8f99;border:2px solid #aec1c2}
+.v91DoorPanel.left{left:0;transform-origin:left center;animation:v91DoorLeft 6s steps(8) infinite}
+.v91DoorPanel.right{right:0;transform-origin:right center;animation:v91DoorRight 6s steps(8) infinite}
+@keyframes v91DoorLeft{0%,25%,70%,100%{transform:translateX(0)}35%,60%{transform:translateX(-78%)}}
+@keyframes v91DoorRight{0%,25%,70%,100%{transform:translateX(0)}35%,60%{transform:translateX(78%)}}
+.v91LobbyGlow{position:absolute;inset:0;background:#d9bd7c33;animation:v91Lobby 3s ease-in-out infinite alternate}
+@keyframes v91Lobby{to{background:#ffd27a55}}
+
+.v91InteriorDesk{position:absolute;bottom:13%;width:18%;height:10%;background:#6d4428;border-top:5px solid #8e5d34}
+.v91InteriorDesk:before,.v91InteriorDesk:after{content:"";position:absolute;top:-23px;width:28px;height:20px;background:#5c95a7;border:4px solid #13201b}
+.v91InteriorDesk:before{left:16%}.v91InteriorDesk:after{right:16%}
+.v91InteriorDesk.d1{left:8%}.v91InteriorDesk.d2{right:8%}
+
+.v91Sidewalk{position:absolute;left:0;right:0;bottom:16%;height:18%;background:#c8c7b4;border-top:8px solid #eee8ce;border-bottom:7px solid #4d544e}
+.v91Road{position:absolute;left:0;right:0;bottom:0;height:16%;background:#242925}
+.v91Road span{position:absolute;top:48%;width:10%;height:5px;background:#e7ddab}
+.v91Road span:nth-child(1){left:42%}.v91Road span:nth-child(2){left:61%}.v91Road span:nth-child(3){left:80%}
+
+.v91Planter{position:absolute;left:6%;bottom:18%;width:34px;height:36px;background:#71492c}
+.v91Planter:before{content:"";position:absolute;width:52px;height:52px;border-radius:50%;background:#35694b;left:-9px;top:-38px;box-shadow:10px -8px #407957}
+.v91Bench{position:absolute;right:7%;bottom:28%;width:110px;height:14px;background:#735039;box-shadow:0 10px #4a3427}
+.v91Bike{position:absolute;right:19%;bottom:25%;width:48px;height:22px;border-bottom:3px solid #303833;opacity:.7}
+
+.v91Walker{position:absolute;bottom:22%;width:18px;height:30px;background:#4f655b;z-index:4}
+.v91Walker:before{content:"";position:absolute;left:3px;top:-10px;width:12px;height:10px;background:#c99b78}
+.v91Walker:after{content:"";position:absolute;left:2px;bottom:-7px;width:5px;height:8px;background:#242a27;box-shadow:9px 0 #242a27}
+.v91Walker.walker1{left:58%;animation:v91Walk1 8s linear infinite}
+.v91Walker.walker2{left:74%;background:#695466;animation:v91Walk2 10s linear 1.6s infinite}
+.v91Walker.walker3{left:46%;background:#4c5f79;animation:v91Walk3 12s linear 3s infinite}
+@keyframes v91Walk1{0%{transform:translateX(-160px)}52%{transform:translateX(120px)}70%,100%{transform:translateX(220px);opacity:0}}
+@keyframes v91Walk2{0%{transform:translateX(180px)}60%{transform:translateX(-80px)}80%,100%{transform:translateX(-150px);opacity:0}}
+@keyframes v91Walk3{0%{transform:translateX(-240px)}75%{transform:translateX(260px)}100%{transform:translateX(340px);opacity:0}}
+
+.v91Car{position:absolute;bottom:5%;left:-150px;width:120px;height:38px;background:#485d63;border-bottom:10px solid #17201d;animation:v91Car 15s linear infinite}
+.v91Car:before{content:"";position:absolute;left:20px;top:-18px;width:70px;height:22px;background:#6f8588}
+@keyframes v91Car{0%,15%{transform:translateX(0)}70%,100%{transform:translateX(1500px)}}
+
+.v91TitlePanel{position:absolute;left:4.5%;top:9%;bottom:7%;width:min(500px,42%);padding:34px;background:#07100cf2;border:4px solid #53675b;box-shadow:9px 9px #000;z-index:10;display:flex;flex-direction:column}
+.v91DateLine{color:#ffd466;font:900 11px monospace;letter-spacing:2px}
+.v91TitlePanel h1{font-size:clamp(58px,7vw,104px);line-height:.9;margin:12px 0 5px;color:#b7ff4a;letter-spacing:-5px}
+.v91Tagline{margin:34px 0 18px;font:700 15px/1.55 monospace;color:#edf3ed;max-width:390px}
+.v91Status{border-top:1px solid #3a4b40;padding-top:14px;color:#8fa294;font:700 9px monospace}
+.v91Credit{margin-top:auto;border-top:1px solid #3a4b40;padding-top:12px;color:#8fa294;font:700 9px monospace;letter-spacing:1px}
+.v91Credit b{color:#b7ff4a}
+.v91TitlePanel .mainbtn{align-self:flex-start;margin-top:10px}
+.v91Hint{margin-top:8px;color:#64776b;font:700 8px monospace}
+
+.v91Home.leaving .v91TitlePanel{animation:v91PanelOut .48s steps(6) forwards}
+.v91Home.leaving .v91Scene{animation:v91ZoomIn .58s ease-in forwards}
+@keyframes v91PanelOut{to{transform:translateX(-115%);opacity:0}}
+@keyframes v91ZoomIn{to{transform:scale(1.08);filter:brightness(1.18)}}
+
+@media(max-width:760px){
+ .v91Home{height:78vh}
+ .v91TitlePanel{left:4%;right:4%;top:6%;bottom:auto;width:auto;min-height:55%;padding:22px}
+ .v91TitlePanel h1{font-size:58px}
+ .v91Facade{left:5%;right:5%;top:45%;height:38%}
+ .v91Tagline{font-size:11px;margin:18px 0 12px}
+ .v91Walker{bottom:18%}
+}
+
+/* V10 — important Betty support feedback */
+#storyDialog.bettySupport{
+  border:3px solid #8fd36b;
+  box-shadow:0 0 0 4px rgba(143,211,107,.13),0 14px 45px rgba(0,0,0,.55);
+  max-width:980px;
+}
+#storyDialog.bettySupport #storyWho{
+  font-size:18px;letter-spacing:3px;color:#47793a;
+}
+#storyDialog.bettySupport #storyText{
+  font-size:22px;line-height:1.45;
+}
+#storyDialog.bettySupport #storyText::first-line{font-weight:800}
+
+#endGameOverlay{position:fixed;inset:0;z-index:999;background:#000c;display:flex;align-items:center;justify-content:center}#endGameOverlay.hidden{display:none}.endGameCard{width:min(620px,88vw);background:#09110d;border:3px solid #6f8b78;box-shadow:12px 12px #000;padding:26px}.endGameCard h2{font:900 30px monospace;color:#b7ff4a}.endGameActions{display:flex;gap:10px;margin-top:18px}#endGameStats{display:grid;grid-template-columns:1fr 1fr;gap:8px}#endGameStats>div{display:flex;justify-content:space-between;padding:10px;background:#0f1813;border-left:4px solid #5f8f77;font:700 11px monospace}.endGameActions button{padding:12px 16px;background:#14231a;color:#dce8df;border:2px solid #6d8c78;font:800 11px monospace}
