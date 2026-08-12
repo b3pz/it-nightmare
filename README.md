@@ -55,3 +55,7 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Corretto ReferenceError: Cannot access 'm' before initialization.
 - La variabile IT Manager viene ora inizializzata all'inizio di updateManager().
 - Nessuna modifica al gameplay della V5.3.5.
+
+## V5.3.7
+- Fix IT Manager bloccato in Segreteria: route ortogonale porta -> corridoio -> IT.
+- Fix crash `.room` su target/station mancanti con safeRoom/safePoint.
