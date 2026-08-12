@@ -13,12 +13,12 @@ window.addEventListener("error",ev=>{
  const msg=ev?.error?.message||ev?.message||"Errore JavaScript";
  const line=ev?.lineno?` // line ${ev.lineno}`:"";
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V5.3.8 // ${msg}${line}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V5.3.9 // ${msg}${line}`;box.classList.remove("hidden")}
 });
 window.addEventListener("unhandledrejection",ev=>{
  const msg=ev?.reason?.message||String(ev?.reason||"Promise rejection");
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V5.3.8 // ${msg}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V5.3.9 // ${msg}`;box.classList.remove("hidden")}
 });
 
 const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
@@ -214,7 +214,7 @@ function drawQuestion(category){
 const npcDefs=[
  {id:"pao",name:"PAO",role:"BIMER",x:250,y:620,tone:"mixed",shirt:"#536f8b",hunter:true},
  {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,tone:"good",shirt:"#765d78"},
- {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51",hunter:true},{id:"hr",name:"HR",role:"PEOPLE",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,state:"outside"}];
+ {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51",hunter:true},{id:"hr",name:"BETTY",role:"HR",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:92,state:"outside"}];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
 
 const npcRelations={};
@@ -239,7 +239,7 @@ function relationOpening(n){
 
 let ambientNPCs=[];
 function spawnAmbient(){
- const seats=stations.filter(s=>["HP Z","MAC"].includes(s.type));
+ const seats=stations.filter(s=>["HP Z","MAC"].includes(s.type)&&s.room!=="HR");
  ambientNPCs=seats.map((s,i)=>({
    name:ambientNames[i%ambientNames.length],homeX:s.x,homeY:s.y+24,x:s.x,y:s.y+24,
    state:"work",timer:12+Math.random()*32,speed:52,shirt:["#4f6259","#665747","#4d596b","#6b4e57"][i%4],
@@ -320,8 +320,25 @@ function moveNpcRoute(n,dt){
 
  return n.routeIndex>=n.route.length;
 }
+
+const MEETING_ROOMS=[
+ {room:"SALA MEET",x:925,y:215,spreadX:70,spreadY:55,weight:5},
+ {room:"SPAZIO A",x:1030,y:480,spreadX:105,spreadY:60,weight:4},
+ {room:"SALA MEET CAPO",x:1395,y:535,spreadX:90,spreadY:55,weight:2}
+];
+function randomMeetingDestination(){
+ const pool=MEETING_ROOMS.flatMap(r=>Array(r.weight).fill(r));
+ const r=pool[Math.floor(Math.random()*pool.length)];
+ return {x:r.x+(Math.random()-.5)*r.spreadX,y:r.y+(Math.random()-.5)*r.spreadY,room:r.room};
+}
+function meetingStationFor(room){
+ let p=stations.find(s=>s.room===room);
+ if(p)return p;
+ const r=MEETING_ROOMS.find(x=>x.room===room)||MEETING_ROOMS[0];
+ return {id:"AV-"+room,room,type:"MEETING AV",x:r.x,y:r.y};
+}
 function npcDestinationForActivity(n,activity){
- if(activity==="meeting")return {x:925+Math.random()*55,y:215+Math.random()*55,room:"SALA MEET"};
+ if(activity==="meeting")return randomMeetingDestination();
  if(activity==="printer")return {x:1240+Math.random()*65,y:790+Math.random()*25,room:"STAMPANTI"};
  if(activity==="gallery")return {x:1080+Math.random()*80,y:650+Math.random()*30,room:"RIFUGIO DIGITALE"};
  if(activity==="coffee")return {x:920+Math.random()*110,y:810+Math.random()*25,room:"CUCINA"};
@@ -338,7 +355,7 @@ function routeViaHub(n,target){
  else if(left)route.push({x:250,y:n.y},{x:250,y:690},{x:350,y:705});
  else route.push({x:n.x,y:700});
  route.push({x:760,y:705},{x:900,y:705});
- if(target.room==="SALA MEET")route.push({x:900,y:300},{x:target.x,y:target.y});
+ if(["SALA MEET","SPAZIO A","SALA MEET CAPO"].includes(target.room))route.push({x:900,y:300},{x:target.x,y:target.y});
  else if(target.room==="RIFUGIO DIGITALE")route.push({x:1020,y:705},{x:target.x,y:target.y});
  else if(target.room==="STAMPANTI")route.push({x:1100,y:705},{x:1200,y:760},{x:target.x,y:target.y});
  else if(target.room==="BAGNI")route.push({x:850,y:705},{x:850,y:650},{x:target.x,y:target.y});
@@ -349,7 +366,7 @@ function generateNpcActivityTicket(n){
  if(n.activityTicket||tickets.length>=difficultyConfig[difficulty].maxTickets||isLunch())return;
  let p,type,level="LOW";
  if(n.activity==="meeting"){
-   p=stations.find(s=>s.room==="SALA MEET");type=["AV","CABLE"][Math.floor(Math.random()*2)];level=Math.random()<.35?"MEDIUM":"LOW";
+   p=meetingStationFor(n.target?.room||"SALA MEET");type=["AV","CABLE"][Math.floor(Math.random()*2)];level=n.target?.room==="SALA MEET CAPO"?(Math.random()<.45?"HIGH":"MEDIUM"):(Math.random()<.35?"MEDIUM":"LOW");
  }else if(n.activity==="printer"){
    p=stations.find(s=>s.room==="STAMPANTI");type=Math.random()<.5?"TONER":"PROCESS";
  }else if(n.activity==="gallery"){
@@ -410,7 +427,7 @@ function updateAmbient(dt){
      ambientCorridorEncounter(n);
      if(moveNpcRoute(n,dt)){n.state="activity";n.timer=10+Math.random()*14}
    }else if(n.state==="activity"){
-     if(n.activity!=="bathroom"&&n.activity!=="coffee"&&n.timer<7&&!n.activityTicket&&Math.random()<.05)generateNpcActivityTicket(n);
+     if(n.activity==="meeting"&&n.timer<8&&!n.activityTicket&&Math.random()<.27)generateNpcActivityTicket(n); else if(n.activity!=="meeting"&&n.activity!=="bathroom"&&n.activity!=="coffee"&&n.timer<7&&!n.activityTicket&&Math.random()<.05)generateNpcActivityTicket(n);
      if(n.timer<=0){
        n.state="return";n.route=buildRoute(n,false);n.routeIndex=0;
      }
@@ -658,7 +675,7 @@ function npcTalk(n){
   const r=Math.random(); if(r<.45){state.stress=Math.max(0,state.stress-6);desc="Un buon consiglio al momento giusto. STRESS -6";} else if(r<.8){state.xp+=12;desc="Ti suggerisce come organizzare le priorità. XP +12";} else {state.rep=Math.min(5,state.rep+1);desc="Una parola buona gira per lo studio. REPUTAZIONE +1";}
  }else if(n.id==="manager"){
   title="DISPATCH";good=false;
-  const levels=state.min>990?["HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];const lv=levels[Math.floor(Math.random()*levels.length)];newTicket(lv,{source:"IT MANAGER"});desc=`«Mi hanno chiamato. Prendi questo: ${lv}.»`;
+  const levels=state.min>990?["HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];const wanted=levels[Math.floor(Math.random()*levels.length)];const lv=managerDispatchTicket(wanted);desc=lv?`«Mi hanno chiamato. Ti ho girato un ${lv}: controlla il PDA.»`:"«Mi hanno chiamato, ma hai già troppi ticket aperti. Chiudine uno.»";
    }else if(n.id==="mokasa"&&n.court){
   title="RICHIESTA DIREZIONE // EXTREME";good=false;
   const ok=Math.random()<.38;
@@ -857,11 +874,24 @@ function managerRouteTo(target){
  }
  return route;
 }
+function managerDispatchTicket(level=null){
+ if(tickets.length>=difficultyConfig[difficulty].maxTickets)return false;
+ const before=tickets.length;
+ const levels=state.min>990?["MEDIUM","HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];
+ const lv=level||levels[Math.floor(Math.random()*levels.length)];
+ newTicket(lv,{source:"IT MANAGER"});
+ const created=tickets.length>before;
+ if(created){renderTickets();refreshPDA();updateTaskProgress()}
+ return created?lv:false;
+}
 function updateManager(dt){
  const m=npcs.find(n=>n.id==="manager");if(!m)return;
 
  if(m.state==="managerRace"){
-   if(moveManagerRoute(m,dt)){
+   const normalSpeed=m.speed;m.speed=m.raceSpeed||92;
+   const raceArrived=moveManagerRoute(m,dt);
+   m.speed=normalSpeed;
+   if(raceArrived){
      m.x=190;m.y=640;
      m.state="desk";
      // Se il player non ha ancora avviato il PC, il Manager ha vinto la corsa.
@@ -903,29 +933,32 @@ function updateManager(dt){
  if(m.state==="managerReturnIT"){
    if(moveManagerRoute(m,dt)){m.x=190;m.y=640;m.state="desk";m.moveTimer=40+Math.random()*65}
  }
- if(introStage==="done"&&state.min>560&&Math.random()<.00045&&tickets.length<difficultyConfig[difficulty].maxTickets){
-   const levels=state.min>990?["MEDIUM","HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];
-   const level=levels[Math.floor(Math.random()*levels.length)];newTicket(level,{source:"IT MANAGER"});
-   if(level==="HIGH"||level==="CRITICAL")storyDialog("IT MANAGER",`Mi hanno appena chiamato dalla direzione. C'è un ${level==="CRITICAL"?"problema critico":"problema urgente"}. Prendilo tu.`);
+ if(introStage==="done"&&state.min>560&&Math.random()<.00045){
+   const level=managerDispatchTicket();
+   if(level)storyDialog("IT MANAGER",`Mi hanno chiamato: ti ho girato un ticket ${level}. Controlla il PDA.`);
  }
 }
 function lunchRouteFor(n,i){
- const target=KITCHEN_SPOTS[i%KITCHEN_SPOTS.length];
- // Route costruita dalla posizione corrente: uscita stanza -> dorsale larga -> cucina.
+ const target=lunchSpotFor(n,i);
+ if(n.id==="manager"||n.id==="hr")return [target];
  const route=[];
- if(n.y<300){ route.push({x:n.x,y:300}); }
- else if(n.y<690){ route.push({x:n.x,y:690}); }
- if(n.x<760) route.push({x:700,y:705},{x:790,y:705});
- else if(n.x>1180) route.push({x:1200,y:705},{x:1080,y:705});
- route.push({x:900,y:705},{x:900,y:760},target);
+ if(n.y<300)route.push({x:n.x,y:300});
+ else if(n.y<690)route.push({x:n.x,y:690});
+ if(n.x<760)route.push({x:700,y:705},{x:790,y:705});
+ else if(n.x>1180)route.push({x:1200,y:705},{x:1080,y:705});
+ route.push(target);
  return route;
 }
-
 function beginLunchMigration(){
  if(dayFlags.lunchMigration)return;dayFlags.lunchMigration=true;
  ambientNPCs.forEach((n,i)=>{n.state="lunchTravel";n.route=lunchRouteFor(n,i);n.routeIndex=0;n.timer=0});
- npcs.forEach((n,i)=>{if(n.id==="manager"){n.homeX=190;n.homeY=640} n.state="specialLunchTravel";n.route=lunchRouteFor(n,ambientNPCs.length+i);n.routeIndex=0;n.speed=n.speed||55;n.seeking=false});
- phoneMessage("STUDIO","PAUSA PRANZO // lo studio si sta svuotando.");
+ npcs.forEach((n,i)=>{
+   n.seeking=false;
+   if(n.id==="manager"){n.x=190;n.y=640;n.state="desk";return}
+   if(n.id==="hr"){n.x=405;n.y=205;n.state="idle";return}
+   n.state="specialLunchTravel";n.route=lunchRouteFor(n,ambientNPCs.length+i);n.routeIndex=0;n.speed=n.speed||55;
+ });
+ phoneMessage("STUDIO","PAUSA PRANZO // qualcuno va in cucina, altri si prendono una pausa in giro.");
 }
 function updateLunchMigration(dt){
  if(state.min>=770&&state.min<840)beginLunchMigration();
@@ -936,9 +969,14 @@ function updateLunchMigration(dt){
  if(state.min>=840&&!dayFlags.lunchReturn){
    dayFlags.lunchReturn=true;
    ambientNPCs.forEach(n=>{n.state="return";n.route=buildRoute(n,false);n.routeIndex=0});
-   npcs.forEach(n=>{const homes={pao:{x:250,y:620},zia:{x:685,y:815},don:{x:895,y:815},manager:{x:190,y:640},hr:{x:405,y:205}};const h=homes[n.id];if(h){n.route=buildRoute({homeX:h.x,homeY:h.y},false);n.route.push(h);n.routeIndex=0;n.state="specialReturn"}});
+   npcs.forEach(n=>{
+     if(n.id==="manager"){n.x=190;n.y=640;n.state="desk";return}
+     if(n.id==="hr"){n.x=405;n.y=205;n.state="idle";return}
+     const homes={pao:{x:250,y:620},zia:{x:685,y:815},don:{x:895,y:815}};
+     const h=homes[n.id];if(h){n.route=buildRoute({homeX:h.x,homeY:h.y},false);n.route.push(h);n.routeIndex=0;n.state="specialReturn"}
+   });
  }
- npcs.forEach(n=>{if(n.state==="specialReturn"&&moveNpcRoute(n,dt))n.state=n.id==="manager"?"desk":"idle"});
+ npcs.forEach(n=>{if(n.state==="specialReturn"&&moveNpcRoute(n,dt))n.state="idle"});
 }
 function randomizeMiniLayout(){
  const box=document.querySelector('.miniGame');if(!box)return;
@@ -952,12 +990,21 @@ function randomizeMiniLayout(){
    V4 — LIVING STUDIO / CAMERA / LORE
    ============================================================= */
 const LUNCH_START=13*60,LUNCH_END=14*60,LATE_START=17*60+30;
-const KITCHEN_SPOTS=[
- {x:840,y:790},{x:875,y:790},{x:910,y:790},{x:945,y:790},
- {x:980,y:790},{x:1015,y:790},{x:850,y:825},{x:890,y:825},
- {x:930,y:825},{x:970,y:825},{x:1010,y:825},{x:1045,y:825},
- {x:1080,y:805},{x:820,y:825},{x:1060,y:835},{x:880,y:845}
+const LUNCH_SPOTS=[
+ // cucina: pochi posti reali
+ {x:875,y:790},{x:930,y:790},{x:985,y:790},{x:1040,y:790},
+ {x:875,y:830},{x:950,y:830},{x:1025,y:830},
+ // pausa distribuita nei corridoi / rifugio digitale
+ {x:780,y:745},{x:820,y:745},{x:1080,y:745},{x:1120,y:745},
+ {x:1080,y:650},{x:1125,y:650},{x:1170,y:650},
+ {x:760,y:690},{x:805,y:690},{x:1160,y:705},{x:1200,y:705}
 ];
+function lunchSpotFor(n,i){
+ if(n.id==="manager")return {x:190,y:640};
+ if(n.id==="hr")return {x:405,y:205};
+ if(n.id==="zia")return {x:835,y:790};
+ return LUNCH_SPOTS[i%LUNCH_SPOTS.length];
+}
 let dayFlags={},lunchMode=false,fullMap=false;
 let introFreeWalk=false,entranceOpened=false,enteredStudio=false;
 let camera={x:0,y:0,zoom:1.68};
@@ -1061,11 +1108,11 @@ function updateLunchReturn(dt){
 
 function setLunchPositions(){
  ambientNPCs.forEach((n,i)=>{
-   const s=KITCHEN_SPOTS[i%KITCHEN_SPOTS.length];
+   const s=lunchSpotFor(n,i);
    n.x=s.x;n.y=s.y;n.state="lunch";n.route=[];n.routeIndex=0;n.timer=9999;
  });
  npcs.forEach((n,i)=>{
-   const s=KITCHEN_SPOTS[(ambientNPCs.length+i)%KITCHEN_SPOTS.length];
+   const s=lunchSpotFor(n,ambientNPCs.length+i);
    n.x=s.x;n.y=s.y;n.seeking=false;
  });
  mokasa=null;
@@ -1363,10 +1410,10 @@ function tryStudioEntrance(){
 
 
 function hrAdvice(){
- const hr=ambientNPCs.find(n=>n.id==="hr");
+ const hr=npcs.find(n=>n.id==="hr");
  if(!hr||Math.hypot(player.x-hr.x,player.y-hr.y)>72)return false;
  const tips=["Se hai tre cose insieme, parti da quella che blocca più persone.","Chiedi sempre quanto è urgente davvero.","Se una richiesta non è chiara, falla spiegare prima di correre.","Controlla il PDA: gli urgenti scadono più in fretta."];
- changeRelation(hr,2);storyDialog("HR",tips[Math.floor(Math.random()*tips.length)]);return true;
+ changeRelation(hr,2);storyDialog("BETTY",tips[Math.floor(Math.random()*tips.length)]);return true;
 }
 
 function interact(){

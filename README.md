@@ -66,3 +66,11 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Route separate: Segreteria -> IT, IT -> SERVER, SERVER -> IT.
 - Ticket ignorati in sicurezza se manca una postazione valida.
 - Error reporter mobile mostra messaggio/linea reale invece del generico Script error.
+
+## V5.3.9 — NPC ROUTINES & DISPATCH
+- IT Manager più rapido solo nella corsa iniziale; velocità normale dopo.
+- Dispatch IT Manager crea e verifica realmente il ticket/PDA.
+- HR: Betty unica NPC, una sola postazione, esclusa dagli ambient NPC.
+- Pranzo distribuito: cucina meno affollata; Betty resta HR e Manager resta IT.
+- Meeting NPC in Sala Meet, Spazio A e Sala Meet Capo.
+- I meeting possono generare ticket AV/CABLE nella sala reale; Sala Meet Capo più severa.
