@@ -9,7 +9,7 @@ const difficultyConfig={
 let difficulty="normal";
 
 const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
-const boot=["[BOOT] ARCHEA IT SERVICES","[OK] Domain reachable","[OK] Autodesk licensing","[OK] File servers","[WARN] Orphan session detected","[USER] ARCH-VOID","[LAST LOGIN] 19:03"];
+const boot=["[BOOT] IT SUPPORT // DAILY SHIFT","[OK] Workstations inventory","[OK] Meeting rooms","[OK] File services","[OK] Ticket queue","[TIME] 08:58","[STATUS] Ready for another day."];
 let bl=0;(function b(){if(bl<boot.length){$("#bootlog").innerHTML+=boot[bl++]+"<br>";setTimeout(b,280)}else $("#toLore").classList.remove("hidden")})();$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{difficulty=$("#difficulty")?.value||"normal";show("game");reset();requestAnimationFrame(loop)};
 
 const rooms=[
@@ -195,8 +195,7 @@ function drawQuestion(category){
 const npcDefs=[
  {id:"pao",name:"PAO",role:"BIMER",x:250,y:620,tone:"mixed",shirt:"#536f8b",hunter:true},
  {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,tone:"good",shirt:"#765d78"},
- {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51",hunter:true}
-];
+ {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51",hunter:true},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,state:"outside"}];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
 let ambientNPCs=[];
 function spawnAmbient(){
@@ -320,6 +319,15 @@ function generateNpcActivityTicket(n){
  n.exclaimUntil=performance.now()+1400;
  renderTickets();refreshPDA();
 }
+function ambientCorridorEncounter(n){
+ if(encounterLock||storyOpen||isLunch()||introStage!=="done")return;
+ if((n.lastEncounter??-999)+75>state.min)return;
+ if(Math.hypot(player.x-n.x,player.y-n.y)>58)return;
+ if(Math.random()>.018)return;
+ n.lastEncounter=state.min;encounterLock=true;n.exclaimUntil=performance.now()+850;
+ const ov=$("#encounterOverlay");if(ov){$("#encounterName").textContent=n.name;ov.classList.add("on")}
+ setTimeout(()=>{if(ov)ov.classList.remove("on");storyDialog(n.name,"Ah, già che ti vedo... ho una cosa che non funziona.",()=>{newTicket(Math.random()<.72?"LOW":"MEDIUM",{source:n.name});encounterLock=false})},850);
+}
 function updateAmbient(dt){
  if(isLunch())return; // lunch positions are controlled absolutely by updateLunchState()
  for(const n of ambientNPCs){
@@ -331,6 +339,7 @@ function updateAmbient(dt){
      n.target=npcDestinationForActivity(n,n.activity);
      n.route=routeViaHub(n,n.target);n.routeIndex=0;n.state="activityTravel";n.activityTicket=false;
    }else if(n.state==="activityTravel"){
+     ambientCorridorEncounter(n);
      if(moveNpcRoute(n,dt)){n.state="activity";n.timer=10+Math.random()*14}
    }else if(n.state==="activity"){
      if(n.timer<7&&!n.activityTicket&&Math.random()<.05)generateNpcActivityTicket(n);
@@ -478,12 +487,12 @@ function nearestNPC(){
 }
 function spawnMokasa(){
  if(Math.random()<.28){
-   mokasa={id:"mokasa",name:"MOKASA",role:"SALA CORTE // EXTREME",x:1450,y:570,tone:"bad",shirt:"#75483d",life:95,court:true};
-   phoneMessage("DIREZIONE","MoKasa è in Sala Corte. Se entri, preparati.");
+   mokasa={id:"mokasa",name:"CAPO",role:"SALA CORTE // EXTREME",x:1450,y:570,tone:"bad",shirt:"#75483d",life:95,court:true};
+   phoneMessage("DIREZIONE","Il CAPO è in Sala Corte. Ha una richiesta urgente.");
  }else{
    const candidates=stations.filter(s=>s.room!=="SERVER");
    const s=candidates[Math.floor(Math.random()*candidates.length)];
-   mokasa={id:"mokasa",name:"MOKASA",role:"CAPO",x:s.x+22,y:s.y+26,tone:"bad",shirt:"#75483d",life:45,court:false};
+   mokasa={id:"mokasa",name:"CAPO",role:"CAPO",x:s.x+22,y:s.y+26,tone:"bad",shirt:"#75483d",life:45,court:false};
  }
 }
 function autoCloseModal(ms=2200){
@@ -566,6 +575,9 @@ function npcTalk(n){
  }else if(n.id==="don"){
   title=["CAFFÈ","DRITTA","PAUSA TATTICA"][Math.floor(Math.random()*3)];
   state.stress=Math.max(0,state.stress-8);state.xp+=6;desc="STRESS -8 · XP +6";
+ }else if(n.id==="manager"){
+  title="DISPATCH";good=false;
+  const levels=state.min>990?["HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];const lv=levels[Math.floor(Math.random()*levels.length)];newTicket(lv,{source:"IT MANAGER"});desc=`«Mi hanno chiamato. Prendi questo: ${lv}.»`;
    }else if(n.id==="mokasa"&&n.court){
   title="RICHIESTA DIREZIONE // EXTREME";good=false;
   const ok=Math.random()<.38;
@@ -648,6 +660,83 @@ function setupCompactHUD(){
  if(btn)btn.onclick=()=>togglePDA($("#pda").classList.contains("hidden"));
 }
 
+
+/* =============================================================
+   V5 — A DAY IN IT SUPPORT
+   ============================================================= */
+let introStage="outside",shiftStarted=false,managerRaceDone=false,managerPenaltyDone=false;
+let storyOpen=false,storyCallback=null;
+const IT_PC={x:140,y:660,room:"IT"};
+const OUTSIDE_ZONE={x:520,y:855,w:185,h:45};
+walkZones.push(OUTSIDE_ZONE,{x:610,y:825,w:95,h:75});
+function storyDialog(who,text,cb=null){
+ storyOpen=true;storyCallback=cb;keys={};
+ const b=$("#storyDialog");if(!b)return;
+ $("#storyWho").textContent=who;$("#storyText").textContent=text;b.classList.remove("hidden");
+}
+function closeStory(){if(!storyOpen)return;storyOpen=false;$("#storyDialog")?.classList.add("hidden");const cb=storyCallback;storyCallback=null;if(cb)cb()}
+function startShiftFromEntrance(){
+ if(shiftStarted)return;shiftStarted=true;state.min=540;introStage="reachPC";
+ storyDialog("ZIA ALE","Buongiorno! Il manager è già in arrivo. Vai ad accendere la tua postazione in IT.");
+ phoneMessage("IT TASK","PRIMA MISSIONE // raggiungi IT e avvia la tua workstation prima del manager.");
+ const m=npcs.find(n=>n.id==="manager");if(m){m.state="managerTravel";m.route=[{x:650,y:760},{x:500,y:705},{x:350,y:705},{x:250,y:675},{x:190,y:640}];m.routeIndex=0}
+}
+function bootWorkstation(){
+ if(introStage!=="reachPC")return false;
+ if(Math.hypot(player.x-IT_PC.x,player.y-IT_PC.y)>78)return false;
+ const won=!managerPenaltyDone;
+ storyDialog("WORKSTATION","POWER ON → BIOS → NETWORK → LOGIN",()=>{
+   introStage="done";managerRaceDone=true;
+   if(won){state.xp+=100;state.rep=Math.min(5,state.rep+1);toast("POSTAZIONE PRONTA PRIMA DEL MANAGER // +100 XP")}
+   else toast("POSTAZIONE OPERATIVA // TURNO AVVIATO");
+   newTicket("LOW");
+ });
+ return true;
+}
+function updateManager(dt){
+ const m=npcs.find(n=>n.id==="manager");if(!m)return;
+ if(m.state==="managerTravel"){
+   if(moveNpcRoute(m,dt)){m.state="desk";m.x=190;m.y=640;
+     if(introStage==="reachPC"&&!managerRaceDone&&!managerPenaltyDone){managerPenaltyDone=true;state.stress+=4;state.rep=Math.max(0,state.rep-1);storyDialog("IT MANAGER","Buongiorno... il PC magari lo accendiamo? Ti stanno già cercando.")}
+   }
+ }
+ if(introStage==="done"&&state.min>560&&Math.random()<.00045&&tickets.length<difficultyConfig[difficulty].maxTickets){
+   const levels=state.min>990?["MEDIUM","HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];
+   const level=levels[Math.floor(Math.random()*levels.length)];newTicket(level,{source:"IT MANAGER"});
+   if(level==="HIGH"||level==="CRITICAL")storyDialog("IT MANAGER",`Mi hanno appena chiamato dalla direzione. C'è un ${level==="CRITICAL"?"problema critico":"problema urgente"}. Prendilo tu.`);
+ }
+}
+function lunchRouteFor(n,i){
+ const target=KITCHEN_SPOTS[i%KITCHEN_SPOTS.length];
+ const route=buildRoute(n,true);route.push(target);return route;
+}
+function beginLunchMigration(){
+ if(dayFlags.lunchMigration)return;dayFlags.lunchMigration=true;
+ ambientNPCs.forEach((n,i)=>{n.state="lunchTravel";n.route=lunchRouteFor(n,i);n.routeIndex=0;n.timer=0});
+ npcs.forEach((n,i)=>{if(n.id==="manager"){n.homeX=190;n.homeY=640} n.state="specialLunchTravel";n.route=buildRoute({homeX:n.x,homeY:n.y},true);n.route.push(KITCHEN_SPOTS[(ambientNPCs.length+i)%KITCHEN_SPOTS.length]);n.routeIndex=0;n.speed=n.speed||55;n.seeking=false});
+ phoneMessage("STUDIO","PAUSA PRANZO // lo studio si sta svuotando.");
+}
+function updateLunchMigration(dt){
+ if(state.min>=770&&state.min<840)beginLunchMigration();
+ if(state.min>=770&&state.min<840){
+   ambientNPCs.forEach(n=>{if(n.state==="lunchTravel"&&moveNpcRoute(n,dt))n.state="lunch"});
+   npcs.forEach(n=>{if(n.state==="specialLunchTravel"&&moveNpcRoute(n,dt))n.state="lunch"});
+ }
+ if(state.min>=840&&!dayFlags.lunchReturn){
+   dayFlags.lunchReturn=true;
+   ambientNPCs.forEach(n=>{n.state="return";n.route=buildRoute(n,false);n.routeIndex=0});
+   npcs.forEach(n=>{const homes={pao:{x:250,y:620},zia:{x:685,y:815},don:{x:895,y:815},manager:{x:190,y:640}};const h=homes[n.id];if(h){n.route=buildRoute({homeX:h.x,homeY:h.y},false);n.route.push(h);n.routeIndex=0;n.state="specialReturn"}});
+ }
+ npcs.forEach(n=>{if(n.state==="specialReturn"&&moveNpcRoute(n,dt))n.state=n.id==="manager"?"desk":"idle"});
+}
+function randomizeMiniLayout(){
+ const box=document.querySelector('.miniGame');if(!box)return;
+ const children=[...box.children].filter(x=>x.tagName==='BUTTON'||x.classList.contains('pixelItem'));
+ children.forEach(x=>x.style.order=Math.floor(Math.random()*50));
+ const cols=2+Math.floor(Math.random()*3);box.style.gridTemplateColumns=`repeat(${cols},minmax(72px,1fr))`;
+ box.classList.add('v5Random');
+}
+
 /* =============================================================
    V4 — LIVING STUDIO / CAMERA / LORE
    ============================================================= */
@@ -676,14 +765,13 @@ function narrativeOnce(key,sender,text){
  phoneMessage(sender,text);
 }
 function updateNarrative(){
- if(!state)return;
- if(state.min>=690)narrativeOnce("1130","PAO","Da stamattina un paio di monitor fanno cose strane. Magari è solo corrente.");
- if(state.min>=775)narrativeOnce("1255","ZIA ALE","Tra poco andiamo tutti a pranzo. Se vuoi un caffè passa ora.");
- if(state.min>=795)narrativeOnce("1315","DON","Sei rimasto su? Se trovi qualcosa acceso fuori dalla cucina... non siamo stati noi.");
- if(state.min>=845)narrativeOnce("1405","ZIA ALE","Siamo rientrati. Quel monitor vicino al corridoio era acceso anche durante pranzo?");
- if(state.min>=1005)narrativeOnce("1645","PAO","Ho trovato una sessione che non riconosco. Utente: 00. Tienila d'occhio.");
- if(state.min>=1065)narrativeOnce("1745","DON","Se vedi scritto ARC_ o VOID da qualche parte, chiamami. Non sto scherzando.");
- if(state.min>=1122)narrativeOnce("1842","SYSTEM","UNKNOWN SESSION // source: INTERNAL");
+ if(!state||!shiftStarted)return;
+ if(state.min>=615)narrativeOnce("1015","ZIA ALE","La Sala Meet tra poco è occupata. Se passa qualcuno di corsa, sai già perché.");
+ if(state.min>=705)narrativeOnce("1145","IT MANAGER","Occhio ai ticket della direzione: se arrivano, hanno priorità.");
+ if(state.min>=765)narrativeOnce("1245","DON","Io tra poco vado a pranzo. Se vuoi fumare, questo è il momento.");
+ if(state.min>=855)narrativeOnce("1415","ZIA ALE","Bentornato. Il pomeriggio di solito è peggio della mattina.");
+ if(state.min>=1005)narrativeOnce("1645","IT MANAGER","Da ora in poi preparati ai classici: prima di andare via avrei una cosina...");
+ if(state.min>=1080)narrativeOnce("1800","CAPO","Prima di andare via devo fare una presentazione. Tieniti libero per la Sala Meet.");
 }
 function computeCamera(){
  if(debug||fullMap)return {x:0,y:0,zoom:1};
@@ -710,7 +798,7 @@ function drawMiniMap(){
    m.fillRect(t.p.x*sx-2,t.p.y*sy-2,5,5);
  });
  m.fillStyle="#67ff87";m.fillRect(player.x*sx-3,player.y*sy-3,7,7);
- // ARC_VOID/anomalies intentionally never appear here.
+ // anomalies intentionally never appear here.
 }
 function refreshPDA(){
  const p=$("#pdaBody");if(!p||!state)return;
@@ -742,12 +830,8 @@ function leaveLunch(){
  const homes={pao:{x:250,y:620},zia:{x:685,y:815},don:{x:895,y:815}};
  npcs.forEach(n=>{if(homes[n.id]){n.x=homes[n.id].x;n.y=homes[n.id].y;n.seeking=false}});
 }
-function updateLunchState(){
- const now=isLunch();
- if(now&&!lunchMode){lunchMode=true;setLunchPositions();narrativeOnce("lunchStart","SYSTEM","13:00 // PAUSA PRANZO. Nessun utente operativo fuori dalla Cucina.");}
- if(!now&&lunchMode){lunchMode=false;leaveLunch();narrativeOnce("lunchEnd","SYSTEM","14:00 // PERSONALE RIENTRATO ALLE POSTAZIONI.");}
-}
-function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:START,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};const spawn=safePlayerSpawn();player={x:spawn.x,y:spawn.y,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=false;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;spawnNPCs();updateInventoryUI();newTicket("LOW");updateTaskProgress();setupCompactHUD();hud()}
+function updateLunchState(){ updateLunchMigration(1/60); }
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio."),250));}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x, y) {
   if (!walkZones.some(z => inside(z, x, y))) {
@@ -882,11 +966,11 @@ function startMiniGame(i){
  }
 
  else if(type==="CABLE"){
-  const order=["LAN","USB-C","HDMI"];
-  body.innerHTML=miniHeader(t,"PATCH PANEL","Collega le tre linee nell'ordine indicato: LAN → USB-C → HDMI.")+
+  const pool=["LAN","USB-C","HDMI","DP","AUDIO","USB-A"];const order=pool.sort(()=>Math.random()-.5).slice(0,3+Math.floor(Math.random()*2));
+  body.innerHTML=miniHeader(t,"PATCH PANEL","Collega le linee nell'ordine indicato.")+
   `<div class="miniGame cableGame">
-   ${["HDMI","LAN","USB-C"].map(x=>`<button class="cablePlug" data-v="${x}">${x}</button>`).join("")}
-   </div><div class="pixelSequence">LAN → USB-C → HDMI</div><div id="miniError"></div>`;
+   ${[...order,...pool.filter(x=>!order.includes(x)).slice(0,2)].sort(()=>Math.random()-.5).map(x=>`<button class="cablePlug" data-v="${x}">${x}</button>`).join("")}
+   </div><div class="pixelSequence">${order.join(" → ")}</div><div id="miniError"></div>`;
   let step=0;
   document.querySelectorAll(".cablePlug").forEach(b=>b.onclick=()=>{
    if(b.dataset.v===order[step]){b.classList.add("done");b.disabled=true;step++;if(step===order.length)miniSuccess(i,"CABLAGGIO OK")}
@@ -972,11 +1056,12 @@ function startMiniGame(i){
    const bad=Math.floor(Math.random()*3);
    body.innerHTML=miniHeader(t,"PROCESS CHECK","Termina solo il processo bloccato.")+
    `<div class="miniGame processGame">
-   ${["DesktopConnector.exe","Revit.exe","SyncAgent.exe"].map((x,n)=>`<button class="processRow" data-ok="${n===bad?1:0}">${x}<i>${n===bad?"NOT RESPONDING":"RUNNING"}</i></button>`).join("")}
+   ${["DesktopConnector.exe","Revit.exe","SyncAgent.exe","AdobeCC.exe","Teams.exe"].sort(()=>Math.random()-.5).slice(0,3+Math.floor(Math.random()*3)).map((x,n)=>`<button class="processRow" data-ok="${n===bad?1:0}">${x}<i>${n===bad?"NOT RESPONDING":"RUNNING"}</i></button>`).join("")}
    </div><div id="miniError"></div>`;
    document.querySelectorAll(".processRow").forEach(b=>b.onclick=()=>b.dataset.ok==="1"?miniSuccess(i,"PROCESSO RIPRISTINATO"):miniMistake("PROCESSO SANO"));
   }
  }
+ setTimeout(randomizeMiniLayout,0);
 }
 function newTicket(force,opts={}){
  if(state.phase!=="shift"||tickets.length>=difficultyConfig[difficulty].maxTickets)return;if(isLunch()&&!opts.anomaly)return;
@@ -994,10 +1079,12 @@ function newTicket(force,opts={}){
 function renderTickets(){
  const tc=$("#ticketCount");if(tc)tc.textContent=tickets.length;
 
- $("#ticketText").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket ${t.level.toLowerCase()}"><b>${t.level}${t.source==="ARC_VOID"?" // ARC_VOID":t.criticalFrom?" // "+t.criticalFrom:""}</b><br>${t.p.room} — ${t.p.id||t.p.kind||t.p.type}<br>${t.taskType?`<br><span class="taskKind">MINIGAME // ${t.taskType}</span>`:`<br><span class="taskKind">DIAGNOSI</span>`}<br>deadline ${fmt(t.due)}</div>`).join(""):"Nessun ticket aperto.";
+ $("#ticketText").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket ${t.level.toLowerCase()}"><b>${t.level}${t.source==="IT MANAGER"?" // MANAGER":t.criticalFrom?" // "+t.criticalFrom:""}</b><br>${t.p.room} — ${t.p.id||t.p.kind||t.p.type}<br>${t.taskType?`<br><span class="taskKind">MINIGAME // ${t.taskType}</span>`:`<br><span class="taskKind">DIAGNOSI</span>`}<br>deadline ${fmt(t.due)}</div>`).join(""):"Nessun ticket aperto.";
 }
 function interact(){
+ if(storyOpen){closeStory();return}
  if(state.phase!=="shift")return;
+ if(bootWorkstation())return;
  if(interactCarry())return;
  let i=tickets.findIndex(t=>Math.hypot(player.x-t.p.x,player.y-t.p.y)<75);
  if(i<0){
@@ -1007,7 +1094,7 @@ function interact(){
 }
  let t=tickets[i],q=t.q;
  if(t.taskType){startMiniGame(i);return}
- $("#modalBody").innerHTML=`<h2 class="${t.level.toLowerCase()}">${t.level}${t.source==="ARC_VOID"?" // ARC_VOID":t.criticalFrom?" // "+t.criticalFrom:""}</h2><p><b>${t.p.room}</b></p><p>${q[0]}</p><div id="answers">${q[1].map((a,n)=>`<button class="choice answer" data-n="${n}">[${n+1}] ${a}</button>`).join("")}</div>`;
+ $("#modalBody").innerHTML=`<h2 class="${t.level.toLowerCase()}">${t.level}${t.source==="IT MANAGER"?" // MANAGER":t.criticalFrom?" // "+t.criticalFrom:""}</h2><p><b>${t.p.room}</b></p><p>${q[0]}</p><div id="answers">${q[1].map((a,n)=>`<button class="choice answer" data-n="${n}">[${n+1}] ${a}</button>`).join("")}</div>`;
  $("#modal").classList.remove("hidden");document.querySelectorAll(".answer").forEach(b=>b.onclick=()=>answer(i,+b.dataset.n));
 }
 function answer(i,n){
@@ -1059,7 +1146,7 @@ function spawnAnomalyTicket(preferredRoom){
             p.room==="RIFUGIO DIGITALE"?"PIXERA":
             p.room==="SALA MEET"?"AV":"TONER";
  const mins={MEDIUM:100,HIGH:75}[level]*difficultyConfig[difficulty].timeMult;
- tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:drawQuestion(categoryForStation(p)),taskType:type,source:"ARC_VOID",expired:false});
+ tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:drawQuestion(categoryForStation(p)),taskType:type,source:"IT MANAGER",expired:false});
  renderTickets();refreshPDA();
 }
 function anomalyEvent(){
@@ -1082,58 +1169,27 @@ function anomalyEvent(){
 function startBoss(){
  state.phase="boss";state.min=BOSS;tickets=[];renderTickets();state.bossPhase=1;bossModal();
 }
-const bossQs=[
-["FASE 1 // IDENTIFICAZIONE","ARCH-VOID sta aprendo sessioni anomale. Qual è il primo approccio?",["Isolare e raccogliere evidenze/log","Aprire la cartella 19_03","Spegnere tutto"],0],
-["FASE 2 // CONTENIMENTO","La sessione si propaga. Cosa fai?",["Bloccare account/sessione e segmentare il problema","Ignorare gli alert","Cancellare i log"],0],
-["FASE 3 // ERADICAZIONE","Hai isolato la sorgente. Ultima azione?",["Rimuovere persistenza, verificare sistemi e ripristinare controllato","Riattivare subito tutto senza test","Dare privilegi admin ad ARCH-VOID"],0]
-];
 function bossModal(){
- let q=bossQs[state.bossPhase-1];
- $("#modalBody").innerHTML=`<h2 class="critical">18:52 // INTERNO 000</h2><p>«Ciao, scusa l'orario. Hai un secondo?»</p><h3>${q[0]}</h3><p>${q[1]}</p><div id="answers">${q[2].map((a,n)=>`<button class="choice bossans" data-n="${n}">[${n+1}] ${a}</button>`).join("")}</div>`;
+ const phases=[
+  ["18:52 // CAPO","Tra otto minuti ho una presentazione. In Sala Meet non esce niente sul display.",["Verifica sorgente/input e catena video prima di cambiare configurazioni","Riavvia tutti gli switch","Formatta il laptop","Ignora e aspetta"],0],
+  ["18:55 // SALA MEET","Il video è tornato, ma Teams usa ancora l'audio del portatile.",["Seleziona i dispositivi audio corretti in Teams/sistema","Cambia VLAN","Resetta il server file","Spegni il display"],0],
+  ["18:58 // IT MANAGER","Ultimo controllo: presentazione, audio e rete sono stabili. Cosa fai?",["Test rapido end-to-end e conferma al CAPO","Modifica altre impostazioni per sicurezza","Aggiorna tutti i driver ora","Vai via senza provare"],0]
+ ];
+ const q=phases[state.bossPhase-1];
+ $("#modalBody").innerHTML=`<h2 class="critical">${q[0]}</h2><p>${q[1]}</p><div id="answers">${q[2].map((a,n)=>`<button class="choice bossans" data-n="${n}">[${n+1}] ${a}</button>`).join("")}</div>`;
  $("#modal").classList.remove("hidden");document.querySelectorAll(".bossans").forEach(b=>b.onclick=()=>bossAnswer(+b.dataset.n));
 }
 function bossAnswer(n){
- let q=bossQs[state.bossPhase-1];
- if(n!==q[3]){state.incident+=28+state.anomalyPenalty*2;state.stress+=15;clamp();if(state.incident>=100||state.bossPhase===3)return ending("ARCH-VOID","ARCH-VOID ottiene privilegi amministrativi. YOU HAVE BEEN REPLACED.");}
+ if(n!==0){state.incident+=25;state.stress+=12;clamp();if(state.incident>=100)return ending("SHIFT FAILED","La presentazione salta e la direzione chiama il reparto IT.");}
  else state.xp+=500;
- if(state.bossPhase<3){state.bossPhase++;bossModal()}else ending("WIN","ARCH-VOID // SESSION TERMINATED",true);
+ if(state.bossPhase<3){state.bossPhase++;bossModal()}else ending("WIN","GIORNATA COMPLETATA",true);
 }
 function ending(type,text,win=false){
  state.phase="ended";state.min=END;clamp();
  if(win){
-  $("#modalBody").innerHTML=`<div id="winPanel"><h2 class="low">HAI VINTO</h2><p>TURNO COMPLETATO // 19:00</p><p>XP <b>${state.xp}</b> · ERRORI <b>${state.strikes}/${state.maxStrikes}</b> · TICKET <b>${state.solved}</b> · INCIDENT <b>${Math.round(state.incident)}%</b></p></div>`;
-  $("#modal").classList.remove("hidden");
-  setTimeout(()=>{
-   $("#modalBody").innerHTML=`<div class="arc-cmd"><pre>C:\\ARCHEA\\SYSTEM&gt; logout
-
-closing session...
-saving logs...
-disconnecting user...
-
-OK.
-
-19:05:00
-
-incoming connection...
-
-ARC_VOID_00
-
-authentication request...
-user: UNKNOWN
-password: ********
-
-ACCESS GRANTED
-
-ARC_VOID_00 LOGIN 19:05
-
-&gt; there is still someone in the building.
-
-_</pre><button class="choice" onclick="location.reload()">TORNA AL MENU</button></div>`;
-  },4800);
- }else{
-  $("#modalBody").innerHTML=`<h2 class="critical">BAD ENDING // ${type}</h2><p>${text}</p><p>XP <b>${state.xp}</b> · ERRORI <b>${state.strikes}/${state.maxStrikes}</b> · INCIDENT <b>${Math.round(state.incident)}%</b></p><button class="choice" onclick="location.reload()">NUOVA PARTITA</button>`;
-  $("#modal").classList.remove("hidden");
- }
+  $("#modalBody").innerHTML=`<div id="winPanel"><h2 class="low">GIORNATA COMPLETATA</h2><p>19:00 // PUOI ANDARE</p><p>XP <b>${state.xp}</b> · ERRORI <b>${state.strikes}/${state.maxStrikes}</b> · TICKET <b>${state.solved}</b> · INCIDENT <b>${Math.round(state.incident)}%</b></p></div>`;$("#modal").classList.remove("hidden");
+  setTimeout(()=>{$("#modalBody").innerHTML=`<div class="arc-cmd"><pre>19:02\n\nMESSAGGIO // CAPO\n\n"Già che ci sei..."\n\n_</pre><button class="choice" onclick="location.reload()">TORNA AL MENU</button></div>`},4300);
+ }else{$("#modalBody").innerHTML=`<h2 class="critical">${type}</h2><p>${text}</p><button class="choice" onclick="location.reload()">NUOVA PARTITA</button>`;$("#modal").classList.remove("hidden")}
 }
 function clamp(){state.incident=Math.max(0,Math.min(100,state.incident));state.stress=Math.max(0,Math.min(100,state.stress));state.rep=Math.max(0,Math.min(5,state.rep))}
 $("#x").onclick=()=>{if(state&&state.phase!=="shift"){toast("Questo evento non può essere ignorato.");return}$("#modal").classList.add("hidden")};
@@ -1144,9 +1200,10 @@ function update(dt) {
   let dx=(keys.d||keys.arrowright||virtualKeys.right?1:0)-(keys.a||keys.arrowleft||virtualKeys.left?1:0)+(joyActive?joyX:0),
       dy=(keys.s||keys.arrowdown||virtualKeys.down?1:0)-(keys.w||keys.arrowup||virtualKeys.up?1:0)+(joyActive?joyY:0);
   if(Math.abs(dx)>.04||Math.abs(dy)>.04){let l=Math.max(1,Math.hypot(dx,dy)),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(playerCanMove(player.x,player.y,player.x+vx,player.y))player.x+=vx;if(playerCanMove(player.x,player.y,player.x,player.y+vy))player.y+=vy}
-  state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed);if(state.min>=BOSS){startBoss();hud();return}
+  if(shiftStarted)state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed); if(!shiftStarted&&introStage==="outside"&&player.y<855){startShiftFromEntrance()} if(state.min>=BOSS){startBoss();hud();return}
   spawnTimer+=dt;anomTimer+=dt;
- updateLunchState();
+ updateLunchMigration(dt);
+ updateManager(dt);
  updateNarrative();
  if(!firstCarryTriggered && state.min>=START+3){
    firstCarryTriggered=true;
@@ -1165,7 +1222,7 @@ function update(dt) {
    startCarryMission();
  }
  mokasaTimer+=dt*difficultyConfig[difficulty].timeSpeed;
- if(!isLunch()&&!mokasa&&state.min>620&&mokasaTimer>55&&Math.random()<.004){spawnMokasa();mokasaTimer=0}
+ if(introStage==="done"&&!isLunch()&&!mokasa&&state.min>960&&mokasaTimer>70&&Math.random()<.0022){spawnMokasa();mokasaTimer=0}
  if(mokasa){mokasa.life-=dt*difficultyConfig[difficulty].timeSpeed;if(mokasa.life<=0)mokasa=null}
  updateAmbient(dt);
  if(!isLunch()) for(const n of npcs.filter(x=>x.hunter)){
@@ -1221,10 +1278,10 @@ function update(dt) {
      idleMinutes=0;
    }
  }
-if(!isLunch()&&spawnTimer>difficultyConfig[difficulty].spawnSeconds){spawnTimer=0;newTicket();maybeCritical()}
+if(introStage==="done"&&!isLunch()&&spawnTimer>difficultyConfig[difficulty].spawnSeconds){spawnTimer=0;newTicket();maybeCritical()}
  const phase=dayPhase();
  const anomalyEvery=phase==="MORNING"?26:phase==="LUNCH"?14:phase==="AFTERNOON"?21:10;
- if(anomTimer>anomalyEvery){anomTimer=0;anomalyEvent()}
+ if(anomTimer>anomalyEvery){anomTimer=0 /* V5: no supernatural anomaly system */}
   expireTickets();
  } else if(state.phase==="boss")state.min=BOSS;else state.min=END;
  hud();updateTaskProgress();
@@ -1515,10 +1572,6 @@ function draw(){
   g.fillStyle="#111";g.font="bold 14px monospace";g.fillText("!",t.p.x-4,t.p.y+5);
  });
 
- const a=anomalyLevel();
- if(a>.12){g.fillStyle=`rgba(16,0,18,${a*.12})`;g.fillRect(0,0,W,H)}
- if(a>.55&&Math.random()<.018){g.fillStyle="#a0002518";g.fillRect(0,Math.random()*H,W,3)}
- if(a>.78&&Math.random()<.008){g.fillStyle="rgba(255,255,255,.035)";g.fillRect(0,0,W,H)}
 
  const cp=carryPrompt();
  if(cp){
@@ -1529,7 +1582,7 @@ function draw(){
  }
 
  drawPixelPerson(player.x,player.y,"#284f3a","#d0a887","#17231d");
- g.strokeStyle="#62e568";g.lineWidth=2;g.strokeRect(px(player.x)-12,px(player.y)-22,24,44);
+
 
  if(debug){
   g.globalAlpha=.24;
@@ -1600,6 +1653,7 @@ addEventListener("keydown",e=>{
  const key=e.key.toLowerCase();
  if(e.key==="Tab"){e.preventDefault();togglePDA(true);return}
  if(key==="m"){e.preventDefault();fullMap=!fullMap;toast(fullMap?"MAPPA COMPLETA":"CAMERA PLAYER");return}
+ if((e.key==="Enter"||key==="e")&&storyOpen){e.preventDefault();closeStory();return}
  if(e.key==="Enter"){
    const btn=!$("#toLore").classList.contains("hidden")&&$("#boot").classList.contains("active")?$("#toLore"):
              $("#lore").classList.contains("active")?$("#start"):null;

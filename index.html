@@ -1,24 +1,15 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>V4 // IT NIGHTMARE V2 — ARCHEA // After Hours</title><link rel="stylesheet" href="style.css?v=4.0"></head>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>V5 // IT NIGHTMARE — A DAY IN IT SUPPORT</title><link rel="stylesheet" href="style.css?v=5.0"></head>
 <body>
-<section id="boot" class="screen active"><div class="card terminal"><h1>IT NIGHTMARE</h1><div class="subtitle">ARCHEA // AFTER HOURS</div><div id="bootlog"></div><button id="toLore" class="mainbtn hidden">CONTINUA</button></div></section>
-<section id="lore" class="screen"><div class="card lore"><div class="kicker">FILE // 19:03</div><h2>Lo studio continua a lavorare anche quando è vuoto.</h2><p>Da alcune settimane il reparto IT registra attività impossibili: sessioni senza proprietario, monitor accesi dopo la chiusura, ticket provenienti da utenti assenti.</p><p>All'inizio sembrano normali problemi informatici. Durante la giornata, però, le anomalie aumentano.</p><blockquote>Il tuo obiettivo è semplice: mantieni operativo lo studio fino alle 19:00.</blockquote><p>Se commetti troppi errori, perdi prima. Se resisti fino alle 18:52, scoprirai cosa sta realmente succedendo.</p><div class="difficulty-box">
-<label for="difficulty">DIFFICOLTÀ</label>
-<select id="difficulty">
-  <option value="easy">EASY — 11-12 min, max 2 ticket, 8 errori</option>
-  <option value="normal" selected>NORMAL — 8 min circa, max 3 ticket, 5 errori</option>
-  <option value="hard">HARD — 5-6 min, max 3 ticket, 3 errori</option>
-  <option value="nightmare">NIGHTMARE — brutale, 2 errori</option>
-</select>
-</div>
-<button id="start" class="mainbtn">INIZIA TURNO — 09:00</button></div></section>
+<section id="boot" class="screen active"><div class="card terminal"><h1>IT NIGHTMARE</h1><div class="subtitle">A DAY IN IT SUPPORT</div><div id="bootlog"></div><button id="toLore" class="mainbtn hidden">CONTINUA</button></div></section>
+<section id="lore" class="screen"><div class="card lore"><div class="kicker">SHIFT // 08:58</div><h2>Una normale giornata nel reparto IT.</h2><p>Utenti, sale meeting, workstation, server, stampanti e richieste che arrivano sempre nel momento peggiore.</p><p>Lo studio vive intorno a te: le persone lavorano, si spostano, vanno alle riunioni, ti fermano nei corridoi e alle 13:00 vanno realmente a pranzo.</p><blockquote>Obiettivo: porta il reparto IT fino alle 19:00 senza perdere il controllo.</blockquote><div class="difficulty-box"><label for="difficulty">DIFFICOLTÀ</label><select id="difficulty"><option value="easy">EASY — rilassata, max 2 ticket</option><option value="normal" selected>NORMAL — giornata standard</option><option value="hard">HARD — molte urgenze</option><option value="nightmare">NIGHTMARE — giornata infernale</option></select></div><button id="start" class="mainbtn">ENTRA IN GIOCO — 08:58</button></div></section>
 <section id="gameScreen" class="screen"><header id="hud"><div><b id="clock">09:00</b><small>TIME</small></div><div><b id="stress">0%</b><small>STRESS</small></div><div><b id="rep">★★★★★</b><small>REPUTAZIONE</small></div><div><b id="strikes">0/3</b><small>ERRORI</small></div><div><b id="xp">0</b><small>XP</small></div><div><b id="incident">0%</b><small>INCIDENT</small></div></header>
 <div id="taskProgressWrap"><span>TASK PROGRESS</span><div id="taskProgress"><i id="taskProgressFill"></i></div><b id="taskProgressText">0%</b></div>
 <main>
 <div id="viewportFrame"><canvas id="game" width="1600" height="900"></canvas></div>
-<div id="miniMapWrap"><div class="mapTitle">MAP // ARCHEA</div><canvas id="miniMap" width="260" height="150"></canvas></div>
+<div id="miniMapWrap"><div class="mapTitle">IT STUDIO // MAP</div><canvas id="miniMap" width="260" height="150"></canvas></div>
 <div id="pda" class="hidden"><div class="pdaHead"><b>IT PDA</b><span>TAB / TASKS</span></div><div id="pdaBody"></div></div>
 <div id="encounterOverlay"><div class="encBang">!</div><div id="encounterName">PAO</div><small>ORA CHE TI VEDO...</small></div>
-<div id="phoneNotification"><div class="phoneApp">MESSAGGIO</div><b id="phoneSender">ZIA ALE</b><span id="phoneText"></span></div>
+<div id="storyDialog" class="hidden"><div id="storyWho"></div><div id="storyText"></div><small>ENTER / E — CONTINUA</small></div><div id="phoneNotification"><div class="phoneApp">MESSAGGIO</div><b id="phoneSender">ZIA ALE</b><span id="phoneText"></span></div>
 <div id="inventoryWrap"><small>INVENTARIO</small><div id="inventory"></div></div>
 <div id="missionPanel" class="hidden"></div><aside id="ticketPanel"><button id="ticketToggle" type="button">TASKS <b id="ticketCount">0</b></button><div id="ticketContent"><h3>TICKET QUEUE</h3><div id="ticketText"></div></div></aside><div id="toast"></div>
 <div id="strikeOverlay" class="strike-overlay hidden"><div class="strike-inner">
@@ -39,5 +30,5 @@
 </div>
 <button id="debugTouch" type="button">DEBUG</button>
 <button id="act">E<span>INTERAGISCI</span></button>
-</div></main><footer><b>V4.0</b> · WASD/FRECCE — MUOVITI · E — INTERAGISCI · TAB — PDA · M — MAP · F2 — DEBUG</footer></section>
-<div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=4.0"></script></body></html>
+</div></main><footer><b>V5.0</b> · WASD/FRECCE — MUOVITI · E — INTERAGISCI · TAB — PDA · M — MAP · F2 — DEBUG</footer></section>
+<div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=5.0"></script></body></html>

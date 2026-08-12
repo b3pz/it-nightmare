@@ -156,3 +156,10 @@ body{background:#010201;overflow:hidden}
  #inventoryWrap{bottom:135px!important;left:5px!important;transform:scale(.72)}
  #pda{width:88vw;max-height:60vh}
 }
+
+/* V5 — A DAY IN IT SUPPORT */
+#storyDialog{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);width:min(760px,88vw);z-index:95;background:#e7eadf;color:#172018;border:5px solid #172018;box-shadow:8px 8px #000;padding:16px 20px;font-family:monospace;font-size:18px;image-rendering:pixelated}
+#storyDialog.hidden{display:none}#storyWho{font-weight:900;font-size:13px;letter-spacing:2px;margin-bottom:8px;color:#3d5d29}#storyText{font-weight:700;line-height:1.35}#storyDialog small{display:block;text-align:right;margin-top:10px;font-size:9px;opacity:.65}
+.miniGame.v5Random{display:grid!important;gap:12px!important;align-items:stretch}.miniGame.v5Random>*{min-height:54px}.mapTitle{color:#9fc5ad!important}
+/* Player is identified by sprite only: no debug selection frame in normal play. */
+@media(max-width:700px){#storyDialog{bottom:150px;font-size:15px;padding:12px;width:86vw}}
