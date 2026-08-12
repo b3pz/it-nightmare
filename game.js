@@ -13,12 +13,12 @@ window.addEventListener("error",ev=>{
  const msg=ev?.error?.message||ev?.message||"Errore JavaScript";
  const line=ev?.lineno?` // line ${ev.lineno}`:"";
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V7.0 // ${msg}${line}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V9.0 // ${msg}${line}`;box.classList.remove("hidden")}
 });
 window.addEventListener("unhandledrejection",ev=>{
  const msg=ev?.reason?.message||String(ev?.reason||"Promise rejection");
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V7.0 // ${msg}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V9.0 // ${msg}`;box.classList.remove("hidden")}
 });
 
 const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
@@ -89,8 +89,16 @@ const EXTERIOR_DOOR={x:605,y:845,w:100,h:65};
 doors.push(EXTERIOR_DOOR);
 const walkZones=[...roomFloors,...corridors,...doors];
 const obstacles=[
-{x:355,y:385,w:380,h:32},{x:355,y:505,w:380,h:32},{x:75,y:145,w:155,h:45},{x:340,y:145,w:120,h:55},{x:565,y:115,w:150,h:90},
-{x:75,y:385,w:125,h:55},{x:75,y:600,w:125,h:23},{x:885,y:160,w:105,h:115},{x:1080,y:155,w:100,h:60},{x:1280,y:155,w:125,h:70},{x:890,y:435,w:190,h:60},{x:1330,y:495,w:185,h:85},{x:835,y:750,w:270,h:34},{x:835,y:815,w:270,h:34},{x:1190,y:775,w:190,h:60}
+ // V9: solo ingombri che il giocatore VEDE realmente. Hitbox leggermente più piccole del mobile.
+ {x:82,y:188,w:135,h:20},{x:350,y:188,w:108,h:28},{x:80,y:408,w:115,h:28},
+ {x:1085,y:208,w:105,h:20},{x:1285,y:208,w:135,h:20},
+ {x:365,y:390,w:360,h:20},{x:365,y:510,w:360,h:20},
+ {x:88,y:590,w:125,h:18},{x:88,y:655,w:125,h:18},
+ {x:V9_MEETINGS["SALA MEET"].table.x+8,y:V9_MEETINGS["SALA MEET"].table.y+5,w:V9_MEETINGS["SALA MEET"].table.w-16,h:20},
+ {x:V9_MEETINGS["SPAZIO A"].table.x+8,y:V9_MEETINGS["SPAZIO A"].table.y+5,w:V9_MEETINGS["SPAZIO A"].table.w-16,h:22},
+ {x:V9_MEETINGS["SALA MEET CAPO"].table.x+8,y:V9_MEETINGS["SALA MEET CAPO"].table.y+5,w:V9_MEETINGS["SALA MEET CAPO"].table.w-16,h:24},
+ {x:843,y:755,w:254,h:16},{x:843,y:820,w:254,h:16},{x:1200,y:815,w:170,h:28},
+ {x:570,y:120,w:135,h:72}
 ];
 const points=[
 {x:155,y:205,room:"EDITORIA",kind:"PC"},{x:400,y:205,room:"IT",kind:"PC"},{x:640,y:205,room:"SERVER",kind:"SERVER"},{x:140,y:450,room:"BIM",kind:"PC"},{x:140,y:660,room:"IT",kind:"PC"},
@@ -213,7 +221,7 @@ function drawQuestion(category){
 const npcDefs=[
  {id:"pao",name:"PAO",role:"BIMER",x:140,y:450,homeRoom:"BIM",homeX:140,homeY:450,tone:"mixed",shirt:"#536f8b",hunter:false,speed:58,state:"work"},
  {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,homeRoom:"INGRESSO / SEGRETERIA",homeX:685,homeY:815,tone:"good",shirt:"#765d78",state:"idle"},
- {id:"don",name:"DON",role:"JOLLY",x:895,y:815,homeRoom:"CUCINA",homeX:895,homeY:815,tone:"good",shirt:"#566a51",hunter:true,state:"idle"},{id:"hr",name:"BETTY",role:"HR",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:118,state:"outside"}];
+ {id:"don",name:"DON",role:"JOLLY",x:895,y:815,homeRoom:"CUCINA",homeX:895,homeY:815,tone:"good",shirt:"#566a51",skin:"#8b5a3c",hair:"#17120f",hunter:true,state:"idle"},{id:"hr",name:"BETTY",role:"HR",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:118,state:"outside"}];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
 
 let bettySupportCooldown=0,bettyPinged=false,bettyLastStressBand=0;
@@ -240,11 +248,8 @@ function relationOpening(n){
 let ambientNPCs=[];
 function spawnAmbient(){
  const seats=stations.filter(s=>["HP Z","MAC"].includes(s.type)&&!["HR","IT","INGRESSO / SEGRETERIA"].includes(s.room));
- ambientNPCs=seats.map((s,i)=>({
-   id:"staff_"+s.id.toLowerCase(),name:ambientNames[i%ambientNames.length],homeRoom:s.room,homeX:s.x,homeY:s.y+28,x:s.x,y:s.y+28,
-   currentRoom:s.room,state:"work",timer:14+Math.random()*28,speed:56,shirt:["#4f6259","#665747","#4d596b","#6b4e57"][i%4],
-   route:[],routeIndex:0,activity:null,activityTicket:false,stuckFor:0
- }));
+ const seatY=s=>{if(s.room==="CENTRALE")return s.y+30;if(s.room==="EDITORIA")return s.y+55;if(s.room==="INTERIOR"||s.room==="RENDERISTI")return s.y+58;if(s.room==="BIM")return s.y+48;return s.y+38};
+ ambientNPCs=seats.map((s,i)=>({id:"staff_"+s.id.toLowerCase(),name:ambientNames[i%ambientNames.length],homeRoom:s.room,homeX:s.x,homeY:seatY(s),x:s.x,y:seatY(s),currentRoom:s.room,state:"work",timer:14+Math.random()*28,speed:56,shirt:["#4f6259","#665747","#4d596b","#6b4e57"][i%4],route:[],routeIndex:0,activity:null,activityTicket:false,stuckFor:0}));
 }
 const officeWaypoints=[
  {x:330,y:300},{x:330,y:700},{x:700,y:700},{x:900,y:700},{x:1050,y:700},
@@ -256,15 +261,25 @@ function buildRoute(n,toKitchen){
 }
 
 
+
+// V9 — sale meeting coerenti: tavolo, schermo e sedute sono dati reali condivisi da grafica e AI.
+const V9_MEETINGS={
+ "SALA MEET":{table:{x:872,y:155,w:126,h:42},screen:{x:935,y:105},seats:[{x:888,y:218},{x:925,y:218},{x:962,y:218},{x:888,y:135},{x:925,y:135},{x:962,y:135}]},
+ "SPAZIO A":{table:{x:875,y:435,w:225,h:44},screen:{x:1030,y:405},seats:[{x:900,y:505},{x:950,y:505},{x:1000,y:505},{x:1050,y:505},{x:900,y:415},{x:950,y:415},{x:1000,y:415},{x:1050,y:415}]},
+ "SALA MEET CAPO":{table:{x:1340,y:500,w:180,h:48},screen:{x:1430,y:450},seats:[{x:1370,y:575},{x:1430,y:575},{x:1490,y:575},{x:1370,y:480},{x:1430,y:480},{x:1490,y:480}]}
+};
+let meetingSeatClaims={};
+function claimMeetingSeat(n,room){const cfg=V9_MEETINGS[room]||V9_MEETINGS["SALA MEET"];const used=new Set(Object.entries(meetingSeatClaims).filter(([id])=>id!==n.id).map(([,v])=>v.room+":"+v.idx));let idx=cfg.seats.findIndex((_,i)=>!used.has(room+":"+i));if(idx<0)idx=Math.floor(Math.random()*cfg.seats.length);meetingSeatClaims[n.id]={room,idx};return {...cfg.seats[idx],room};}
+function releaseMeetingSeat(n){if(n&&n.id)delete meetingSeatClaims[n.id]}
 const MEETING_ROOMS=[
  {room:"SALA MEET",x:925,y:215,spreadX:70,spreadY:55,weight:5},
  {room:"SPAZIO A",x:1030,y:480,spreadX:105,spreadY:60,weight:4},
  {room:"SALA MEET CAPO",x:1395,y:535,spreadX:90,spreadY:55,weight:2}
 ];
-function randomMeetingDestination(){
+function randomMeetingDestination(n){
  const pool=MEETING_ROOMS.flatMap(r=>Array(r.weight).fill(r));
  const r=pool[Math.floor(Math.random()*pool.length)];
- return {x:r.x+(Math.random()-.5)*r.spreadX,y:r.y+(Math.random()-.5)*r.spreadY,room:r.room};
+ return n?claimMeetingSeat(n,r.room):{...V9_MEETINGS[r.room].seats[0],room:r.room};
 }
 function meetingStationFor(room){
  let p=stations.find(s=>s.room===room);
@@ -273,7 +288,7 @@ function meetingStationFor(room){
  return {id:"AV-"+room,room,type:"MEETING AV",x:r.x,y:r.y};
 }
 function npcDestinationForActivity(n,activity){
- if(activity==="meeting")return randomMeetingDestination();
+ if(activity==="meeting")return randomMeetingDestination(n);
  if(activity==="printer")return {x:1240+Math.random()*65,y:790+Math.random()*25,room:"STAMPANTI"};
  if(activity==="gallery")return {x:1080+Math.random()*80,y:650+Math.random()*30,room:"RIFUGIO DIGITALE"};
  if(activity==="coffee")return {x:920+Math.random()*110,y:810+Math.random()*25,room:"CUCINA"};
@@ -476,7 +491,7 @@ function updateAmbient(dt){
    }else if(n.state==="activity"){
      if(n.activity==="meeting"&&n.timer<8&&!n.activityTicket&&Math.random()<.27)generateNpcActivityTicket(n); else if(n.activity!=="meeting"&&n.activity!=="bathroom"&&n.activity!=="coffee"&&n.timer<7&&!n.activityTicket&&Math.random()<.05)generateNpcActivityTicket(n);
      if(n.timer<=0){
-       n.state="return";n.routeGoal={x:n.homeX,y:n.homeY,room:n.homeRoom};n.route=buildRoute(n,false);n.routeIndex=0;
+       releaseMeetingSeat(n);n.state="return";n.routeGoal={x:n.homeX,y:n.homeY,room:n.homeRoom};n.route=buildRoute(n,false);n.routeIndex=0;
      }
    }else if(n.state==="return"){
      if(moveNpcRoute(n,dt)){n.x=n.homeX;n.y=n.homeY;n.state="work";n.activity=null;n.timer=20+Math.random()*45}
@@ -624,6 +639,135 @@ function carryPrompt(){
  return carryMission.recipient?`E — CONSEGNA ${carryMission.item} A ${carryMission.recipient.name}`:`E — CONSEGNA ${carryMission.item}`;
 }
 
+
+/* =============================================================
+   V8 — STUDIO EVENTS
+   Events are physical situations in the office, not ordinary tickets.
+   ============================================================= */
+let studioEvent=null,studioEventNext=610,eventSerial=0;
+function eventNPC(name){return [...npcs,...ambientNPCs].find(n=>n.name===name||n.id===name)}
+function eventFreeNPCs(count=2){
+ return ambientNPCs.filter(n=>n.state==="work"&&!n.eventCarry).sort(()=>Math.random()-.5).slice(0,count);
+}
+function startAmazonEvent(){
+ if(studioEvent||introStage!=="done"||isLunch())return false;
+ const helpers=eventFreeNPCs(3);
+ const packages=[
+  {id:"AMZ-IT-1",label:"PACCO IT // CAVI",owner:"PLAYER",x:705,y:800,to:{x:150,y:610,room:"IT"},taken:false,done:false},
+  {id:"AMZ-IT-2",label:"PACCO IT // PERIFERICHE",owner:"PLAYER",x:730,y:800,to:{x:190,y:610,room:"IT"},taken:false,done:false},
+  ...helpers.map((n,i)=>({id:"AMZ-NPC-"+i,label:"PACCO "+n.name,owner:n.id,x:755+i*22,y:800,to:{x:n.homeX,y:n.homeY,room:n.homeRoom},taken:false,done:false}))
+ ];
+ studioEvent={id:"amazon-"+(++eventSerial),type:"AMAZON",title:"CONSEGNA AMAZON",stage:"pickup",packages,helpers,started:state.min};
+ showMissionBanner("PACCHI IN INGRESSO","Zia Ale ha ricevuto una consegna. Ritira i 2 pacchi destinati al REPARTO IT.","2 PACCHI IT // +240 XP","EVENTO STUDIO");
+ storyDialog("ZIA ALE","Sono arrivati i pacchi Amazon. Gli altri prendono i loro: questi due sono per il Reparto IT.",()=>{});
+ helpers.forEach((n,i)=>{
+   const p=packages.find(p=>p.owner===n.id);if(!p)return;
+   n.eventCarry=p.id;n.state="eventPickup";n.routeGoal={x:p.x,y:p.y,room:"INGRESSO / SEGRETERIA"};
+   n.route=findNpcPath({x:n.x,y:n.y},n.routeGoal);n.routeIndex=0;
+ });
+ showStudioEventHud("CONSEGNA AMAZON","0/2 pacchi IT consegnati");
+ return true;
+}
+function startMeetingRushEvent(){
+ if(studioEvent||introStage!=="done"||isLunch())return false;
+ studioEvent={id:"meet-"+(++eventSerial),type:"MEETING_RUSH",title:"MEETING TRA 2 MINUTI",stage:"pickup",
+   item:"EXTENDER HDMI",pickup:{x:200,y:610,room:"IT"},to:{x:925,y:220,room:"SALA MEET"},started:state.min,carried:false};
+ showMissionBanner("MEETING TRA 2 MINUTI","Recupera l'EXTENDER HDMI in IT e portalo in SALA MEET.","TEMPO LIMITATO // +220 XP","EVENTO STUDIO");
+ phoneMessage("ZIA ALE","Sala Meet: stanno iniziando e manca l'extender HDMI.");
+ showStudioEventHud("MEETING URGENTE","Prendi EXTENDER HDMI in IT");
+ return true;
+}
+function startDeskSetupEvent(){
+ if(studioEvent||introStage!=="done"||isLunch())return false;
+ const rec=availableRecipient();
+ if(!rec)return false;
+ studioEvent={id:"desk-"+(++eventSerial),type:"DESK_SETUP",title:"CAMBIO POSTAZIONE",stage:"pickup",
+   item:"MONITOR",pickup:{x:175,y:610,room:"IT"},to:{x:rec.homeX,y:rec.homeY,room:rec.homeRoom},recipient:rec,started:state.min,carried:false};
+ showMissionBanner("CAMBIO POSTAZIONE",`${rec.name} ha bisogno di un monitor. Prendilo in IT e portalo alla sua postazione.`,"+200 XP · RAPPORTO +5","EVENTO STUDIO");
+ phoneMessage(rec.name,"Mi spostano di postazione. Quando puoi mi porti un monitor?");
+ showStudioEventHud("CAMBIO POSTAZIONE",`MONITOR → ${rec.name}`);
+ return true;
+}
+function maybeStartStudioEvent(){
+ if(studioEvent||introStage!=="done"||state.min<studioEventNext||isLunch())return;
+ const r=Math.random();
+ if(state.min<690)startAmazonEvent();
+ else if(r<.48)startMeetingRushEvent();
+ else if(r<.82)startDeskSetupEvent();
+ else startAmazonEvent();
+ studioEventNext=state.min+85+Math.random()*75;
+}
+function studioEventTarget(){
+ if(!studioEvent)return null;
+ if(studioEvent.type==="AMAZON"){
+   const p=studioEvent.packages.find(p=>p.owner==="PLAYER"&&!p.done&&(p.taken||inventory.length<3));
+   if(!p)return null;
+   return p.taken?p.to:{x:p.x,y:p.y,room:"INGRESSO / SEGRETERIA"};
+ }
+ return studioEvent.stage==="pickup"?studioEvent.pickup:studioEvent.to;
+}
+function interactStudioEvent(){
+ if(!studioEvent)return false;
+ const t=studioEventTarget();if(!t||Math.hypot(player.x-t.x,player.y-t.y)>72)return false;
+ if(studioEvent.type==="AMAZON"){
+   const p=studioEvent.packages.find(p=>p.owner==="PLAYER"&&!p.done&&(p.taken||Math.hypot(player.x-p.x,player.y-p.y)<=72));
+   if(!p)return false;
+   if(!p.taken){
+     if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
+     p.taken=true;inventory.push(p.label);updateInventoryUI();showStudioEventHud("CONSEGNA AMAZON",`Porta ${p.label} nel REPARTO IT`);return true;
+   }
+   const ix=inventory.indexOf(p.label);if(ix>=0)inventory.splice(ix,1);p.done=true;updateInventoryUI();
+   const done=studioEvent.packages.filter(x=>x.owner==="PLAYER"&&x.done).length;
+   showStudioEventHud("CONSEGNA AMAZON",`${done}/2 pacchi IT consegnati`);
+   if(done>=2){state.xp+=240;state.solved++;dayFlags.carryCompleted=(dayFlags.carryCompleted||0)+1;showRewardResult("EVENTO COMPLETATO",["PACCHI IT CONSEGNATI","XP +240","ZIA ALE RAPPORTO +4"],"success");const z=eventNPC("zia");if(z)changeRelation(z,4);studioEvent=null;hideStudioEventHud();updateTaskProgress()}
+   return true;
+ }
+ if(studioEvent.stage==="pickup"){
+   if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
+   inventory.push(studioEvent.item);studioEvent.carried=true;studioEvent.stage="deliver";updateInventoryUI();
+   showStudioEventHud(studioEvent.title,`Consegna ${studioEvent.item} → ${studioEvent.recipient?.name||safeRoom(studioEvent.to,"DESTINAZIONE")}`);return true;
+ }
+ const ix=inventory.indexOf(studioEvent.item);if(ix>=0)inventory.splice(ix,1);
+ const ev=studioEvent;studioEvent=null;updateInventoryUI();hideStudioEventHud();
+ const xp=ev.type==="MEETING_RUSH"?220:200;state.xp+=xp;state.solved++;
+ if(ev.recipient)changeRelation(ev.recipient,5);
+ showRewardResult("EVENTO COMPLETATO",[ev.title,`XP +${xp}`,ev.recipient?`${ev.recipient.name} RAPPORTO +5`:"MEETING PRONTO"],"success");updateTaskProgress();return true;
+}
+function studioEventPrompt(){
+ const t=studioEventTarget();if(!t||Math.hypot(player.x-t.x,player.y-t.y)>92)return null;
+ if(studioEvent.type==="AMAZON"){
+  const p=studioEvent.packages.find(p=>p.owner==="PLAYER"&&!p.done&&(p.taken||Math.hypot(player.x-p.x,player.y-p.y)<=92));
+  return p?(p.taken?`E — CONSEGNA ${p.label}`:`E — PRENDI ${p.label}`):null;
+ }
+ return studioEvent.stage==="pickup"?`E — PRENDI ${studioEvent.item}`:`E — CONSEGNA ${studioEvent.item}`;
+}
+function updateStudioEvent(dt){
+ if(!studioEvent)return;
+ if(studioEvent.type==="AMAZON"){
+  for(const n of studioEvent.helpers){
+   const p=studioEvent.packages.find(p=>p.owner===n.id);if(!p||p.done)continue;
+   if(n.state==="eventPickup"){
+    if(moveNpcRoute(n,dt)){p.taken=true;n.state="eventDeliver";n.routeGoal={...p.to};n.route=findNpcPath({x:n.x,y:n.y},p.to);n.routeIndex=0}
+   }else if(n.state==="eventDeliver"){
+    if(moveNpcRoute(n,dt)){p.done=true;n.eventCarry=null;n.state="work";n.x=n.homeX;n.y=n.homeY}
+   }
+  }
+ }
+ if(studioEvent.type==="MEETING_RUSH"&&state.min-studioEvent.started>8&&!studioEvent.carried){
+   state.stress+=5;showStudioEventHud("MEETING URGENTE","Sei in ritardo: EXTENDER HDMI ancora in IT");
+ }
+}
+function drawStudioEventObjects(){
+ if(!studioEvent)return;
+ if(studioEvent.type==="AMAZON"){
+  for(const p of studioEvent.packages){
+   if(p.done||p.taken)continue;
+   g.fillStyle=p.owner==="PLAYER"?"#d8a44c":"#a87943";g.fillRect(p.x-10,p.y-8,20,16);
+   g.fillStyle="#2a1a0c";g.font="bold 6px monospace";g.fillText("AMZ",p.x-8,p.y+2);
+  }
+  for(const n of studioEvent.helpers){if(n.eventCarry){g.fillStyle="#b9874d";g.fillRect(n.x-9,n.y-2,18,13)}}
+ }
+}
 function spawnNPCs(){
  npcs=npcDefs.map(n=>({...n}));spawnAmbient();mokasa={id:"mokasa",name:"CAPO",role:"DIREZIONE",x:1435,y:555,homeRoom:"SALA MEET CAPO",homeX:1435,homeY:555,tone:"bad",shirt:"#75483d",life:Infinity,court:false};npcCooldown={};mokasaTimer=0;lastZiaHour=-1;
  lastPlayerPos={x:player.x,y:player.y};idleMinutes=0;
@@ -836,7 +980,22 @@ function setupCompactHUD(){
 /* =============================================================
    V5 — A DAY IN IT SUPPORT
    ============================================================= */
+
+function showMissionBanner(title,text,reward="",kicker="MISSIONE"){
+ const b=$("#missionBanner");if(!b)return;
+ $("#missionKicker").textContent=kicker;$("#missionTitle").textContent=title;
+ $("#missionText").textContent=text;$("#missionReward").textContent=reward;
+ b.classList.remove("hidden","out");clearTimeout(b._t);
+ b._t=setTimeout(()=>b.classList.add("out"),4200);
+ setTimeout(()=>b.classList.add("hidden"),4800);
+}
+function showStudioEventHud(title,text){
+ const h=$("#studioEventHud");if(!h)return;
+ $("#studioEventTitle").textContent=title;$("#studioEventText").textContent=text;h.classList.remove("hidden");
+}
+function hideStudioEventHud(){ $("#studioEventHud")?.classList.add("hidden"); }
 let introStage="outside",shiftStarted=false,managerRaceDone=false,managerPenaltyDone=false;
+let introMissionArmed=false,introManagerAlerted=false;
 let storyOpen=false,storyCallback=null;
 const IT_PC={x:140,y:660,room:"IT"};
 const OUTSIDE_ZONE={x:500,y:850,w:225,h:70};
@@ -855,10 +1014,20 @@ function storyDialog(who,text,cb=null){
 }
 function closeStory(){if(!storyOpen)return;storyOpen=false;$("#storyDialog")?.classList.add("hidden");const cb=storyCallback;storyCallback=null;if(cb)cb();setTimeout(flushDeferredDialog,80)}
 function startShiftFromEntrance(){
- if(shiftStarted)return;shiftStarted=true;state.min=540;introStage="reachPC";
- storyDialog("ZIA ALE","Buongiorno! Il manager è già in arrivo. Vai ad accendere la tua postazione in IT.");
- phoneMessage("IT TASK","PRIMA MISSIONE // raggiungi IT e avvia la tua workstation prima del manager.");
- const m=npcs.find(n=>n.id==="manager");if(m){m.state="managerTravel";m.route=managerStartRoute();m.routeIndex=0}
+ if(shiftStarted)return;
+ shiftStarted=true;state.min=540;introStage="reachPC";introManagerAlerted=true;
+ const m=npcs.find(n=>n.id==="manager");
+ if(m){
+   m.exclaimUntil=performance.now()+1500;
+   m.state="managerRace";m.route=managerStartRoute();m.routeIndex=0;
+ }
+ showMissionBanner(
+   "ARRIVA PRIMA DI LUI",
+   "Raggiungi il REPARTO IT e accendi la tua workstation prima dell'IT Manager.",
+   "VITTORIA // +100 XP · +REPUTAZIONE",
+   "MISSIONE // APERTURA TURNO"
+ );
+ phoneMessage("IT MANAGER","Vediamo se almeno stamattina riesci ad accendere il PC prima di me.");
 }
 function bootWorkstation(){
  if(introStage!=="reachPC")return false;
@@ -880,8 +1049,12 @@ function bootWorkstation(){
    if(!powered)return;
    $("#modal").classList.add("hidden");
    introStage="done";managerRaceDone=true;
-   if(won){state.xp+=100;state.rep=Math.min(5,state.rep+1);toast("PC ACCESO PRIMA DEL MANAGER // +100 XP")}
-   else toast("POSTAZIONE OPERATIVA // TURNO AVVIATO");
+   if(won){
+     state.xp+=100;state.rep=Math.min(5,state.rep+1);
+     showRewardResult("MISSIONE COMPLETATA",["ARRIVATO PRIMA DELL'IT MANAGER","XP +100","REPUTAZIONE +1"],"success");
+   }else{
+     showRewardResult("MISSIONE COMPLETATA",["POSTAZIONE OPERATIVA","IT MANAGER ARRIVATO PRIMA","STRESS +4"],"failure");
+   }
    newTicket("LOW");
  };
  return true;
@@ -889,29 +1062,14 @@ function bootWorkstation(){
 
 /* V5.3.2 — IT MANAGER DEDICATED PATH */
 
-function managerStartRoute(){
- return findNpcPath({x:650,y:800},{x:190,y:640,room:"IT"});
-}
+function managerStartRoute(){const m=npcs.find(n=>n.id==="manager");const from=m?{x:m.x,y:m.y}:{x:650,y:800};return findNpcPath(from,{x:190,y:670,room:"IT"});}
 function managerITtoServerRoute(){
  return findNpcPath({x:190,y:640},{x:650,y:190,room:"SERVER"});
 }
 function managerServerToITRoute(){
  return findNpcPath({x:650,y:190},{x:190,y:640,room:"IT"});
 }
-function moveManagerRoute(n,dt){
- if(!n.route||!n.route.length||n.routeIndex>=n.route.length)return true;
- const p=n.route[n.routeIndex];
- const dx=p.x-n.x,dy=p.y-n.y,d=Math.hypot(dx,dy);
- if(d<6){
-   n.x=p.x;n.y=p.y;n.routeIndex++;
-   return n.routeIndex>=n.route.length;
- }
- const step=(n.speed||58)*dt;
- // Percorso manuale già validato: niente collisione generica che lo incastra sui bordi porta.
- if(Math.abs(dx)>0)n.x+=Math.sign(dx)*Math.min(Math.abs(dx),step);
- if(Math.abs(dy)>0)n.y+=Math.sign(dy)*Math.min(Math.abs(dy),step);
- return false;
-}
+function moveManagerRoute(n,dt){if(!n.route||!n.route.length||n.routeIndex>=n.route.length)return true;const old=n.speed;n.speed=n.raceSpeed||96;const done=moveNpcRoute(n,dt);n.speed=old;return done;}
 
 function safeRoom(obj,fallback="CORRIDOIO"){return obj&&typeof obj.room==="string"&&obj.room?obj.room:fallback;}
 function safePoint(obj,fallback={x:820,y:705,room:"CORRIDOIO"}){if(!obj||!Number.isFinite(obj.x)||!Number.isFinite(obj.y))return {x:fallback.x,y:fallback.y,room:safeRoom(fallback)};return {x:obj.x,y:obj.y,room:safeRoom(obj,safeRoom(fallback))};}
@@ -949,7 +1107,6 @@ function updateManager(dt){
    const raceArrived=moveManagerRoute(m,dt);
    m.speed=normalSpeed;
    if(raceArrived){
-     m.x=190;m.y=640;
      m.state="desk";
      // Se il player non ha ancora avviato il PC, il Manager ha vinto la corsa.
      if(introStage==="reachPC"&&!managerRaceDone&&!managerPenaltyDone){
@@ -963,7 +1120,7 @@ function updateManager(dt){
 
  // V5.3.2 FINAL: postazione IT fissa; solo IT <-> SERVER. Ticket globali.
  if(m.state==="managerTravel"){
-   if(moveManagerRoute(m,dt)){m.state="desk";m.x=190;m.y=640;
+   if(moveManagerRoute(m,dt)){m.state="desk";
      if(introStage==="reachPC"&&!managerRaceDone&&!managerPenaltyDone){managerPenaltyDone=true;state.stress+=4;state.rep=Math.max(0,state.rep-1);storyDialog("IT MANAGER","Buongiorno... il PC magari lo accendiamo? Ti stanno già cercando.")}
    }
  }
@@ -988,7 +1145,7 @@ function updateManager(dt){
    }
  }
  if(m.state==="managerReturnIT"){
-   if(moveManagerRoute(m,dt)){m.x=190;m.y=640;m.state="desk";m.moveTimer=40+Math.random()*65}
+   if(moveManagerRoute(m,dt)){m.state="desk";m.moveTimer=40+Math.random()*65}
  }
  if(introStage==="done"&&state.min>560&&Math.random()<.00045){
    const level=managerDispatchTicket();
@@ -1184,18 +1341,10 @@ function setLunchPositions(){
 function leaveLunch(){forceLunchReturn();}
 function updateLunchState(){ updateLunchMigration(1/60); }
 
-function beginEntranceWalk(){
- introFreeWalk=true;
- entranceOpened=false;
- const box=$("#storyBox")||$("#gbDialog")||$("#dialogBox")||document.querySelector(".storyBox");
- if(box)box.classList.add("hidden");
- const overlay=$("#storyOverlay")||$("#dialogOverlay");
- if(overlay)overlay.classList.add("hidden");
- toast("RAGGIUNGI L'INGRESSO // E — ENTRA");
-}
+function beginEntranceWalk(){introFreeWalk=true;entranceOpened=true;const box=$("#storyDialog");if(box)box.classList.add("hidden");toast("ENTRA NELLO STUDIO");}
 
 
-function runV7Audit(){
+function runV8Audit(){
  const issues=[];
  const workRooms=["EDITORIA","BIM","INTERIOR","RENDERISTI"];
  for(const room of workRooms){
@@ -1220,7 +1369,7 @@ function runV7Audit(){
   const p=findNpcPath({x:n.homeX,y:n.homeY},{x:790,y:705,room:"CORRIDOIO"});
   if(!p.length)issues.push(`PATH: ${n.name}/${n.homeRoom} non raggiunge corridoio`);
  }
- console.log("V7 AUDIT:",issues.length?issues:"OK");
+ console.log("V9 AUDIT:",issues.length?issues:"OK");
  return issues;
 }
 function runV6Audit(){
@@ -1230,7 +1379,7 @@ function runV6Audit(){
  if(stations.filter(s=>s.room==="HR").length!==1)issues.push("HR deve avere una sola postazione");
  const privateAmbient=ambientNPCs.filter(n=>PRIVATE_ROOMS.has(n.homeRoom));if(privateAmbient.length)issues.push("NPC ambient assegnati a stanze private");
  const kitchenPC=stations.filter(s=>s.room==="CUCINA"&&["HP Z","MAC"].includes(s.type));if(kitchenPC.length)issues.push("PC presenti in cucina");
- console.log("V7 AUDIT:",issues.length?issues:"OK");return issues;
+ console.log("V9 AUDIT:",issues.length?issues:"OK");return issues;
 }
 function reset(){
  bettySupportCooldown=0;bettyPinged=false;bettyLastStressBand=0;
@@ -1238,7 +1387,7 @@ function reset(){
  Object.keys(npcRelations).forEach(k=>delete npcRelations[k]);
 
  introFreeWalk=false;entranceOpened=false;enteredStudio=false;window.__entranceDialogReady=false;
-const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();runV7Audit();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio."),250));}
+const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;studioEvent=null;studioEventNext=610;eventSerial=0;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();runV8Audit();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio."),250));}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x, y) {
   if (!walkZones.some(z => inside(z, x, y))) {
@@ -1327,12 +1476,10 @@ function miniHeader(t,title,subtitle){
 
 
 function showRewardResult(title,rows,kind="success"){
- const ov=$("#rewardOverlay"),box=$("#rewardRows"),ttl=$("#rewardTitle");
- if(!ov||!box||!ttl){toast(title+" // "+rows.join(" · "));return}
- ttl.textContent=title;ttl.className=kind;
- box.innerHTML=rows.map(x=>`<div>${x}</div>`).join("");
- ov.classList.remove("hidden");
- $("#rewardContinue").onclick=()=>{ov.classList.add("hidden");setTimeout(flushDeferredDialog,80)};
+ const ov=$("#rewardOverlay"),box=$("#rewardRows"),ttl=$("#rewardTitle");if(!ov||!box||!ttl){toast(title+" // "+rows.join(" · "));return}
+ if(window.__rewardTimer)clearTimeout(window.__rewardTimer);ttl.textContent=title;ttl.className=kind;box.innerHTML=rows.map((x,i)=>`<div><span>${i===0?"✓":"+"}</span><b>${x}</b></div>`).join("");ov.classList.remove("hidden");
+ const close=()=>{if(ov.classList.contains("hidden"))return;ov.classList.add("hidden");window.removeEventListener("keydown",key);clearTimeout(window.__rewardTimer);setTimeout(flushDeferredDialog,80)};
+ const key=e=>{if(e.key==="Enter"||e.key.toLowerCase()==="e"){e.preventDefault();close()}};window.addEventListener("keydown",key);$("#rewardContinue").onclick=close;window.__rewardTimer=setTimeout(close,5200);
 }
 function miniSuccess(i,label,skipContext=false){
  if(i<0||i>=tickets.length)return;
@@ -1599,20 +1746,8 @@ function nearStudioEntrance(){
 }
 function tryStudioEntrance(){
  if(!introFreeWalk||enteredStudio||!nearStudioEntrance())return false;
- entranceOpened=true;
- enteredStudio=true;
- introFreeWalk=false;
- // Move just inside the lobby, not deep into the studio.
- player.x=745;player.y=790;
- // Start greeting only after crossing the entrance.
- setTimeout(()=>{
-   if(typeof showStoryDialog==="function")showStoryDialog("ZIA ALE","Buongiorno!");
-   else if(typeof showDialogue==="function")showDialogue("ZIA ALE","Buongiorno!");
-   else phoneMessage("ZIA ALE","Buongiorno!");
- },180);
- if(state&&state.min<9*60)state.min=9*60-1;
- toast("SEI ENTRATO NELLO STUDIO");
- return true;
+ entranceOpened=true;enteredStudio=true;introFreeWalk=false;player.x=745;player.y=790;introStage="entranceGreeting";if(state&&state.min<540)state.min=539;
+ storyDialog("ZIA ALE","Buongiorno! Il manager è già in arrivo. Vai ad accendere la tua postazione in IT.",()=>{introStage="managerTrigger";const m=npcs.find(n=>n.id==="manager");if(m){m.state="managerWatch";m.exclaimUntil=performance.now()+1800}introMissionArmed=true;toast("! // L'IT MANAGER TI HA VISTO")});return true;
 }
 
 
@@ -1699,6 +1834,7 @@ function interact(){
    return
  }
  if(bootWorkstation())return;
+ if(interactStudioEvent())return;
  if(interactCarry())return;
  let i=tickets.findIndex(t=>Math.hypot(player.x-t.p.x,player.y-t.p.y)<75);
  if(i<0){
@@ -1833,7 +1969,7 @@ function updateWorkloadStress(dt){
  const open=tickets.length,critical=tickets.filter(t=>t.level==="CRITICAL").length,high=tickets.filter(t=>t.level==="HIGH").length;
  const hostile=[...ambientNPCs,...npcs].filter(n=>ensureRelation(n)<=-15).length;
  const deadline=tickets.filter(t=>t.due-state.min<25).length;
- const pressure=Math.max(0,open-1)*0.62+high*0.55+critical*1.10+deadline*.55+hostile*.025+(state.incident/100)*.42;
+ const pressure=.035+open*.30+Math.max(0,open-1)*.52+high*.62+critical*1.18+deadline*.60+hostile*.03+(state.incident/100)*.48;
  if(pressure>0)state.stress+=pressure*dt*difficultyConfig[difficulty].stressMult;
  if(open===0&&!isLunch())state.stress=Math.max(0,state.stress-.055*dt);
  if(isLunch()&&open<2)state.stress=Math.max(0,state.stress-.16*dt);
@@ -1846,22 +1982,30 @@ function update(dt) {
  updateLunchReturn(dt);
 
  monitorEntranceIntro();
+ if(introFreeWalk&&!enteredStudio&&nearStudioEntrance())tryStudioEntrance();
+ if(introStage==="managerTrigger"&&introMissionArmed){
+   const m=npcs.find(n=>n.id==="manager");
+   if(!m||Math.hypot(player.x-m.x,player.y-m.y)<190){introMissionArmed=false;startShiftFromEntrance()}
+ }
 
  if(state.phase==="shift"){
   let dx=(keys.d||keys.arrowright||virtualKeys.right?1:0)-(keys.a||keys.arrowleft||virtualKeys.left?1:0)+(joyActive?joyX:0),
       dy=(keys.s||keys.arrowdown||virtualKeys.down?1:0)-(keys.w||keys.arrowup||virtualKeys.up?1:0)+(joyActive?joyY:0);
-  if(Math.abs(dx)>.04||Math.abs(dy)>.04){let l=Math.max(1,Math.hypot(dx,dy)),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(playerCanMove(player.x,player.y,player.x+vx,player.y))player.x+=vx;if(playerCanMove(player.x,player.y,player.x,player.y+vy))player.y+=vy}
+  if(introStage!=="entranceGreeting"&&(Math.abs(dx)>.04||Math.abs(dy)>.04)){let l=Math.max(1,Math.hypot(dx,dy)),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(playerCanMove(player.x,player.y,player.x+vx,player.y))player.x+=vx;if(playerCanMove(player.x,player.y,player.x,player.y+vy))player.y+=vy}
   // V5.1.1.1: the shift starts only after the player physically crosses the exterior door.
-  if(introStage==="entering" && player.y<855 && player.x>610 && player.x<705){startShiftFromEntrance()}
+  if(introStage==="managerTrigger"&&introMissionArmed){
+   const m=npcs.find(n=>n.id==="manager");
+   if(m&&Math.hypot(player.x-m.x,player.y-m.y)<190){introMissionArmed=false;startShiftFromEntrance()}
+  }
+  
   if(shiftStarted)state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed); if(state.min>=BOSS){startBoss();hud();return}
   spawnTimer+=dt;anomTimer+=dt;
  updateLunchMigration(dt);
  updateManager(dt);
  updateNarrative();
- if(!firstCarryTriggered && state.min>=START+3){
-   firstCarryTriggered=true;
-   startTutorialCarryMission();
- }
+ maybeStartStudioEvent();
+ updateStudioEvent(dt);
+ if(!firstCarryTriggered && state.min>=START+3){ firstCarryTriggered=true; }
    
  const hr=Math.floor(state.min/60);
  if(hr!==lastZiaHour&&!isLunch()){
@@ -2093,7 +2237,7 @@ function furniture(){
  centralDesk6(355,385,380); centralDesk6(355,505,380); // CENTRALE 6 + 6, corridoio centrale libero
  // Reparto IT: due postazioni soltanto, PG + Manager.
  desk(78,650,145); desk(78,585,145);
- meetingRoomSetup(870,115,135,925,205);meetingRoomSetup(875,425,205,1030,480);meetingRoomSetup(1330,485,185,1395,535);
+ meetingRoomSetup(872,155,126,935,105);meetingRoomSetup(875,435,225,1030,405);meetingRoomSetup(1340,500,180,1430,450);
  drawDiningTable();
  desk(1190,810,190); // solo banco stampanti
  for(let x=565;x<710;x+=42)serverRack(x,115);
@@ -2102,20 +2246,12 @@ function furniture(){
  [[70,75],[345,75],[575,75],[870,75],[1080,75],[1275,75],[350,330],[890,385],[1320,420],[870,755],[1180,755]].forEach(p=>lightFixture(...p));
 }
 function meetingRoomSetup(x,y,w,screenX,screenY){
- // tavolo grande
- g.fillStyle="#171311";g.fillRect(x+4,y+5,w,34);
- g.fillStyle="#6b4224";g.fillRect(x,y,w,28);
- g.fillStyle="#8a5a31";g.fillRect(x,y,w,4);
- // sedie
- for(let sx=x+18;sx<x+w-10;sx+=42){
-   g.fillStyle="#252b28";g.fillRect(sx,y-18,22,14);g.fillRect(sx,y+32,22,14);
- }
- // grande display a parete
- g.fillStyle="#111815";g.fillRect(screenX-32,screenY-75,64,34);
- g.fillStyle="#58a0b8";g.fillRect(screenX-27,screenY-70,54,24);
- // Wacom / controller sul tavolo
- g.fillStyle="#26302d";g.fillRect(x+w/2-18,y+7,36,16);
- g.strokeStyle="#74a6b5";g.strokeRect(x+w/2-18,y+7,36,16);
+ const room=Object.keys(V9_MEETINGS).find(k=>Math.abs(V9_MEETINGS[k].table.x-x)<20)||"SALA MEET";
+ const c=V9_MEETINGS[room],t=c.table,s=c.screen;
+ g.fillStyle="#171311";g.fillRect(t.x+4,t.y+5,t.w,38);g.fillStyle="#6b4224";g.fillRect(t.x,t.y,t.w,30);g.fillStyle="#8a5a31";g.fillRect(t.x,t.y,t.w,4);
+ c.seats.forEach(q=>{g.fillStyle="#303631";g.fillRect(q.x-11,q.y-7,22,14)});
+ g.fillStyle="#111815";g.fillRect(s.x-34,s.y-18,68,36);g.fillStyle="#58a0b8";g.fillRect(s.x-29,s.y-13,58,26);
+ g.fillStyle="#26302d";g.fillRect(t.x+t.w/2-18,t.y+7,36,16);g.strokeStyle="#74a6b5";g.strokeRect(t.x+t.w/2-18,t.y+7,36,16);
 }
 function drawBathroomFixtures(){
  // V5.3.5: BAGNI puliti — soltanto due porte WC.
@@ -2206,16 +2342,7 @@ function draw(){
  if(useCam){g.save();g.scale(cam.zoom,cam.zoom);g.translate(-cam.x,-cam.y)}
  g.fillStyle="#050706";g.fillRect(0,0,W,H);
  corridors.forEach(visualCorridor);
- // V5.1.1 — ingresso esterno realmente giocabile
- if(introStage==="outside"||introStage==="entering"){
-   g.fillStyle="#1a1d1b";g.fillRect(500,850,225,70);
-   g.strokeStyle="#49534d";g.lineWidth=3;g.strokeRect(500,850,225,70);
-   g.fillStyle="#2b1c11";g.fillRect(615,825,70,35);
-   g.fillStyle="#9a6a3c";g.fillRect(620,827,60,8);
-   g.fillStyle="#d6e0d8";g.font="bold 10px monospace";g.fillText("INGRESSO STUDIO",598,817);
-   if(introStage==="outside"&&Math.hypot(player.x-655,player.y-875)<105){g.fillStyle="#ffd447";g.font="bold 12px monospace";g.fillText("E — APRI",620,905)}
-   if(introStage==="entering"){g.fillStyle="#7dff91";g.font="bold 11px monospace";g.fillText("PORTA APERTA",610,905)}
- }
+ // V9: esterno unico; nessuna seconda porta grafica o interazione duplicata.
  
  // V5.1.2 real studio entrance
  if(introFreeWalk&&!enteredStudio){
@@ -2226,7 +2353,7 @@ function draw(){
    if(nearStudioEntrance()){
      g.fillStyle="rgba(4,8,6,.94)";g.fillRect(d.x-5,d.y-38,d.w+10,28);
      g.strokeStyle="#b7ff4a";g.lineWidth=2;g.strokeRect(d.x-5,d.y-38,d.w+10,28);
-     g.fillStyle="#b7ff4a";g.font="bold 10px monospace";g.fillText("E — ENTRA",d.x+26,d.y-20);
+     g.fillStyle="#b7ff4a";g.font="bold 10px monospace";g.fillText("ENTRA",d.x+34,d.y-20);
    }
  }
 
@@ -2234,6 +2361,7 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  rooms.forEach(drawRoomWalls);
  doors.forEach(visualDoor);
  furniture();
+ if(debug){g.save();g.fillStyle="rgba(255,65,65,.20)";g.strokeStyle="#ff4141";g.lineWidth=2;obstacles.forEach(o=>{g.fillRect(o.x,o.y,o.w,o.h);g.strokeRect(o.x,o.y,o.w,o.h)});g.restore()}
  drawServerRacks();
  rooms.forEach(label);
 
@@ -2243,7 +2371,7 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
    g.fillStyle=s.type==="PIXERA"?"#725b96":"#3d778e";g.fillRect(s.x-14,s.y-9,28,14);
  });
  [...npcs,...(mokasa?[mokasa]:[])].forEach(n=>{
-   drawPixelPerson(n.x,n.y,n.shirt,"#d0a887",n.tone==="bad"?"#3a1717":"#202522");
+   drawPixelPerson(n.x,n.y,n.shirt,n.skin||"#d0a887",n.hair||(n.tone==="bad"?"#3a1717":"#202522"));
    g.fillStyle="#050706";g.fillRect(px(n.x)-30,px(n.y)-39,60,13);
    g.fillStyle=n.tone==="bad"?"#ff6262":n.tone==="good"?"#62e568":"#ffd447";
    g.font="bold 9px monospace";g.textAlign="center";g.fillText(n.name,px(n.x),px(n.y)-30);g.textAlign="left";
@@ -2259,6 +2387,8 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  g.fillStyle="#4b3423";g.fillRect(78,605,145,18);
  g.fillStyle="#222a26";g.fillRect(82,578,137,27);
  // V6.5: nessuna etichetta sopra le postazioni; il nome è nella targa stanza.
+
+ drawStudioEventObjects();
 
  // Marker missione inventario
  if(carryMission){
@@ -2324,6 +2454,7 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  });
 
 
+ const ep=studioEventPrompt();if(ep){g.fillStyle="#ffd65a";g.font="bold 10px monospace";g.fillText(ep,px(player.x)-80,px(player.y)-48)}
  const cp=carryPrompt();
  if(cp){
    const w=Math.min(390,cp.length*7+24),x=player.x-w/2,y=player.y-55;
@@ -2529,6 +2660,9 @@ window.addEventListener("error",function(ev){
  let old=document.getElementById("runtimeError");
  if(old)return;
  let d=document.createElement("div");d.id="runtimeError";
- d.textContent="JS ERROR V7.0 // "+(ev.message||"errore sconosciuto");
+ d.textContent="JS ERROR V9.0 // "+(ev.message||"errore sconosciuto");
  document.body.appendChild(d);
 });
+
+// V9 accessibility: home e setup utilizzabili anche senza mouse.
+window.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key.toLowerCase()!=="e")return;const boot=document.querySelector("#boot.active"),lore=document.querySelector("#lore.active");if(boot){e.preventDefault();document.querySelector("#toLore")?.click()}else if(lore){e.preventDefault();document.querySelector("#start")?.click()}});

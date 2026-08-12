@@ -114,3 +114,28 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Stress più sensibile a coda, deadline, HIGH/CRITICAL e NPC ostili.
 - DEBUG F2 protetto e ampliato con route/stato/homeRoom/STUCK di tutti gli NPC.
 - Audit V7 su PC/NPC/stanze private/Cucina/Bagni/homeRoom/path principali.
+
+# V8.0 — EVENTS & OPENING
+- Ingresso reso sequenziale: porta -> saluto Zia Ale -> ! IT Manager -> corsa obbligatoria.
+- Grande banner centrale della missione iniziale: arrivare in Reparto IT e accendere il PC prima del Manager.
+- IT Manager usa lo stato managerRace e la sua velocità dedicata; non è più bypassabile entrando nello studio.
+- Nuovo sistema STUDIO EVENTS distinto dai ticket.
+- Evento Amazon: pacchi fisici in ingresso; NPC ritirano i propri, il player porta due pacchi IT al Reparto IT.
+- Evento Meeting urgente: recupero fisico EXTENDER HDMI da IT e consegna in Sala Meet.
+- Evento Cambio postazione: trasporto MONITOR a un NPC.
+- NPC helper possono trasportare visivamente pacchi e seguire un percorso verso il proprio reparto.
+- DON ha sprite con carnagione più scura e capelli dedicati, coerente con lo stile pixel-art.
+- Il vecchio tutorial automatico CUFFIE a +3 minuti è rimosso: gli oggetti entrano in gioco tramite eventi e missioni contestuali.
+
+
+# V9.0 — STUDIO CONSOLIDATION
+- Home esterna completamente ridisegnata e credit “Creato e sviluppato da B3pZ”.
+- Ingresso a soglia unica: niente seconda porta/E obbligatoria.
+- IT Manager usa pathfinding collision-aware; rimossi snap/teleport durante la corsa iniziale.
+- Collisioni riallineate ai soli arredi visibili; F2 mostra le hitbox reali in rosso.
+- Sedute workstation corrette per EDITORIA/BIM/INTERIOR/RENDERISTI/CENTRALE.
+- Sale meeting ridisegnate con tavolo, display e sedute reali condivise con l'AI.
+- Gli NPC in meeting occupano una sedia disponibile.
+- Result Popup 2.0: ENTER/E/click/auto-close 5.2s.
+- Minigiochi ridimensionati e griglia responsive; resta attiva la regola 3 errori = intervento fallito.
+- Pressione/stress più dinamici durante il turno.
