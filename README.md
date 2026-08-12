@@ -38,3 +38,9 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Sistema relazioni AMICO / NEUTRALE / OSTILE con effetti su deadline e difficoltà.
 - Task completate migliorano il rapporto; task scadute lo peggiorano.
 - HR: un solo NPC, una sola postazione/PC, fisso nella stanza e con consigli utili.
+
+## V5.3.4 — IT MANAGER ENTRANCE PATH
+- Corretta la corsa iniziale del Manager dalla Segreteria al Reparto IT.
+- Il Manager si allinea alla porta prima di attraversarla, evitando il muro.
+- Aggiunto stato managerRace dedicato.
+- F2 mostra la route corrente del Manager in giallo.

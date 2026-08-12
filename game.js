@@ -776,6 +776,25 @@ function bootWorkstation(){
 }
 
 /* V5.3.2 — IT MANAGER DEDICATED PATH */
+
+function managerStartRoute(){
+ // V5.3.4: uscita sicura dalla Segreteria.
+ // Prima si allinea alla porta, poi attraversa la soglia, poi imbocca il corridoio.
+ return [
+   {x:760,y:790},  // dentro Segreteria, lato porta
+   {x:800,y:790},  // allineamento orizzontale
+   {x:820,y:755},  // soglia
+   {x:820,y:705},  // fuori dalla stanza
+   {x:760,y:705},  // corridoio basso
+   {x:650,y:705},
+   {x:540,y:705},
+   {x:430,y:705},
+   {x:340,y:680},
+   {x:260,y:640},
+   {x:190,y:640}   // postazione IT
+ ];
+}
+
 function managerRouteTo(target){
  const route=[];
  if(target.room==="SERVER"){
@@ -792,6 +811,20 @@ function managerRouteTo(target){
  return route;
 }
 function updateManager(dt){
+ if(m.state==="managerRace"){
+   if(moveNpcRoute(m,dt)){
+     m.x=190;m.y=640;
+     m.state="desk";
+     // Se il player non ha ancora avviato il PC, il Manager ha vinto la corsa.
+     if(introStage==="reachPC"&&!managerRaceDone&&!managerPenaltyDone){
+       managerPenaltyDone=true;
+       state.stress+=4;
+       state.rep=Math.max(0,state.rep-1);
+       storyDialog("IT MANAGER","Buongiorno... il PC magari lo accendiamo? Ti stanno già cercando.");
+     }
+   }
+ }
+
  // V5.3.2 FINAL: postazione IT fissa; solo IT <-> SERVER. Ticket globali.
 
  const m=npcs.find(n=>n.id==="manager");if(!m)return;
@@ -816,7 +849,7 @@ function updateManager(dt){
  if(m.state==="managerServerStay"){
    m.serverStay-=dt;
    if(m.serverStay<=0){
-     m.route=managerRouteTo({x:190,y:640,room:"IT"});
+     m.route=managerStartRoute();
      m.routeIndex=0;m.state="managerReturnIT";
    }
  }
@@ -1898,6 +1931,22 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
 
 
  if(debug){
+  if(itManager&&itManager.route&&itManager.route.length){
+    g.save();
+    g.strokeStyle="#ffd84a";g.lineWidth=3;g.beginPath();
+    g.moveTo(itManager.x,itManager.y);
+    for(let ri=itManager.routeIndex||0;ri<itManager.route.length;ri++){
+      const wp=itManager.route[ri];
+      g.lineTo(wp.x,wp.y);
+    }
+    g.stroke();
+    for(let ri=itManager.routeIndex||0;ri<itManager.route.length;ri++){
+      const wp=itManager.route[ri];
+      g.fillStyle="#ffd84a";g.fillRect(wp.x-4,wp.y-4,8,8);
+    }
+    g.restore();
+  }
+
   g.globalAlpha=.24;
   g.fillStyle="#37ff82";roomFloors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
   g.fillStyle="#2aa8ff";corridors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
