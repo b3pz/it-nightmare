@@ -195,3 +195,26 @@ body{background:#010201;overflow:hidden}
 .contextCheckAnswers{display:grid;gap:7px}
 .contextCheckAnswers button{padding:10px;text-align:left;background:#0e1511;color:#dfe9e2;border:2px solid #39473f;font:700 10px monospace;cursor:pointer}
 .contextCheckAnswers button:hover{border-color:#b7ff4a}
+
+/* =============================================================
+   V6.0 — STUDIO OVERHAUL
+   ============================================================= */
+#phoneNotification{top:96px!important;right:14px!important;left:auto!important;bottom:auto!important;width:min(330px,72vw)!important;z-index:86!important;pointer-events:none}
+#storyDialog{z-index:96!important}
+#modal{z-index:92!important}
+#modal section{width:min(820px,90vw)!important;max-height:78vh!important;overflow:auto!important}
+#modalBody{max-width:100%!important;overflow:hidden!important}
+.miniGame{width:100%!important;box-sizing:border-box!important;min-height:150px!important;max-height:48vh!important;overflow:auto!important;padding:16px!important;gap:10px!important}
+.miniGame>*{max-width:100%;box-sizing:border-box}.processRow,.fileRow{width:min(100%,560px)!important}.pixScreen{width:min(120px,30vw)!important}
+#miniError{height:auto!important;min-height:22px!important}
+.contextCheck{max-width:100%;box-sizing:border-box}.contextCheckAnswers button{white-space:normal}
+#pda{width:min(720px,90vw)!important}.tabletTabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:8px 0 12px}.tabletTabs span{padding:7px 4px;background:#101712;border:1px solid #3b4a40;text-align:center;color:#9cff73;font:700 8px monospace}
+#pda h4{margin:14px 0 6px;color:#6ee7ff;font:700 9px monospace;letter-spacing:2px}.relationshipList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.relRow{display:grid;grid-template-columns:70px 70px 1fr 34px;gap:5px;align-items:center;padding:6px;background:#0a100c;font:700 8px monospace}.relRow>i{height:6px;background:#232d27;display:block}.relRow>i>em{height:100%;display:block;background:#81948a}.relRow.friend{color:#8cff7a}.relRow.friend i em{background:#76e86a}.relRow.enemy{color:#ff6a64}.relRow.enemy i em{background:#e64e4e}.tabletState{padding:8px;background:#0a100c}
+@media(max-width:700px){#phoneNotification{top:86px!important;right:6px!important;width:64vw!important;font-size:10px!important}#modal section{width:94vw!important;max-height:64vh!important}.miniGame{max-height:38vh!important;padding:9px!important}.relationshipList{grid-template-columns:1fr}.relRow{grid-template-columns:58px 60px 1fr 30px}#pda{max-height:63vh!important}}
+
+/* V6.5 TABLET IT 2.0 */
+#jsError{position:fixed;left:8px;right:8px;top:118px;z-index:999;padding:13px;background:#4a0909;border:2px solid #ff5656;color:#fff;font:700 12px monospace}
+#pda{width:min(920px,92vw)!important;max-height:78vh!important;overflow:auto!important;background:#07100c!important;border:2px solid #52655a!important}
+.tabletTabs{display:grid!important;grid-template-columns:repeat(4,1fr)!important}.tabletTab{padding:10px;border:1px solid #405047;background:#0b120e;color:#91a198;font:700 10px monospace;cursor:pointer}.tabletTab.active{background:#173021;color:#b7ff4a;border-color:#79a08b}
+.ticketWindow{border:1px solid #52655a;background:#07100c}.windowTitle{display:flex;justify-content:space-between;padding:10px 12px;background:#15251d;border-bottom:1px solid #52655a;color:#dce5df}.windowTitle small{color:#81948a}.ticketColumns,.pdaTicketRow{display:grid;grid-template-columns:90px 90px 1fr 1fr 80px;gap:8px;align-items:center}.ticketColumns{padding:8px 10px;color:#7f9388;font-size:8px;border-bottom:1px solid #2c3932}.pdaTicketRow{width:100%;padding:10px;background:#09100c;border:0;border-bottom:1px solid #243129;color:#dce5df;text-align:left;font:700 10px monospace;cursor:pointer}.pdaTicketRow:hover{background:#132219}.pdaTicketRow .prio{padding:3px 5px}.pdaTicketRow .low{color:#8fe37d}.pdaTicketRow .medium{color:#ffc857}.pdaTicketRow .high,.pdaTicketRow .critical{color:#ff625b}.stateCards{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.stateCards b,.inventoryPda div{padding:12px;background:#0d1711;border:1px solid #334039}.ticketDetail{padding:12px}.osTitle{padding:8px 10px;margin:-12px -12px 18px}.winWindow .osTitle{background:#17375e;color:#fff}.macWindow{background:#171918;border-radius:10px}.macWindow .osTitle{background:#292c2a;border-radius:8px 8px 0 0;color:#ff6b65;letter-spacing:5px}
+@media(max-width:700px){#pda{width:94vw!important;max-height:66vh!important}.ticketColumns{display:none}.pdaTicketRow{grid-template-columns:70px 70px 1fr}.pdaTicketRow span:nth-of-type(2),.pdaTicketRow small{display:none}}

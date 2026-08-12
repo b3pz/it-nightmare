@@ -1,4 +1,4 @@
-// IT NIGHTMARE V5.3 STUDIO ROUTINE
+// IT NIGHTMARE V6.5 // STUDIO CONSOLIDATION
 const $=s=>document.querySelector(s),C=$("#game"),g=C.getContext("2d");g.imageSmoothingEnabled=false;
 const W=C.width,H=C.height,START=540,BOSS=1132,END=1140,TIME_SPEED=5.2;
 const difficultyConfig={
@@ -13,12 +13,12 @@ window.addEventListener("error",ev=>{
  const msg=ev?.error?.message||ev?.message||"Errore JavaScript";
  const line=ev?.lineno?` // line ${ev.lineno}`:"";
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V5.4.0 // ${msg}${line}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V6.5 // ${msg}${line}`;box.classList.remove("hidden")}
 });
 window.addEventListener("unhandledrejection",ev=>{
  const msg=ev?.reason?.message||String(ev?.reason||"Promise rejection");
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V5.4.0 // ${msg}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V6.5 // ${msg}`;box.classList.remove("hidden")}
 });
 
 const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
@@ -28,7 +28,7 @@ let bl=0;(function b(){if(bl<boot.length){$("#bootlog").innerHTML+=boot[bl++]+"<
 const rooms=[
 {name:"EDITORIA",x:30,y:55,w:250,h:210,f:"stone"},{name:"HR",x:300,y:55,w:205,h:210,f:"stone"},{name:"SERVER",x:525,y:55,w:230,h:210,f:"server"},
 {name:"BIM",x:30,y:310,w:210,h:185,f:"stone"},{name:"IT",x:30,y:535,w:210,h:180,f:"wood"},{name:"CENTRALE",x:315,y:310,w:440,h:355,f:"stone"},
-{name:"SALA MEET",x:840,y:55,w:190,h:270,f:"stone"},{name:"THE BUNKER",x:1050,y:55,w:170,h:270,f:"wood"},{name:"RENDERISTI",x:1240,y:55,w:210,h:270,f:"wood"},
+{name:"SALA MEET",x:840,y:55,w:190,h:270,f:"stone"},{name:"INTERIOR",x:1050,y:55,w:170,h:270,f:"wood"},{name:"RENDERISTI",x:1240,y:55,w:210,h:270,f:"wood"},
 {name:"SPAZIO A",x:840,y:365,w:300,h:185,f:"stone"},{name:"BAGNI",x:840,y:585,w:180,h:125,f:"tile"},{name:"RIFUGIO DIGITALE",x:1040,y:585,w:180,h:125,f:"wood"},
 {name:"SALA MEET CAPO",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO / SEGRETERIA",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:840,y:735,w:285,h:130,f:"tile"},{name:"STAMPANTI",x:1145,y:735,w:285,h:130,f:"stone"}];
 // NAVIGATION LAYER: corridoi enormi e porte sovradimensionate. Nessun bordo grafico è una collisione.
@@ -90,12 +90,12 @@ const EXTERIOR_DOOR={x:605,y:845,w:100,h:65};
 doors.push(EXTERIOR_DOOR);
 const walkZones=[...roomFloors,...corridors,...doors];
 const obstacles=[
-{x:385,y:420,w:290,h:42},{x:385,y:350,w:245,h:35},{x:75,y:145,w:155,h:45},{x:340,y:145,w:120,h:55},{x:565,y:115,w:150,h:90},
+{x:355,y:385,w:380,h:32},{x:355,y:505,w:380,h:32},{x:75,y:145,w:155,h:45},{x:340,y:145,w:120,h:55},{x:565,y:115,w:150,h:90},
 {x:75,y:385,w:125,h:55},{x:75,y:600,w:125,h:23},{x:885,y:160,w:105,h:115},{x:1080,y:155,w:100,h:60},{x:1280,y:155,w:125,h:70},{x:890,y:435,w:190,h:60},{x:1330,y:495,w:185,h:85},{x:885,y:775,w:180,h:55},{x:1190,y:775,w:190,h:60}
 ];
 const points=[
 {x:155,y:205,room:"EDITORIA",kind:"PC"},{x:400,y:205,room:"IT",kind:"PC"},{x:640,y:205,room:"SERVER",kind:"SERVER"},{x:140,y:450,room:"BIM",kind:"PC"},{x:140,y:660,room:"IT",kind:"PC"},
-{x:535,y:560,room:"CENTRALE",kind:"PC"},{x:940,y:285,room:"SALA MEET",kind:"MEETING"},{x:1135,y:285,room:"THE BUNKER",kind:"PC"},{x:1345,y:285,room:"RENDERISTI",kind:"PC"},{x:1010,y:520,room:"SPAZIO A",kind:"MEETING"},
+{x:535,y:560,room:"CENTRALE",kind:"PC"},{x:940,y:285,room:"SALA MEET",kind:"MEETING"},{x:1135,y:285,room:"INTERIOR",kind:"PC"},{x:1345,y:285,room:"RENDERISTI",kind:"PC"},{x:1010,y:520,room:"SPAZIO A",kind:"MEETING"},
 {x:1120,y:680,room:"RIFUGIO DIGITALE",kind:"PC"},{x:1430,y:650,room:"SALA MEET CAPO",kind:"MEETING"},{x:1020,y:835,room:"CUCINA",kind:"COFFEE"},{x:1290,y:835,room:"STAMPANTI",kind:"PRINTER"}];
 const bosses=["DIREZIONE","PRESIDENZA","CAPO ASSOLUTO"];
 const questionBanks={"MAC_ADOBE": [["Creative Cloud su macOS mostra l'utente disconnesso. Primo controllo?", ["Verificare sessione Adobe, rete e stato Creative Cloud", "Cancellare la cartella System", "Resettare il domain controller", "Cambiare VLAN"], 0], ["InDesign segnala font mancanti aprendo un progetto. Cosa verifichi?", ["Font richiesti, attivazione Adobe Fonts e Font Book", "DNS del server", "Driver GPU del server", "Spooler Windows"], 0], ["Photoshop non vede più un disco di memoria virtuale disponibile. Primo controllo?", ["Spazio libero e impostazioni Scratch Disks", "GPO Windows", "Porta HDMI", "Licenza Revit"], 0], ["Illustrator apre un file con collegamenti mancanti. Cosa controlli?", ["Percorsi e file collegati nel pannello Links", "DHCP", "Account Autodesk", "Firmware switch"], 0], ["Acrobat non stampa correttamente un PDF complesso. Primo test?", ["Provare stampa come immagine/altro PDF e verificare driver/coda", "Formattare il Mac", "Cambiare DNS aziendale", "Resettare Revit"], 0], ["Creative Cloud resta bloccato su sincronizzazione. Approccio corretto?", ["Controllare rete, account, stato servizi e log prima del reset", "Cancellare tutti i file Adobe", "Spegnere il NAS", "Cambiare monitor"], 0], ["Un Mac non monta una share SMB che gli altri vedono. Primo controllo?", ["Connettività, percorso smb:// e credenziali", "Reinstallare Photoshop", "Cambiare mouse", "Reset Pixera"], 0], ["InDesign esporta un PDF con immagini a bassa qualità. Cosa controlli?", ["Preset di esportazione e risoluzione delle immagini sorgenti", "DNS", "Bluetooth", "GPO"], 0], ["Font Book segnala un font duplicato. Cosa fai?", ["Valuti duplicati e disattivi/rimuovi quello errato", "Riavvii il server", "Resetti Desktop Connector", "Cambi IP"], 0], ["Un Mac ha pochissimo spazio libero e Adobe è lento. Prima azione?", ["Individuare cosa occupa spazio e liberare cache/file sicuri", "Cancellare /System", "Spegnere lo switch", "Cambiare VLAN"], 0], ["Photoshop non usa correttamente l'accelerazione grafica. Cosa verifichi?", ["Impostazioni GPU, compatibilità e aggiornamenti", "Permessi stampante", "DNS reverse", "Pixera"], 0], ["Un PDF esportato da InDesign ha font sostituiti. Causa probabile?", ["Font non disponibili/incorporabili o sostituiti nel documento", "Gateway errato", "Cavo HDMI", "DHCP esaurito"], 0]], "WORKSTATION": [["Una HP Z non naviga ma le altre sì. Primo controllo?", ["IP, gateway, DNS e link della singola workstation", "Riavviare tutti i server", "Formattare", "Cambiare switch core"], 0], ["Revit è molto lento solo su una workstation. Primo approccio?", ["Verificare risorse, modello, add-in e stato locale prima di interventi invasivi", "Reset dominio", "Cambiare stampante", "Spegnere NAS"], 0], ["Desktop Connector non sincronizza su un solo PC. Cosa controlli?", ["Account, stato client, cache e log", "Cancellare il progetto cloud", "Cambiare GPU", "Riavviare DHCP"], 0], ["Windows mostra disco C quasi pieno. Prima azione?", ["Analizzare occupazione e pulire file/cache sicuri", "Cancellare Windows", "Reset DNS", "Disinstallare driver rete"], 0], ["Una HP Z non vede il secondo monitor. Primo controllo?", ["Input, cavo, porta GPU e rilevamento display", "Active Directory", "Licenza Adobe", "Spooler"], 0], ["Office chiede continuamente autenticazione. Cosa controlli?", ["Account, token/credenziali e connettività ai servizi", "HDMI", "Driver plotter", "Pixera"], 0], ["Un'applicazione si chiude solo per un utente Windows. Primo test?", ["Verificare profilo, log evento e riproducibilità", "Riavviare tutti gli switch", "Cambiare VLAN globale", "Formattare server"], 0], ["La workstation non riceve policy aggiornate. Cosa puoi verificare?", ["Connettività dominio e gpupdate /force con eventuali errori", "Photoshop", "HDMI", "Toner"], 0], ["Il PC è acceso da molti giorni e ha comportamenti strani. Informazione utile?", ["Uptime e stato aggiornamenti prima di riavviare", "Numero di PDF", "Luminosità TV", "Pixera"], 0], ["Una periferica USB non viene rilevata. Primo approccio?", ["Provare porta/cavo/periferica e Gestione dispositivi", "Cambiare DNS", "Reset Autodesk", "Spegnere server"], 0], ["Revit non trova una stampante che Windows vede. Cosa controlli?", ["Driver, stampante predefinita e sessione/app", "DHCP server", "Adobe Fonts", "HDMI"], 0], ["Desktop Connector mostra file in conflitto. Cosa fai?", ["Identificare versione/stato sync prima di sovrascrivere", "Cancellare entrambe le copie", "Reset dominio", "Cambiare GPU"], 0]], "NETWORK": [["Ping IP funziona ma il nome server no. Sospetto principale?", ["DNS", "GPU", "HDMI", "Bluetooth"], 0], ["Più utenti perdono una share nello stesso momento. Priorità?", ["Capire ampiezza e verificare rete/server/servizio", "Formattare un client", "Cambiare mouse", "Reinstallare Adobe"], 0], ["Un client ha indirizzo 169.254.x.x. Cosa indica spesso?", ["Mancata assegnazione DHCP", "Errore GPU", "Problema PDF", "Licenza Autodesk"], 0], ["La rete cablata cade solo su una postazione. Primo controllo?", ["Cavo, presa, link e configurazione NIC", "Riavvio domain controller", "Reset Pixera", "Cambiare toner"], 0], ["Gateway risponde ma Internet no su più PC. Cosa verifichi?", ["DNS, routing/firewall e connettività a monte", "Mouse", "InDesign", "Monitor"], 0], ["Una share funziona per tutti tranne un utente. Cosa controlli?", ["Permessi, credenziali, mapping e connettività utente", "Switch core subito", "Formattare server", "HDMI"], 0], ["Una porta di rete non dà link. Primo test?", ["Cavo/patch/porta switch e stato fisico", "Adobe Fonts", "Revit cache", "Spooler"], 0], ["Connessione intermittente verso un server. Dato utile?", ["Ping continuo/log/perdita pacchetti e percorso", "Colore desktop", "Versione Acrobat", "Toner"], 0], ["DNS risolve un IP vecchio. Possibile causa?", ["Record/cache DNS non aggiornati", "GPU", "USB", "HDMI"], 0], ["Un servizio è raggiungibile localmente ma non dai client. Cosa controlli?", ["Firewall, binding, porta e routing", "Font Book", "Stampante USB", "Luminosità"], 0], ["Due dispositivi hanno lo stesso IP. Sintomo possibile?", ["Connettività intermittente/conflitto ARP", "PDF sgranati", "Revit lento", "Audio basso"], 0], ["Wi‑Fi funziona ma Ethernet no su un PC. Primo confronto?", ["Configurazione NIC, link e IP delle due interfacce", "Reset dominio", "Pixera", "Adobe"], 0]], "MEETING": [["TV accesa ma nessuna immagine dal PC. Primo controllo?", ["Input selezionato, sorgente e cavo HDMI", "DNS", "Revit", "Spooler"], 0], ["Zoom vede video ma non sente il microfono. Cosa controlli?", ["Dispositivo input e permessi microfono", "DHCP", "Adobe Fonts", "Plotter"], 0], ["Teams usa l'altoparlante sbagliato. Dove intervieni?", ["Selezione dispositivo audio in Teams/sistema", "DNS server", "Desktop Connector", "Pixera"], 0], ["Il mirroring non trova il display. Primo approccio?", ["Rete, receiver e compatibilità/stato servizio", "Formattare PC", "Reset dominio", "Cambiare toner"], 0], ["La webcam non compare nell'app meeting. Primo test?", ["Permessi, collegamento e altra app che la sta usando", "Revit cache", "DNS reverse", "Adobe"], 0], ["Immagine HDMI presente ma senza audio. Cosa controlli?", ["Output audio selezionato e capacità HDMI/display", "DHCP", "Stampante", "Font"], 0], ["Presentazione tagliata ai bordi sul TV. Cosa verifichi?", ["Risoluzione/scaling/aspect ratio", "Account Autodesk", "Spooler", "Gateway"], 0], ["Il telecomando della sala non risponde. Primo controllo?", ["Batterie e puntamento/stato dispositivo", "DNS", "Revit", "Creative Cloud"], 0], ["Il display cambia input da solo. Cosa indaghi?", ["Auto input/CEC/configurazione professionale", "Font Book", "DHCP", "Toner"], 0], ["Audio in videoconferenza produce eco. Prima correzione?", ["Evitare doppi microfoni/speaker e verificare dispositivi attivi", "Cambiare VLAN", "Reset Adobe", "Reinstallare Revit"], 0], ["PC collegato via USB-C non manda video. Cosa verifichi?", ["Supporto video della porta/adattatore e cavo", "DNS", "Spooler", "Licenza Acrobat"], 0], ["Sala meeting offline ma PC naviga. Cosa controlli?", ["IP/rete del dispositivo AV e servizio receiver", "Formattare PC", "Cambiare mouse", "Reset font"], 0]], "SERVER": [["Un servizio server non risponde. Primo approccio?", ["Verificare host, rete, servizio e log", "Riavviare tutto senza verifiche", "Cancellare DNS", "Cambiare monitor"], 0], ["Spazio disco server quasi esaurito. Prima azione?", ["Identificare volumi/cartelle in crescita e causa", "Cancellare log a caso", "Formattare", "Spegnere switch"], 0], ["Molti utenti non autenticano. Cosa controlli?", ["Servizi dominio, DNS, connettività e log", "HDMI", "Adobe", "Toner"], 0], ["Una share server è improvvisamente read-only. Cosa verifichi?", ["Permessi, filesystem/spazio e stato servizio", "GPU client", "Pixera", "Bluetooth"], 0], ["Backup segnala fallimento. Primo passo?", ["Leggere errore/log e verificare destinazione/spazio/connettività", "Ignorarlo", "Cancellare backup precedenti subito", "Riavviare ogni PC"], 0], ["Server raggiungibile via IP ma non hostname. Cosa controlli?", ["DNS", "GPU", "USB", "Adobe Fonts"], 0], ["CPU server al 100%. Prima di terminare processi?", ["Identificare processo/carico e raccogliere evidenze", "Spegnere server", "Cancellare profili", "Cambiare VLAN"], 0], ["Un volume storage è degradato. Priorità?", ["Verificare stato array/dischi e protezione dati", "Reinstallare Office", "Reset TV", "Cambiare mouse"], 0], ["Un servizio si arresta ripetutamente. Cosa cerchi?", ["Event log/log applicativo, dipendenze e causa", "Toner", "HDMI", "Font"], 0], ["Una porta TCP applicativa non risponde. Cosa verifichi?", ["Servizio in ascolto, firewall e percorso rete", "Photoshop", "Mouse", "Display"], 0], ["Permessi di una cartella sono cambiati. Prima azione?", ["Verificare ACL, audit e modifica prima di sovrascrivere", "Formattare server", "Reset DHCP", "Cambiare monitor"], 0], ["Dopo un riavvio un servizio non parte automaticamente. Cosa controlli?", ["Startup type, dipendenze e log di avvio", "Adobe", "HDMI", "Stampante"], 0]], "PRINT": [["Stampante di rete offline per tutti. Primo controllo?", ["Alimentazione, rete/IP e raggiungibilità", "Formattare client", "Reset dominio", "Revit"], 0], ["Coda di stampa bloccata su un PC. Cosa controlli?", ["Coda/spooler e job problematico", "DNS globale", "Pixera", "Adobe Fonts"], 0], ["Plotter stampa formato errato. Cosa verifichi?", ["Formato carta, driver e impostazioni applicazione", "DHCP", "Account Autodesk", "GPU server"], 0], ["PDF esce con caratteri strani. Primo test?", ["Altro PDF/driver e incorporamento font", "Reset switch", "Cambiare VLAN", "Revit cache"], 0], ["Solo un utente non vede la stampante condivisa. Cosa controlli?", ["Connessione/mapping, driver e permessi utente", "Spegnere server", "HDMI", "Pixera"], 0], ["Stampante ha IP diverso dal configurato sul PC. Soluzione?", ["Correggere porta TCP/IP o indirizzamento", "Formattare PC", "Reset Adobe", "Cambiare mouse"], 0], ["Job enorme blocca la coda. Approccio?", ["Identificare/rimuovere job e verificare spooler", "Riavviare dominio", "Cancellare DNS", "Spegnere NAS"], 0], ["Stampa molto lenta da un solo file. Cosa confronti?", ["Complessità file, driver e stampa come immagine", "DHCP", "Revit licensing", "Bluetooth"], 0], ["Plotter segnala carta ma il rotolo è presente. Primo controllo?", ["Caricamento/sensori/formato selezionato", "DNS", "Adobe", "Windows Update"], 0], ["Colori molto diversi in stampa. Cosa indaghi?", ["Profilo colore, driver e impostazioni applicazione", "Gateway", "Active Directory", "Pixera"], 0], ["Driver vecchio causa crash applicazione. Cosa fai?", ["Verificare/aggiornare driver compatibile", "Reset dominio", "Cancellare share", "Cambiare HDMI"], 0], ["Stampante risponde al ping ma Windows la mostra offline. Cosa controlli?", ["Porta, SNMP/stato, spooler e driver", "DNS soltanto", "GPU", "Font Book"], 0]], "PIXERA": [["Un monitor del Rifugio Digitale è nero. Primo controllo?", ["Alimentazione, input, segnale e player/Pixera", "Domain controller", "Revit", "Spooler"], 0], ["Pixera vede il player ma non manda contenuto. Cosa controlli?", ["Timeline/output/mapping e stato del player", "Adobe Fonts", "DHCP client casuale", "Mouse"], 0], ["Due display non sono sincronizzati. Cosa indaghi?", ["Sync, rete, timing e configurazione output", "Revit cache", "Toner", "Office"], 0], ["Il contenuto ha risoluzione errata. Cosa controlli?", ["Canvas/output resolution e mapping display", "DNS reverse", "Account Windows", "Stampante"], 0], ["Un player Pixera risulta offline. Primo test?", ["Rete/IP, alimentazione e servizio player", "Photoshop", "HDMI del laptop", "GPO"], 0], ["Il monitor mostra desktop invece del contenuto. Cosa verifichi?", ["Output assegnato/fullscreen e configurazione player", "DHCP server", "Revit", "Toner"], 0], ["Contenuto scatta su un display. Cosa controlli?", ["Prestazioni player, codec/media e rete", "Font Book", "Spooler", "Mouse"], 0], ["Pixera perde connessione dopo standby display. Cosa indaghi?", ["Power management, rete e handshake/output", "Adobe", "DNS cache client", "Revit"], 0], ["Un file media non viene riprodotto. Primo controllo?", ["Codec/formato, percorso e accessibilità del file", "Domain controller", "Stampante", "USB mouse"], 0], ["Display wall mostra ordine sbagliato. Cosa correggi?", ["Mapping/assegnazione output", "DNS", "Creative Cloud", "DHCP"], 0], ["Tutti i display diventano neri insieme. Priorità?", ["Verificare player/master, rete e distribuzione segnale", "Cambiare ogni monitor", "Reset font", "Revit"], 0], ["Pixera segnala media missing. Cosa fai?", ["Verificare percorso, storage e relink dei media", "Formattare player", "Reset dominio", "Cambiare toner"], 0]], "IT": [["Devi diagnosticare un PC lento. Quale dato raccogli per primo?", ["CPU/RAM/disco, uptime e processi", "Colore wallpaper", "Numero di monitor", "Versione PDF"], 0], ["Un utente non riesce a fare login. Primo approccio?", ["Verificare errore, rete, account e dominio", "Formattare PC", "Cambiare HDMI", "Reset Pixera"], 0], ["gpupdate /force restituisce errore. Cosa fai?", ["Leggere errore e verificare connettività/DNS/dominio", "Cancellare Windows", "Reset Adobe", "Cambiare stampante"], 0], ["Devi liberare spazio senza rischiare dati utente. Approccio?", ["Analizzare e pulire cache/temp sicure, non dati di lavoro", "Cancellare Desktop", "Formattare", "Eliminare profilo"], 0], ["Un software non parte dopo aggiornamento. Primo controllo?", ["Log/errore, compatibilità e dipendenze", "Riavviare switch", "Cambiare VLAN", "Toner"], 0], ["Devi capire se un servizio remoto risponde su una porta. Cosa verifichi?", ["Connettività host e test della porta specifica", "Photoshop", "HDMI", "Font"], 0], ["Utente ha password scaduta. Intervento corretto?", ["Gestire reset/cambio secondo policy e verificare account", "Creare account condiviso", "Disabilitare dominio", "Formattare"], 0], ["PC non applica una nuova configurazione. Cosa confronti?", ["Policy/config effettiva, log e riavvio se necessario", "Toner", "Pixera", "Illustrator"], 0], ["Un'app richiede admin per funzionare. Prima di concederlo?", ["Capire requisito e trovare soluzione a minimo privilegio", "Dare Domain Admin", "Disabilitare UAC ovunque", "Condividere password IT"], 0], ["Un utente segnala 'Internet rotto'. Prima domanda utile?", ["Capire cosa non funziona e se riguarda altri servizi/utenti", "Formattare", "Reset server", "Cambiare monitor"], 0], ["Devi riavviare un PC remoto dopo intervento. Cosa è importante?", ["Verificare lavoro utente e comunicare prima del riavvio", "Spegnere senza avviso", "Cancellare profilo", "Cambiare IP"], 0], ["Un errore compare dopo login solo per un utente. Cosa sospetti tra le prime cose?", ["Profilo/configurazione utente o startup specifico", "Switch core", "Pixera", "Plotter"], 0]]};
@@ -103,7 +103,7 @@ const questionDecks={};
 function categoryForStation(s){
  if(!s)return "IT";
  if(!s)return "WORKSTATION";
- if(s.room==="EDITORIA"||s.room==="THE BUNKER")return "MAC_ADOBE";
+ if(s.room==="EDITORIA"||s.room==="INTERIOR")return "MAC_ADOBE";
  if(s.room==="SERVER")return "SERVER";
  if(["SALA MEET","SPAZIO A","SALA MEET CAPO"].includes(s.room))return "MEETING";
  if(s.room==="RIFUGIO DIGITALE")return "PIXERA";
@@ -212,7 +212,7 @@ function drawQuestion(category){
 
 
 const npcDefs=[
- {id:"pao",name:"PAO",role:"BIMER",x:250,y:620,tone:"mixed",shirt:"#536f8b",hunter:true},
+ {id:"pao",name:"PAO",role:"BIMER",x:140,y:450,homeRoom:"BIM",homeX:140,homeY:450,tone:"mixed",shirt:"#536f8b",hunter:false,speed:58,state:"work"},
  {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,tone:"good",shirt:"#765d78"},
  {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51",hunter:true},{id:"hr",name:"BETTY",role:"HR",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:92,state:"outside"}];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
@@ -240,11 +240,11 @@ function relationOpening(n){
 
 let ambientNPCs=[];
 function spawnAmbient(){
- const seats=stations.filter(s=>["HP Z","MAC"].includes(s.type)&&s.room!=="HR");
+ const seats=stations.filter(s=>["HP Z","MAC"].includes(s.type)&&!["HR","IT","INGRESSO / SEGRETERIA"].includes(s.room));
  ambientNPCs=seats.map((s,i)=>({
-   name:ambientNames[i%ambientNames.length],homeX:s.x,homeY:s.y+24,x:s.x,y:s.y+24,
-   state:"work",timer:12+Math.random()*32,speed:52,shirt:["#4f6259","#665747","#4d596b","#6b4e57"][i%4],
-   route:[],routeIndex:0
+   id:"staff_"+s.id.toLowerCase(),name:ambientNames[i%ambientNames.length],homeRoom:s.room,homeX:s.x,homeY:s.y+28,x:s.x,y:s.y+28,
+   currentRoom:s.room,state:"work",timer:14+Math.random()*28,speed:56,shirt:["#4f6259","#665747","#4d596b","#6b4e57"][i%4],
+   route:[],routeIndex:0,activity:null,activityTicket:false,stuckFor:0
  }));
 }
 const officeWaypoints=[
@@ -292,35 +292,7 @@ function buildRoute(n,toKitchen){
    {x:n.homeX,y:675},{x:n.homeX,y:n.homeY}
  ];
 }
-function moveNpcRoute(n,dt){
- if(!n.route.length||n.routeIndex>=n.route.length)return true;
- const p=n.route[n.routeIndex],dx=p.x-n.x,dy=p.y-n.y,d=Math.hypot(dx,dy);
 
- if(d<9){
-   n.x=p.x;n.y=p.y;n.routeIndex++;n.blockedFor=0;
-   return n.routeIndex>=n.route.length;
- }
-
- const step=n.speed*dt;
- let moved=false;
- const tryX=()=>{
-   const sx=Math.sign(dx)*Math.min(Math.abs(dx),step);
-   if(playerCanMove(n.x,n.y,n.x+sx,n.y)){n.x+=sx;moved=true}
- };
- const tryY=()=>{
-   const sy=Math.sign(dy)*Math.min(Math.abs(dy),step);
-   if(playerCanMove(n.x,n.y,n.x,n.y+sy)){n.y+=sy;moved=true}
- };
- if(Math.abs(dx)>Math.abs(dy)){tryX();tryY()}else{tryY();tryX()}
-
- if(!moved){
-   n.blockedFor=(n.blockedFor||0)+dt;
-   // non restare eternamente contro una parete
-   if(n.blockedFor>1.5){n.routeIndex++;n.blockedFor=0}
- }else n.blockedFor=0;
-
- return n.routeIndex>=n.route.length;
-}
 
 const MEETING_ROOMS=[
  {room:"SALA MEET",x:925,y:215,spreadX:70,spreadY:55,weight:5},
@@ -346,22 +318,46 @@ function npcDestinationForActivity(n,activity){
  if(activity==="bathroom")return {x:900+Math.random()*55,y:650+Math.random()*20,room:"BAGNI"};
  return {x:n.homeX,y:n.homeY,room:"HOME"};
 }
+const PRIVATE_ROOMS=new Set(["HR","IT","INGRESSO / SEGRETERIA"]);
+const ROOM_EXITS={
+ "EDITORIA":{x:250,y:265},"HR":{x:455,y:265},"SERVER":{x:755,y:250},"BIM":{x:240,y:430},"IT":{x:250,y:675},
+ "CENTRALE":{x:710,y:610},"SALA MEET":{x:840,y:300},"INTERIOR":{x:1050,y:300},"RENDERISTI":{x:1240,y:300},
+ "SPAZIO A":{x:840,y:520},"BAGNI":{x:840,y:650},"RIFUGIO DIGITALE":{x:1040,y:650},"SALA MEET CAPO":{x:1290,y:650},
+ "INGRESSO / SEGRETERIA":{x:755,y:775},"CUCINA":{x:900,y:735},"STAMPANTI":{x:1180,y:735}
+};
+function roomAt(x,y){const r=rooms.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);return r?r.name:"CORRIDOIO"}
+function corridorRoute(from,to){
+ const a=safePoint(from),b=safePoint(to);const out=[];
+ // backbone: lower corridor y=705, central vertical x=790, upper corridor y=300.
+ const aTop=a.y<350,bTop=b.y<350;
+ const aRight=a.x>1000,bRight=b.x>1000;
+ if(aTop&&bTop){out.push({x:a.x,y:300},{x:b.x,y:300});}
+ else if(aRight&&bRight){out.push({x:1225,y:a.y},{x:1225,y:b.y});}
+ else{out.push({x:a.x,y:705},{x:790,y:705}); if(b.y<600)out.push({x:790,y:300}); out.push({x:b.x,y:b.y<600?300:705});}
+ return out;
+}
 function routeViaHub(n,target){
- target=safePoint(target,{x:n?.x||820,y:n?.y||705,room:"CORRIDOIO"});
- // Safe hub corridor system. The existing door/collision logic validates each segment.
- const route=[];
- const central=n.x>=350&&n.x<=720&&n.y>=360&&n.y<=650;
- const left=n.x<310;
- if(central)route.push({x:n.x,y:560},{x:690,y:560},{x:710,y:675});
- else if(left)route.push({x:250,y:n.y},{x:250,y:690},{x:350,y:705});
- else route.push({x:n.x,y:700});
- route.push({x:760,y:705},{x:900,y:705});
- if(["SALA MEET","SPAZIO A","SALA MEET CAPO"].includes(target.room))route.push({x:900,y:300},{x:target.x,y:target.y});
- else if(target.room==="RIFUGIO DIGITALE")route.push({x:1020,y:705},{x:target.x,y:target.y});
- else if(target.room==="STAMPANTI")route.push({x:1100,y:705},{x:1200,y:760},{x:target.x,y:target.y});
- else if(target.room==="BAGNI")route.push({x:850,y:705},{x:850,y:650},{x:target.x,y:target.y});
- else route.push({x:900,y:805},{x:target.x,y:target.y});
- return route;
+ target=safePoint(target,{x:n?.homeX||790,y:n?.homeY||705,room:n?.homeRoom||"CORRIDOIO"});
+ const route=[];const current=roomAt(n.x,n.y);const dest=safeRoom(target,"CORRIDOIO");
+ // Le stanze private non sono destinazioni di wandering.
+ if(PRIVATE_ROOMS.has(dest)&&!["hr","manager","zia"].includes(n.id)) return routeNpcHome(n);
+ const exitA=ROOM_EXITS[current],exitB=ROOM_EXITS[dest];
+ if(exitA)route.push({...exitA,room:"CORRIDOIO"});
+ if(exitA&&exitB)route.push(...corridorRoute(exitA,exitB));
+ else if(exitB)route.push(...corridorRoute({x:n.x,y:n.y,room:"CORRIDOIO"},exitB));
+ if(exitB)route.push({...exitB,room:dest});
+ route.push(target);return route;
+}
+function moveNpcRoute(n,dt){
+ if(!n.route||n.routeIndex>=n.route.length)return true;
+ const p=n.route[n.routeIndex],dx=p.x-n.x,dy=p.y-n.y,d=Math.hypot(dx,dy);
+ if(d<7){n.x=p.x;n.y=p.y;n.routeIndex++;n.stuckFor=0;if(n.routeIndex>=n.route.length)n.currentRoom=safeRoom(p,n.currentRoom);return n.routeIndex>=n.route.length;}
+ const step=(n.speed||56)*dt;
+ // Route V6 già vincolata a porte/corridoi: movimento ortogonale senza collisione dei mobili.
+ if(Math.abs(dx)>=Math.abs(dy))n.x+=Math.sign(dx)*Math.min(Math.abs(dx),step);else n.y+=Math.sign(dy)*Math.min(Math.abs(dy),step);
+ const moved=Math.min(d,step);n.stuckFor=moved<.2?(n.stuckFor||0)+dt:0;
+ if(n.stuckFor>1.2){n.x=p.x;n.y=p.y;n.routeIndex++;n.stuckFor=0;}
+ return n.routeIndex>=n.route.length;
 }
 function generateNpcActivityTicket(n){
  if(n.activityTicket||tickets.length>=difficultyConfig[difficulty].maxTickets||isLunch())return;
@@ -574,7 +570,7 @@ function carryPrompt(){
 }
 
 function spawnNPCs(){
- npcs=npcDefs.map(n=>({...n}));spawnAmbient();mokasa=null;npcCooldown={};mokasaTimer=0;lastZiaHour=-1;
+ npcs=npcDefs.map(n=>({...n}));spawnAmbient();mokasa={id:"mokasa",name:"CAPO",role:"DIREZIONE",x:1435,y:555,homeRoom:"SALA MEET CAPO",homeX:1435,homeY:555,tone:"bad",shirt:"#75483d",life:Infinity,court:false};npcCooldown={};mokasaTimer=0;lastZiaHour=-1;
  lastPlayerPos={x:player.x,y:player.y};idleMinutes=0;
 }
 function nearestNPC(){
@@ -676,7 +672,7 @@ function npcTalk(n){
   const r=Math.random(); if(r<.45){state.stress=Math.max(0,state.stress-6);desc="Un buon consiglio al momento giusto. STRESS -6";} else if(r<.8){state.xp+=12;desc="Ti suggerisce come organizzare le priorità. XP +12";} else {state.rep=Math.min(5,state.rep+1);desc="Una parola buona gira per lo studio. REPUTAZIONE +1";}
  }else if(n.id==="manager"){
   title="DISPATCH";good=false;
-  const levels=state.min>990?["HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];const wanted=levels[Math.floor(Math.random()*levels.length)];const lv=managerDispatchTicket(wanted);desc=lv?`«Mi hanno chiamato. Ti ho girato un ${lv}: controlla il PDA.»`:"«Mi hanno chiamato, ma hai già troppi ticket aperti. Chiudine uno.»";
+  const levels=state.min>990?["HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];const wanted=levels[Math.floor(Math.random()*levels.length)];const lv=managerDispatchTicket(wanted);desc=lv?`«Mi hanno chiamato. Ti ho girato un ${lv}: controlla il TABLET IT.»`:"«Mi hanno chiamato, ma hai già troppi ticket aperti. Chiudine uno.»";
    }else if(n.id==="mokasa"&&n.court){
   title="RICHIESTA DIREZIONE // EXTREME";good=false;
   const ok=Math.random()<.38;
@@ -727,24 +723,28 @@ function validateMap(){
  return bad;
 }
 const stations=[
- ...[[405,405],[455,405],[505,405],[555,405],[605,405],[655,405],
-     [405,480],[455,480],[505,480],[555,480],[605,480],[655,480]].map((p,i)=>({id:"C"+String(i+1).padStart(2,"0"),room:"CENTRALE",type:"HP Z",x:p[0],y:p[1]})),
- ...[[95,155],[145,155],[195,155],[120,205]].map((p,i)=>({id:"G"+String(i+1).padStart(2,"0"),room:"EDITORIA",type:"MAC",x:p[0],y:p[1]})),
- ...[[1080,170],[1130,170],[1170,220]].map((p,i)=>({id:"B"+String(i+1).padStart(2,"0"),room:"THE BUNKER",type:"MAC",x:p[0],y:p[1]})),
- ...[[350,155],[405,155],[455,205]].map((p,i)=>({id:"L"+String(i+1).padStart(2,"0"),room:"HR",type:"HP Z",x:p[0],y:p[1]})),
- ...[[110,385],[165,385],[135,450]].map((p,i)=>({id:"A"+String(i+1).padStart(2,"0"),room:"BIM",type:"HP Z",x:p[0],y:p[1]})),
- ...[[1300,165],[1360,165],[1415,215]].map((p,i)=>({id:"P"+String(i+1).padStart(2,"0"),room:"RENDERISTI",type:"HP Z",x:p[0],y:p[1]})),
- ...[[95,600],[150,600],[195,650]].map((p,i)=>({id:"IT"+String(i+1).padStart(2,"0"),room:"IT",type:"HP Z",x:p[0],y:p[1]})),
+ // CENTRALE V6.5: eccezione open-space, 2 tavoli x 6 persone = 12 postazioni.
+ ...[[385,405],[445,405],[505,405],[565,405],[625,405],[685,405],[385,525],[445,525],[505,525],[565,525],[625,525],[685,525]].map((p,i)=>({id:"C"+String(i+1).padStart(2,"0"),room:"CENTRALE",type:"HP Z",x:p[0],y:p[1]})),
+ // Reparti operativi: massimo 4 postazioni; qui 3 per lasciare spazio agli NPC.
+ ...[[95,155],[155,155],[215,155]].map((p,i)=>({id:"E"+String(i+1).padStart(2,"0"),room:"EDITORIA",type:"MAC",x:p[0],y:p[1]})),
+ ...[[1090,170],[1140,170],[1190,170]].map((p,i)=>({id:"I"+String(i+1).padStart(2,"0"),room:"INTERIOR",type:"MAC",x:p[0],y:p[1]})),
+ ...[[105,385],[165,385],[205,440]].map((p,i)=>({id:"B"+String(i+1).padStart(2,"0"),room:"BIM",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[1300,165],[1360,165],[1420,215]].map((p,i)=>({id:"R"+String(i+1).padStart(2,"0"),room:"RENDERISTI",type:"HP Z",x:p[0],y:p[1]})),
+ // Stanze private: una sola postazione HR; IT ha solo PG + Manager e non genera ambient NPC.
+ {id:"HR01",room:"HR",type:"PRIVATE",x:405,y:180},
+ {id:"IT-PG",room:"IT",type:"PRIVATE",x:125,y:650},
+ {id:"IT-MGR",room:"IT",type:"PRIVATE",x:190,y:640},
+ // Sale e infrastruttura.
  {id:"MEET-TV",room:"SALA MEET",type:"AV",x:925,y:205},
  {id:"SPAZIO-TV",room:"SPAZIO A",type:"AV",x:1030,y:480},
- {id:"CORTE-TV",room:"SALA MEET CAPO",type:"AV",x:1395,y:535},
+ {id:"CAPO-TV",room:"SALA MEET CAPO",type:"AV",x:1395,y:535},
  {id:"PIX-01",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1080,y:635},
  {id:"PIX-02",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1130,y:635},
  {id:"SRV-01",room:"SERVER",type:"SERVER",x:610,y:145},
  {id:"SRV-02",room:"SERVER",type:"SERVER",x:665,y:145},
- {id:"PRN-01",room:"STAMPANTI",type:"PRINTER",x:1210,y:805},
- {id:"PRN-02",room:"STAMPANTI",type:"PRINTER",x:1260,y:805},
- {id:"PRN-03",room:"STAMPANTI",type:"PRINTER",x:1310,y:805}
+ {id:"PRN-01",room:"STAMPANTI",type:"PRINTER",x:1210,y:800},
+ {id:"PRN-02",room:"STAMPANTI",type:"PRINTER",x:1260,y:800},
+ {id:"PRN-03",room:"STAMPANTI",type:"PRINTER",x:1310,y:800}
 ];
 
 
@@ -768,12 +768,15 @@ let storyOpen=false,storyCallback=null;
 const IT_PC={x:140,y:660,room:"IT"};
 const OUTSIDE_ZONE={x:500,y:850,w:225,h:70};
 walkZones.push(OUTSIDE_ZONE,{x:605,y:825,w:100,h:95});
+let deferredDialogs=[];
+function flushDeferredDialog(){if(!deferredDialogs.length||!$("#modal")?.classList.contains("hidden")||storyOpen)return;const d=deferredDialogs.shift();storyDialog(d.who,d.text,d.cb)}
 function storyDialog(who,text,cb=null){
+ if(!$("#modal")?.classList.contains("hidden")){deferredDialogs.push({who,text,cb});phoneMessage(who,text);return}
  storyOpen=true;storyCallback=cb;keys={};
  const b=$("#storyDialog");if(!b)return;
  $("#storyWho").textContent=who;$("#storyText").textContent=text;b.classList.remove("hidden");
 }
-function closeStory(){if(!storyOpen)return;storyOpen=false;$("#storyDialog")?.classList.add("hidden");const cb=storyCallback;storyCallback=null;if(cb)cb()}
+function closeStory(){if(!storyOpen)return;storyOpen=false;$("#storyDialog")?.classList.add("hidden");const cb=storyCallback;storyCallback=null;if(cb)cb();setTimeout(flushDeferredDialog,80)}
 function startShiftFromEntrance(){
  if(shiftStarted)return;shiftStarted=true;state.min=540;introStage="reachPC";
  storyDialog("ZIA ALE","Buongiorno! Il manager è già in arrivo. Vai ad accendere la tua postazione in IT.");
@@ -936,7 +939,7 @@ function updateManager(dt){
  }
  if(introStage==="done"&&state.min>560&&Math.random()<.00045){
    const level=managerDispatchTicket();
-   if(level)storyDialog("IT MANAGER",`Mi hanno chiamato: ti ho girato un ticket ${level}. Controlla il PDA.`);
+   if(level)storyDialog("IT MANAGER",`Mi hanno chiamato: ti ho girato un ticket ${level}. Controlla il TABLET IT.`);
  }
 }
 function lunchRouteFor(n,i){
@@ -992,19 +995,15 @@ function randomizeMiniLayout(){
    ============================================================= */
 const LUNCH_START=13*60,LUNCH_END=14*60,LATE_START=17*60+30;
 const LUNCH_SPOTS=[
- // cucina: pochi posti reali
- {x:875,y:790},{x:930,y:790},{x:985,y:790},{x:1040,y:790},
- {x:875,y:830},{x:950,y:830},{x:1025,y:830},
- // pausa distribuita nei corridoi / rifugio digitale
- {x:780,y:745},{x:820,y:745},{x:1080,y:745},{x:1120,y:745},
- {x:1080,y:650},{x:1125,y:650},{x:1170,y:650},
- {x:760,y:690},{x:805,y:690},{x:1160,y:705},{x:1200,y:705}
+ {x:905,y:770,room:"CUCINA",seat:true},{x:947,y:770,room:"CUCINA",seat:true},{x:989,y:770,room:"CUCINA",seat:true},{x:1031,y:770,room:"CUCINA",seat:true},
+ {x:905,y:844,room:"CUCINA",seat:true},{x:947,y:844,room:"CUCINA",seat:true},{x:989,y:844,room:"CUCINA",seat:true},{x:1031,y:844,room:"CUCINA",seat:true},
+ {x:785,y:745,room:"BREAK",seat:false},{x:1100,y:705,room:"BREAK",seat:false},{x:1170,y:705,room:"BREAK",seat:false}
 ];
 function lunchSpotFor(n,i){
  if(n.id==="manager")return {x:190,y:640};
  if(n.id==="hr")return {x:405,y:205};
  if(n.id==="zia")return {x:835,y:790};
- return LUNCH_SPOTS[i%LUNCH_SPOTS.length];
+ return {...LUNCH_SPOTS[i%LUNCH_SPOTS.length]};
 }
 let dayFlags={},lunchMode=false,fullMap=false;
 let introFreeWalk=false,entranceOpened=false,enteredStudio=false;
@@ -1074,11 +1073,22 @@ function setupMiniMapControls(){
  w.addEventListener("touchstart",down,{passive:true});document.addEventListener("touchmove",move,{passive:false});document.addEventListener("touchend",up);
 }
 
+let pdaTab="TASK";
 function refreshPDA(){
  const p=$("#pdaBody");if(!p||!state)return;
- const active=tickets.map(t=>`<div class="pdaTask"><b>${t.level} // ${safeRoom(t.p,"SEGNALAZIONE")}</b><span>${t.p.id||t.p.type||"POSTAZIONE"}</span><small>${t.taskType?"INTERVENTO // "+t.taskType:"DIAGNOSI"} · ${fmt(t.due)}</small></div>`).join("");
+ const active=tickets.map((t,i)=>`<button class="pdaTicketRow" data-ticket="${i}"><b class="prio ${t.level.toLowerCase()}">${t.level}</b><span>${t.p?.id||t.p?.type||"POSTAZIONE"}</span><span>${safeRoom(t.p,"SEGNALAZIONE")}</span><span>${t.taskType||"DIAGNOSI"}</span><small>${fmt(t.due)}</small></button>`).join("");
  const carry=carryMission?`<div class="pdaCarry"><b>${carryMission.item}</b><span>${carryMission.stage==="pickup"?"RITIRO: "+safeRoom(carryMission.pickup,"IT"):"CONSEGNA: "+(carryMission.recipient?carryMission.recipient.name:safeRoom(carryMission.to,"POSTAZIONE"))}</span></div>`:"";
- p.innerHTML=(carry||active)||"<div class='pdaEmpty'>NESSUNA ATTIVITÀ APERTA</div>";
+ const people=[...ambientNPCs,...npcs].filter(n=>n.id&&n.id!=="manager"&&n.id!=="zia");
+ const rel=people.map(n=>{const v=ensureRelation(n),tier=v>=45?"AMICO":v>=15?"SIMPATIA":v<=-45?"NEMICO":v<=-15?"ANTIPATIA":"NEUTRALE";const pct=Math.round((v+100)/2);return `<div class="relRow ${v>=45?"friend":v<=-45?"enemy":""}"><b>${n.name}</b><span>${tier}</span><i><em style="width:${pct}%"></em></i><small>${v>0?"+":""}${v}</small></div>`}).join("");
+ const tabs=["TASK","INVENTARIO","RAPPORTI","STATO"].map(t=>`<button class="tabletTab ${pdaTab===t?"active":""}" data-tab="${t}">${t}</button>`).join("");
+ let body="";
+ if(pdaTab==="TASK") body=`<section class="ticketWindow"><div class="windowTitle"><span>Gestione ticket IT</span><small>Windows // Service Desk</small></div><div class="ticketColumns"><b>PRIORITÀ</b><b>ID</b><b>REPARTO</b><b>PROBLEMA</b><b>SCADENZA</b></div>${carry||active||"<div class='pdaEmpty'>NESSUN TICKET APERTO</div>"}</section>`;
+ else if(pdaTab==="INVENTARIO") body=`<section><h4>INVENTARIO</h4><div class="inventoryPda">${inventory.length?inventory.map(x=>`<div>${x}</div>`).join(""):"NESSUN OGGETTO"}</div></section>`;
+ else if(pdaTab==="RAPPORTI") body=`<section><h4>RAPPORTI // STUDIO</h4><div class="relationshipList">${rel}</div></section>`;
+ else body=`<section class="tabletState"><h4>STATO OPERATORE</h4><div class="stateCards"><b>STRESS ${Math.round(state.stress)}%</b><b>ERRORI ${state.strikes}/${state.maxStrikes}</b><b>INCIDENT ${Math.round(state.incident)}%</b><b>XP ${state.xp}</b></div><p>${state.stress>=65?"BETTY // Se sei al limite, passa in HR.":"Nessun bonus attivo."}</p></section>`;
+ p.innerHTML=`<div class="tabletTabs">${tabs}</div>${body}`;
+ p.querySelectorAll(".tabletTab").forEach(b=>b.onclick=()=>{pdaTab=b.dataset.tab;refreshPDA()});
+ p.querySelectorAll(".pdaTicketRow").forEach(b=>b.onclick=()=>{const t=tickets[+b.dataset.ticket];if(!t)return;const mac=safeRoom(t.p)==="EDITORIA";$("#modalBody").innerHTML=`<div class="ticketDetail ${mac?"macWindow":"winWindow"}"><div class="osTitle">${mac?"● ● ●  Supporto Mac":"▣  Service Desk // Windows"}</div><h2>${t.level} // ${t.p?.id||"TICKET"}</h2><p><b>Reparto:</b> ${safeRoom(t.p,"SEGNALAZIONE")}</p><p><b>Problema:</b> ${t.taskType||"DIAGNOSI"}</p><p><b>Scadenza:</b> ${fmt(t.due)}</p><button class="choice" onclick="document.querySelector('#modal').classList.add('hidden')">PRENDI IN CARICO</button></div>`;$("#modal").classList.remove("hidden")});
 }
 function togglePDA(force){
  const p=$("#pda");if(!p)return;
@@ -1116,7 +1126,7 @@ function setLunchPositions(){
    const s=lunchSpotFor(n,ambientNPCs.length+i);
    n.x=s.x;n.y=s.y;n.seeking=false;
  });
- mokasa=null;
+ if(mokasa){mokasa.x=mokasa.homeX||1435;mokasa.y=mokasa.homeY||555;mokasa.life=Infinity;}
 }
 function leaveLunch(){forceLunchReturn();}
 function updateLunchState(){ updateLunchMigration(1/60); }
@@ -1131,13 +1141,22 @@ function beginEntranceWalk(){
  toast("RAGGIUNGI L'INGRESSO // E — ENTRA");
 }
 
+function runV6Audit(){
+ const issues=[];const workRooms=["EDITORIA","BIM","INTERIOR","RENDERISTI"];
+ for(const room of workRooms){const count=stations.filter(s=>s.room===room&&["HP Z","MAC"].includes(s.type)).length;if(count>4)issues.push(`${room}: ${count} PC (>4)`)}
+ const central=stations.filter(s=>s.room==="CENTRALE"&&s.type==="HP Z").length;if(central!==12)issues.push(`CENTRALE: ${central} PC (attesi 12)`);
+ if(stations.filter(s=>s.room==="HR").length!==1)issues.push("HR deve avere una sola postazione");
+ const privateAmbient=ambientNPCs.filter(n=>PRIVATE_ROOMS.has(n.homeRoom));if(privateAmbient.length)issues.push("NPC ambient assegnati a stanze private");
+ const kitchenPC=stations.filter(s=>s.room==="CUCINA"&&["HP Z","MAC"].includes(s.type));if(kitchenPC.length)issues.push("PC presenti in cucina");
+ console.log("V6 AUDIT:",issues.length?issues:"OK");return issues;
+}
 function reset(){
  bettySupportCooldown=0;bettyPinged=false;bettyLastStressBand=0;
 
  Object.keys(npcRelations).forEach(k=>delete npcRelations[k]);
 
  introFreeWalk=false;entranceOpened=false;enteredStudio=false;window.__entranceDialogReady=false;
-const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio."),250));}
+const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();runV6Audit();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio."),250));}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x, y) {
   if (!walkZones.some(z => inside(z, x, y))) {
@@ -1190,7 +1209,7 @@ function taskTypeForStation(s){
   "CENTRALE":["PROCESS","CABLE"],
   "LOFT":["PROCESS","CABLE"],
   "RENDERISTI":["PROCESS","CABLE"],
-  "THE BUNKER":["RELINK","PROCESS"],
+  "INTERIOR":["RELINK","PROCESS"],
   "SALA MEET":["AV","AV","CABLE"],
   "SPAZIO A":["AV","CABLE","AV"],
   "SALA MEET CAPO":["AV","AV","CABLE"],
@@ -1238,7 +1257,7 @@ function miniSuccess(i,label,skipContext=false){
  const xp={LOW:120,MEDIUM:290,HIGH:560,CRITICAL:820}[t.level];
  tickets.splice(i,1);
  activeMiniGame=null;
- $("#modal").classList.add("hidden");
+ $("#modal").classList.add("hidden");setTimeout(flushDeferredDialog,80);
  state.xp+=xp;state.solved++;state.stress=Math.max(0,state.stress-4);
  state.incident=Math.max(0,state.incident-({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]));
  toast(`${label} // TASK COMPLETE +${xp} XP`);
@@ -1246,16 +1265,18 @@ function miniSuccess(i,label,skipContext=false){
  renderTickets();updateTaskProgress();hud();
 }
 
+function failMiniGameCurrent(){
+ if(!activeMiniGame)return;const i=activeMiniGame.index,t=tickets[i];
+ if(t){tickets.splice(i,1);state.rep-=t.level==="CRITICAL"?2:1;state.incident+=({LOW:5,MEDIUM:8,HIGH:12,CRITICAL:16}[t.level]||6)*difficultyConfig[difficulty].incidentMult;}
+ activeMiniGame=null;$("#modal").classList.add("hidden");toast("INTERVENTO FALLITO // TROPPI ERRORI");renderTickets();hud();checkEarlyEnd();setTimeout(flushDeferredDialog,80);
+}
 function miniMistake(text="ERRORE"){
  if(!activeMiniGame)return;
- activeMiniGame.errors=(activeMiniGame.errors||0)+1;
- state.stress+=2*difficultyConfig[difficulty].stressMult;
- const e=$("#miniError");if(e){e.textContent=text;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),550)}
- if(activeMiniGame.errors>=3){
-   state.incident+=4*difficultyConfig[difficulty].incidentMult;
-   activeMiniGame.errors=0;
- }
- clamp();hud();
+ activeMiniGame.errors=(activeMiniGame.errors||0)+1;state.strikes++;
+ const t=tickets[activeMiniGame.index],severity=t?({LOW:4,MEDIUM:6,HIGH:9,CRITICAL:12}[t.level]||5):5;
+ state.stress+=severity*difficultyConfig[difficulty].stressMult;state.incident+=2*difficultyConfig[difficulty].incidentMult;
+ const e=$("#miniError");if(e){e.textContent=`${text} // ERRORE ${activeMiniGame.errors}/3`;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),750)}
+ clamp();hud();checkEarlyEnd();if(activeMiniGame&&activeMiniGame.errors>=3)failMiniGameCurrent();
 }
 
 
@@ -1284,7 +1305,7 @@ const contextChecks={
  "EDITORIA":[
   {q:"Adobe segnala media offline. Primo tentativo?",a:["Relink al file corretto","Reinstallare Adobe","Cambiare utente macOS"],ok:0}
  ],
- "THE BUNKER":[
+ "INTERIOR":[
   {q:"File Adobe apre con font mancanti. Prima cosa?",a:["Verificare font/link","Cancellare progetto","Reset rete"],ok:0}
  ],
  "BIM":[
@@ -1305,47 +1326,15 @@ const contextChecks={
 };
 
 function maybeContextCheck(i,onDone){
- const t=tickets[i];if(!t){onDone();return}
- const bank=contextChecks[safeRoom(t.p,"IT")]||[];
- // Solo una parte dei minigiochi: non deve spezzare il ritmo.
- if(!bank.length||Math.random()>.42){onDone();return}
- const c=bank[Math.floor(Math.random()*bank.length)];
- const body=$("#modalBody");
- const panel=document.createElement("div");
- panel.className="contextCheck";
- panel.innerHTML=`<div class="contextCheckTitle">CHECK RAPIDO // ${safeRoom(t.p,"IT")}</div>
- <div class="contextCheckQ">${c.q}</div>
- <div class="contextCheckAnswers">${c.a.map((x,n)=>`<button data-n="${n}">[${n+1}] ${x}</button>`).join("")}</div>`;
- body.appendChild(panel);
-
- const finish=()=>{
-   panel.remove();
-   onDone();
- };
- panel.querySelectorAll("button").forEach(b=>b.onclick=()=>{
-   const n=+b.dataset.n;
-   if(n===c.ok){
-     state.xp+=25;
-     toast("CHECK CORRETTO // +25 XP");
-     finish();
-   }else{
-     state.stress+=2*difficultyConfig[difficulty].stressMult;
-     state.incident+=1;
-     toast("CHECK ERRATO // +STRESS");
-     clamp();hud();
-     finish();
-   }
- });
-
- // numeri da tastiera per il check rapido
- const handler=e=>{
-   if(!panel.isConnected)return window.removeEventListener("keydown",handler);
-   if(/^[1-9]$/.test(e.key)){
-     const n=+e.key-1,btn=panel.querySelectorAll("button")[n];
-     if(btn){e.preventDefault();btn.click()}
-   }
- };
- window.addEventListener("keydown",handler);
+ const t=tickets[i];if(!t){onDone();return}const bank=contextChecks[safeRoom(t.p,"IT")]||[];
+ if(!bank.length||Math.random()>.40){onDone();return}
+ const original=bank[Math.floor(Math.random()*bank.length)];
+ const choices=original.a.map((text,idx)=>({text,correct:idx===original.ok})).sort(()=>Math.random()-.5);
+ const body=$("#modalBody"),panel=document.createElement("div");panel.className="contextCheck";
+ panel.innerHTML=`<div class="contextCheckTitle">CHECK RAPIDO // ${safeRoom(t.p,"IT")}</div><div class="contextCheckQ">${original.q}</div><div class="contextCheckAnswers">${choices.map((c,n)=>`<button data-n="${n}" data-ok="${c.correct?1:0}">[${n+1}] ${c.text}</button>`).join("")}</div>`;body.appendChild(panel);
+ const finish=()=>{panel.remove();onDone()};
+ panel.querySelectorAll("button").forEach(btn=>btn.onclick=()=>{if(btn.dataset.ok==="1"){state.xp+=25;toast("CHECK CORRETTO // +25 XP");finish()}else{miniMistake("CHECK ERRATO");if(activeMiniGame)finish()}});
+ const handler=e=>{if(!panel.isConnected)return window.removeEventListener("keydown",handler);if(/^[1-9]$/.test(e.key)){const btn=panel.querySelectorAll("button")[+e.key-1];if(btn){e.preventDefault();btn.click()}}};window.addEventListener("keydown",handler);
 }
 
 function startMiniGame(i){
@@ -1478,7 +1467,7 @@ function newTicket(force,opts={}){
  let mins={LOW:110,MEDIUM:90,HIGH:70,CRITICAL:42}[level]*difficultyConfig[difficulty].timeMult;
  const useMini=true;
  tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:null,taskType:taskTypeForStation(p),criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,source:opts.source||"USER",expired:false});
- renderTickets();
+ state.stress+=({LOW:1,MEDIUM:2,HIGH:4,CRITICAL:7}[level]||1)*difficultyConfig[difficulty].stressMult;renderTickets();
 }
 function renderTickets(){
  const tc=$("#ticketCount");if(tc)tc.textContent=tickets.length;
@@ -1723,8 +1712,17 @@ function monitorEntranceIntro(){
  }
 }
 
+function updateWorkloadStress(dt){
+ if(!state||introStage!=="done"||state.phase!=="shift")return;
+ const open=tickets.length,critical=tickets.filter(t=>t.level==="CRITICAL").length,high=tickets.filter(t=>t.level==="HIGH").length;
+ const pressure=Math.max(0,open-1)*0.36+high*0.30+critical*0.65+(state.incident/100)*0.22;
+ if(pressure>0)state.stress+=pressure*dt*difficultyConfig[difficulty].stressMult;
+ // recupero naturale minimo solo quando la coda è quasi vuota.
+ if(open===0&&!isLunch())state.stress=Math.max(0,state.stress-.10*dt);
+}
 function update(dt) {
  updateBettySupport(dt);
+ updateWorkloadStress(dt);
 
  updateLunchReturn(dt);
 
@@ -1809,8 +1807,7 @@ function update(dt) {
    const last=npcCooldown.mokasa??-999;
    if(state.min-last>20){
      npcTalk(mokasa);
-     // Dopo l'interazione sparisce: non serve premere E e non può colpire due volte nello stesso spawn.
-     mokasa=null;
+     // V6.5: il CAPO è una presenza persistente; dopo l’interazione resta nello studio.
      idleMinutes=0;
    }
  }
@@ -1955,34 +1952,27 @@ function drawHRRoom(){
  g.fillStyle="#252b28";g.fillRect(x+33,y+34,22,16);
 }
 
+function drawDiningTable(){
+ const x=885,y=790,w=190;
+ g.fillStyle="#171311";g.fillRect(x+4,y+5,w,32);g.fillStyle="#6b4224";g.fillRect(x,y,w,27);g.fillStyle="#8a5a31";g.fillRect(x,y,w,4);
+ // otto sedute, nessun PC.
+ for(let sx=x+18;sx<x+w-12;sx+=42){g.fillStyle="#303631";g.fillRect(sx,y-20,22,14);g.fillRect(sx,y+34,22,14)}
+ // piano cucina / frigo sul fondo
+ g.fillStyle="#39423d";g.fillRect(855,748,215,24);g.fillStyle="#79867f";g.fillRect(858,751,50,18);g.fillStyle="#202724";g.fillRect(1018,750,48,20);
+}
 function furniture(){
- // EDITORIA / BIM / HR / RENDERISTI: postazioni ordinate, non sovrapposte.
- desk(72,185,160); drawHRRoom(); // HR: una sola postazione
- desk(70,405,135); desk(1280,205,135);
-
- // CENTRALE: due file pulite e distanziate.
- desk(385,385,285); desk(385,485,285);
-
- // IT: scaffale + due postazioni, inclusa la postazione del player.
- desk(78,650,135); desk(78,585,135);
-
- // Sale meeting: tavolone unico + display a parete.
- meetingRoomSetup(870,115,135,925,205);
- meetingRoomSetup(875,425,205,1030,480);
- meetingRoomSetup(1330,485,185,1395,535);
-
- // THE BUNKER / cucina / stampanti.
- desk(1080,205,105);
- desk(890,810,175);
- desk(1190,810,190);
-
+ // Reparti normali compatti; CENTRALE V6.5: due tavoli distinti da 6.
+ desk(72,185,145); drawHRRoom(); desk(70,405,135); desk(1080,205,115); desk(1280,205,145);
+ centralDesk6(355,385,380); centralDesk6(355,505,380); // CENTRALE 6 + 6, corridoio centrale libero
+ // Reparto IT: due postazioni soltanto, PG + Manager.
+ desk(78,650,145); desk(78,585,145);
+ meetingRoomSetup(870,115,135,925,205);meetingRoomSetup(875,425,205,1030,480);meetingRoomSetup(1330,485,185,1395,535);
+ drawDiningTable();
+ desk(1190,810,190); // solo banco stampanti
  for(let x=565;x<710;x+=42)serverRack(x,115);
- printer(1210,785);printer(1250,785);printer(1290,785);
- drawBathroomFixtures();
-
- [[250,220],[470,220],[815,300],[1140,300],[1285,635],[1040,825],[430,825],[75,330],[85,570],[1510,645]].forEach(p=>plant(...p));
+ printer(1210,785);printer(1250,785);printer(1290,785);drawBathroomFixtures();
+ [[250,220],[470,220],[815,300],[1140,300],[1285,635],[430,825],[75,330],[85,570],[1510,645]].forEach(p=>plant(...p));
  [[70,75],[345,75],[575,75],[870,75],[1080,75],[1275,75],[350,330],[890,385],[1320,420],[870,755],[1180,755]].forEach(p=>lightFixture(...p));
- g.fillStyle="#8d3a32";[[265,255],[735,270],[1185,350],[1230,620]].forEach(([x,y])=>g.fillRect(x,y,8,22));
 }
 function meetingRoomSetup(x,y,w,screenX,screenY){
  // tavolo grande
@@ -2015,10 +2005,11 @@ function drawBathroomFixtures(){
 }
 
 function label(r){
- const w=Math.min(r.w-22,r.name.length*8+22);
+ const displayName=r.name==="IT"?"REPARTO IT":r.name;
+ const w=Math.min(r.w-22,displayName.length*8+22);
  g.fillStyle="rgba(6,8,7,.92)";g.fillRect(r.x+12,r.y+10,w,24);
  g.strokeStyle="#252c27";g.strokeRect(r.x+12,r.y+10,w,24);
- g.fillStyle="#d5c7ac";g.font="bold 13px monospace";g.fillText(r.name,r.x+19,r.y+27);
+ g.fillStyle="#d5c7ac";g.font="bold 13px monospace";g.fillText(displayName,r.x+19,r.y+27);
 }
 
 /* ---------------- V3 PIXEL ART RENDER HELPERS ---------------- */
@@ -2032,6 +2023,14 @@ function drawPixelPerson(x,y,shirt="#536f8b",skin="#c89e7d",accent="#222"){
  g.fillStyle="#241c18";g.fillRect(x-6,y-18,12,3);
  g.fillStyle="#111";g.fillRect(x-4,y-14,2,2);g.fillRect(x+2,y-14,2,2);
  g.fillStyle="#202522";g.fillRect(x-8,y+12,6,7);g.fillRect(x+2,y+12,6,7);
+}
+
+function centralDesk6(x,y,w){
+ x=px(x);y=px(y);w=px(w);
+ g.fillStyle="#171311";g.fillRect(x+4,y+5,w,28);
+ g.fillStyle="#6b4224";g.fillRect(x,y,w,24);g.fillStyle="#8a5a31";g.fillRect(x,y,w,4);
+ const gap=(w-44)/5;
+ for(let j=0;j<6;j++){const mx=Math.round(x+j*gap);g.fillStyle="#111815";g.fillRect(mx,y-24,32,20);g.fillStyle="#58a0b8";g.fillRect(mx+4,y-20,24,12);g.fillStyle="#0a0d0c";g.fillRect(mx+14,y-4,4,7)}
 }
 function pixelDesk(x,y,w){
  x=px(x);y=px(y);w=px(w);
@@ -2132,7 +2131,7 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  // Scaffale fisico IT SUPPLIES
  g.fillStyle="#4b3423";g.fillRect(78,605,145,18);
  g.fillStyle="#222a26";g.fillRect(82,578,137,27);
- g.fillStyle="#c5eaff";g.font="bold 8px monospace";g.fillText("REPARTO IT",112,594);
+ // V6.5: nessuna etichetta sopra le postazioni; il nome è nella targa stanza.
 
  // Marker missione inventario
  if(carryMission){
@@ -2210,17 +2209,18 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
 
 
  if(debug){
-  if(itManager&&itManager.route&&itManager.route.length){
+  const dbgManager=(typeof itManager!=="undefined"&&itManager)?itManager:npcs.find(n=>n.id==="manager");
+  if(dbgManager&&Array.isArray(dbgManager.route)&&dbgManager.route.length){
     g.save();
     g.strokeStyle="#ffd84a";g.lineWidth=3;g.beginPath();
-    g.moveTo(itManager.x,itManager.y);
-    for(let ri=itManager.routeIndex||0;ri<itManager.route.length;ri++){
-      const wp=itManager.route[ri];
+    g.moveTo(dbgManager.x,dbgManager.y);
+    for(let ri=dbgManager.routeIndex||0;ri<dbgManager.route.length;ri++){
+      const wp=dbgManager.route[ri];
       g.lineTo(wp.x,wp.y);
     }
     g.stroke();
-    for(let ri=itManager.routeIndex||0;ri<itManager.route.length;ri++){
-      const wp=itManager.route[ri];
+    for(let ri=dbgManager.routeIndex||0;ri<dbgManager.route.length;ri++){
+      const wp=dbgManager.route[ri];
       g.fillStyle="#ffd84a";g.fillRect(wp.x-4,wp.y-4,8,8);
     }
     g.restore();
@@ -2402,6 +2402,6 @@ window.addEventListener("error",function(ev){
  let old=document.getElementById("runtimeError");
  if(old)return;
  let d=document.createElement("div");d.id="runtimeError";
- d.textContent="JS ERROR V2.7.2.3 // "+(ev.message||"errore sconosciuto");
+ d.textContent="JS ERROR V6.5 // "+(ev.message||"errore sconosciuto");
  document.body.appendChild(d);
 });

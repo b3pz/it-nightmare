@@ -82,3 +82,17 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Betty monitora lo stress con soglie 42/60/80 e può invitarti in HR.
 - Interagendo con Betty: consiglio + riduzione stress; ai livelli alti anche XP/reputazione.
 - Cooldown anti-abuso per evitare bonus infiniti.
+
+
+## V6.0.0 — STUDIO OVERHAUL
+- Reparti operativi max 4 PC/NPC; Centrale 6 postazioni su due tavoli.
+- HR/Betty, Reparto IT/Manager e Segreteria/Zia Ale sono stanze private.
+- THE BUNKER rinominato INTERIOR.
+- Cucina ridisegnata come cucina/pranzo: tavolo, sedie, nessun PC.
+- Navigazione NPC riscritta su porte/corridoi con anti-stuck.
+- TABLET IT sostituisce PDA e mostra rapporti AMICO/NEUTRALE/OSTILE.
+- Messaggi asincroni accodati durante minigiochi; notifiche separate dal risultato.
+- Errori minigiochi contano davvero: ERRORI + stress + incident, massimo 3 errori per intervento.
+- Check rapidi con risposte randomizzate.
+- Stress ribilanciato in base a coda, urgenze e incident.
+- Audit interno V6 su postazioni, stanze private e cucina.
