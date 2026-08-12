@@ -9,7 +9,7 @@ function v911ShowError(message,source="",line=0,col=0){
  }
  const bar=document.getElementById("jsError");
  if(bar){
-   bar.textContent=`JS ERROR V10.2.0 // ${txt}${line?` @ ${line}:${col}`:""}`;
+   bar.textContent=`JS ERROR V12 CLEAN // ${txt}${line?` @ ${line}:${col}`:""}`;
    bar.classList.remove("hidden");
  }
  console.error("V9.1 runtime error:",message,source,line,col);
@@ -56,6 +56,12 @@ const roomFloors=rooms.map(r=>({x:r.x+8,y:r.y+8,w:r.w-16,h:r.h-16}));
 
 /* V10.1 — ESTERNO REALE */
 const V101_EXTERIOR={WALL_Y:935,SIDEWALK:{x:320,y:945,w:1000,h:55},ROAD:{x:0,y:1000,w:1600,h:40},ENTRANCE:{x:650,y:930,w:110,h:70}};
+
+const V12C_EXTERIOR={
+ WALL_Y:935,
+ SIDEWALK:{x:320,y:945,w:1000,h:55},
+ ROAD:{x:0,y:1000,w:1600,h:40}
+};
 const corridors=[
  {x:235,y:250,w:555,h:78},{x:235,y:690,w:560,h:88},{x:745,y:35,w:105,h:900},
  {x:805,y:310,w:485,h:88},{x:1205,y:300,w:100,h:635},{x:1260,y:665,w:205,h:110},
@@ -870,9 +876,33 @@ function spawnNPCs(){
  npcs=npcDefs.map(n=>({...n}));spawnAmbient();mokasa={id:"mokasa",name:"CAPO",role:"DIREZIONE",x:1435,y:555,homeRoom:"SALA MEET CAPO",homeX:1435,homeY:555,tone:"bad",shirt:"#75483d",life:Infinity,court:false};npcCooldown={};mokasaTimer=0;lastZiaHour=-1;
  lastPlayerPos={x:player.x,y:player.y};idleMinutes=0;
 }
+
+/* V12 CLEAN — LOS helper. Does not change keyboard/input. */
+function v12cSegmentBlocked(x1,y1,x2,y2){
+ const steps=Math.max(4,Math.ceil(Math.hypot(x2-x1,y2-y1)/10));
+ for(let i=1;i<steps;i++){
+   const t=i/steps,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t;
+   if(!walkable(x,y))return true;
+ }
+ return false;
+}
+function v12cNpcCanSeePlayer(n,maxDist=100){
+ if(!n)return false;
+ if(Math.hypot(n.x-player.x,n.y-player.y)>maxDist)return false;
+ const nr=roomAt(n.x,n.y)?.name,pr=roomAt(player.x,player.y)?.name;
+ if(!enteredStudio && nr)return false;
+ if(nr&&pr&&nr!==pr&&v12cSegmentBlocked(n.x,n.y,player.x,player.y))return false;
+ return !v12cSegmentBlocked(n.x,n.y,player.x,player.y);
+}
+
 function nearestNPC(){
- const all=mokasa?[...npcs,mokasa]:npcs;
- return all.map(n=>({n,d:Math.hypot(player.x-n.x,player.y-n.y)})).sort((a,b)=>a.d-b.d)[0];
+ let best=null,bd=999;
+ for(const n of [...ambientNPCs,...npcs,...(mokasa?[mokasa]:[])]){
+   if(!n||!v12cNpcCanSeePlayer(n,110))continue;
+   const d=Math.hypot(n.x-player.x,n.y-player.y);
+   if(d<bd){best=n;bd=d}
+ }
+ return best?{n:best,d:bd}:null;
 }
 
 function updateCapoRoutine(dt){
@@ -1092,6 +1122,7 @@ function showStudioEventHud(title,text){
  $("#studioEventTitle").textContent=title;$("#studioEventText").textContent=text;h.classList.remove("hidden");
 }
 function hideStudioEventHud(){ $("#studioEventHud")?.classList.add("hidden"); }
+let v12cDoorbellRung=false,v12cDoorOpened=false;
 let introStage="outside",shiftStarted=false,managerRaceDone=false,managerPenaltyDone=false; // V10 state kept only for compatibility
 let introMissionArmed=false,introManagerAlerted=false;
 let storyOpen=false,storyCallback=null;
@@ -1370,6 +1401,25 @@ function narrativeOnce(key,sender,text){
  dayFlags[key]=true;
  phoneMessage(sender,text);
 }
+
+let v12cStoryMission=0;
+function v12cStoryProgression(){
+ if(!state||introStage!=="done"||storyOpen||isLunch())return;
+ if(v12cStoryMission<1&&state.min>=600){
+   v12cStoryMission=1;
+   showMissionBanner("MISSIONE 2 // SALA MEET","Controlla la sala meeting: qualcosa non torna.","EVENTO STORIA","STORIA");
+   if(!studioEvent)startMeetingRushEvent();
+ }else if(v12cStoryMission<2&&state.min>=690){
+   v12cStoryMission=2;
+   showMissionBanner("MISSIONE 3 // CONSEGNA","Zia Ale ha ricevuto dei pacchi. Quelli IT sono tuoi.","EVENTO STORIA","STORIA");
+   if(!studioEvent)startAmazonEvent();
+ }else if(v12cStoryMission<3&&state.min>=900){
+   v12cStoryMission=3;
+   showMissionBanner("MISSIONE 4 // POMERIGGIO","Cambio postazione urgente: serve un monitor.","EVENTO STORIA","STORIA");
+   if(!studioEvent)startDeskSetupEvent();
+ }
+}
+
 function updateNarrative(){
  if(!state||!shiftStarted)return;
  if(state.min>=615)narrativeOnce("1015","ZIA ALE","La Sala Meet tra poco è occupata. Se passa qualcuno di corsa, sai già perché.");
@@ -1540,6 +1590,7 @@ function runV6Audit(){
  console.log("V9 AUDIT:",issues.length?issues:"OK");return issues;
 }
 function reset(){
+ v12cDoorbellRung=false;v12cDoorOpened=false;v12cStoryMission=0;
  bettySupportCooldown=0;bettyPinged=false;bettyLastStressBand=0;
 
  Object.keys(npcRelations).forEach(k=>delete npcRelations[k]);
@@ -1902,26 +1953,40 @@ function nearStudioEntrance(){
  return Math.hypot(player.x-(STUDIO_ENTRANCE.x+STUDIO_ENTRANCE.w/2),
                    player.y-(STUDIO_ENTRANCE.y+STUDIO_ENTRANCE.h/2))<82;
 }
+
+function v12cRingDoorbell(){
+ if(v12cDoorbellRung)return true;
+ v12cDoorbellRung=true;
+ storyDialog("ZIA ALE","Arrivo! Ti apro subito.",()=>{
+   v12cDoorOpened=true;
+   entranceOpened=true;
+   toast("PORTA APERTA");
+ });
+ return true;
+}
 function tryStudioEntrance(){
  if(!introFreeWalk||enteredStudio||!nearStudioEntrance())return false;
 
- // V10: nessun teleport. La porta diventa semplicemente attraversabile.
+ // V12 CLEAN: first E rings bell. After Ale opens, second E enters using
+ // the ORIGINAL V10.2 interaction pathway (no new keyboard listeners).
+ if(!v12cDoorOpened){
+   return v12cRingDoorbell();
+ }
+
  entranceOpened=true;
  enteredStudio=true;
  introFreeWalk=false;
- introStage="inside";
- if(state)state.min=Math.max(state.min,540);
+ introStage="entranceGreeting";
 
  const m=npcs.find(n=>n.id==="manager");
  if(m){
-   // Il manager resta ESATTAMENTE dove si trova.
    m.state="managerWatch";m.route=null;m.routeIndex=0;m.stuckFor=0;
-   m.exclaimUntil=performance.now()+2600;
+   m.exclaimUntil=performance.now()+2200;
  }
 
  storyDialog("ZIA ALE","Buongiorno! Guarda il manager: sta per partire. Devi arrivare in IT e accendere la tua postazione prima di lui.",()=>{
-   introStage="raceReady";
-   startShiftFromEntrance();
+   introStage="managerTrigger";
+   introMissionArmed=true;
  });
  return true;
 }
@@ -2231,6 +2296,7 @@ function update(dt) {
  updateLunchMigration(dt);
  updateManager(dt);
  updateNarrative();
+ v12cStoryProgression();
  maybeStartStudioEvent();
  updateStudioEvent(dt);
  if(!firstCarryTriggered && state.min>=START+3){ firstCarryTriggered=true; }
@@ -2629,6 +2695,12 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  g.fillStyle="#e1d8a5";for(let x=80;x<1560;x+=180)g.fillRect(x,1018,90,4);
  g.fillStyle=entranceOpened?"#5a7a72":"#3c3328";g.fillRect(STUDIO_ENTRANCE.x,STUDIO_ENTRANCE.y,STUDIO_ENTRANCE.w,15);
 
+ // V12C_SIDEWALK_DRAW
+ g.fillStyle="#17130f";g.fillRect(320,V12C_EXTERIOR.WALL_Y,1000,10);
+ g.fillStyle="#c5c0aa";g.fillRect(V12C_EXTERIOR.SIDEWALK.x,V12C_EXTERIOR.SIDEWALK.y,V12C_EXTERIOR.SIDEWALK.w,V12C_EXTERIOR.SIDEWALK.h);
+ g.fillStyle="#373d38";g.fillRect(V12C_EXTERIOR.ROAD.x,V12C_EXTERIOR.ROAD.y,V12C_EXTERIOR.ROAD.w,V12C_EXTERIOR.ROAD.h);
+ g.fillStyle="#e4dba6";for(let x=70;x<1540;x+=190)g.fillRect(x,1018,95,4);
+
  // Marker missione inventario
  if(carryMission){
    const q=carryTarget();
@@ -2915,8 +2987,8 @@ function v911StartupSelfTest(){
      if(!cfg.table||!cfg.screen||!Array.isArray(cfg.seats))problems.push("meeting config "+name);
    }
  }catch(e){problems.push(e.message)}
- if(problems.length)console.error("V10.2.0 SELF TEST",problems);
- else console.log("V10.2.0 SELF TEST // OK");
+ if(problems.length)console.error("V12 CLEAN SELF TEST",problems);
+ else console.log("V12 CLEAN SELF TEST // OK");
  return problems;
 }
 

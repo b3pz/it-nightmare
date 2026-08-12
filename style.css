@@ -372,3 +372,23 @@ body{background:#010201;overflow:hidden}
 #storyDialog.bettySupport #storyText::first-line{font-weight:800}
 
 #endGameOverlay{position:fixed;inset:0;z-index:999;background:#000c;display:flex;align-items:center;justify-content:center}#endGameOverlay.hidden{display:none}.endGameCard{width:min(620px,88vw);background:#09110d;border:3px solid #6f8b78;box-shadow:12px 12px #000;padding:26px}.endGameCard h2{font:900 30px monospace;color:#b7ff4a}.endGameActions{display:flex;gap:10px;margin-top:18px}#endGameStats{display:grid;grid-template-columns:1fr 1fr;gap:8px}#endGameStats>div{display:flex;justify-content:space-between;padding:10px;background:#0f1813;border-left:4px solid #5f8f77;font:700 11px monospace}.endGameActions button{padding:12px 16px;background:#14231a;color:#dce8df;border:2px solid #6d8c78;font:800 11px monospace}
+
+/* V12 CLEAN — HOME */
+.bootIntel{margin:18px 0 16px;border-top:1px solid rgba(164,255,76,.22);border-bottom:1px solid rgba(164,255,76,.18);padding:13px 0 12px}
+.bootIntelTitle{color:#a4ff4c;font-size:10px;letter-spacing:2.5px;margin-bottom:10px}
+.bootIntelGrid{display:grid;grid-template-columns:1fr 1fr;gap:5px 18px;font-family:monospace}
+.bootIntelGrid div{display:grid;grid-template-columns:86px 1fr;align-items:center;min-height:22px;border-bottom:1px dotted rgba(215,230,216,.12)}
+.bootIntelGrid span{color:#75877b;font-size:8px;letter-spacing:1.1px}
+.bootIntelGrid b{color:#d8e2d8;font-size:9px;font-weight:600}
+.bootIntelGrid .ok{color:#7eff78}.bootIntelGrid .warn{color:#ffd45e}
+.bootLog{margin-top:11px;padding:9px 10px;background:rgba(0,0,0,.24);border-left:2px solid rgba(164,255,76,.45);color:#93a297;font:8px/1.65 monospace}
+.bootLog i{color:#7eff78;font-style:normal}.bootLog div:nth-child(3) i{color:#ffd45e}
+.buildTag{margin-left:8px;color:#64766a;font-size:7px;letter-spacing:1px}
+@media(max-width:850px){.bootIntelGrid{grid-template-columns:1fr}.bootLog{font-size:7px}}
+
+/* V12 CLEAN — compact mission popup */
+#missionBanner{top:9%;width:min(560px,72vw);padding:14px 18px;border-width:3px;box-shadow:6px 6px #000}
+#missionBanner b{font-size:clamp(18px,2.6vw,28px);line-height:1.05}
+#missionBanner span{font-size:10px;line-height:1.35}
+#missionBanner em{font-size:9px;margin-top:8px}
+#missionBanner small{font-size:8px;letter-spacing:2px}

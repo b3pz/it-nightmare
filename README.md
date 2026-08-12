@@ -226,3 +226,24 @@ Build di consolidamento.
   - run normale 30-55%;
   - giornata difficile 60-80%;
   - oltre 90% solo in situazioni realmente critiche.
+
+# V12 CLEAN — GAMEPLAY LOCK
+
+Base ricostruita dalla V10.2 stabile.
+
+PRINCIPIO:
+- sistema input/tasto E della V10.2 mantenuto intatto;
+- nessun nuovo listener tastiera;
+- nessuna duplicazione di interact().
+
+Riportati sopra la base stabile:
+- home più ricca e ironica;
+- popup missione più compatto;
+- marciapiede/strada realmente visibili;
+- campanello + apertura Zia Ale usando il normale flusso E della V10.2;
+- line-of-sight NPC;
+- riduzione dei teleport NPC;
+- missioni narrative 2/3/4 distanziate;
+- trigger tecnici da tenere fuori dal gameplay normale.
+
+Questa è la build da validare prima di V1 GRAFICA.
