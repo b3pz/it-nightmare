@@ -9,6 +9,18 @@ const difficultyConfig={
 };
 let difficulty="normal";
 
+window.addEventListener("error",ev=>{
+ const msg=ev?.error?.message||ev?.message||"Errore JavaScript";
+ const line=ev?.lineno?` // line ${ev.lineno}`:"";
+ const box=document.querySelector("#jsError");
+ if(box){box.textContent=`JS ERROR V5.3.8 // ${msg}${line}`;box.classList.remove("hidden")}
+});
+window.addEventListener("unhandledrejection",ev=>{
+ const msg=ev?.reason?.message||String(ev?.reason||"Promise rejection");
+ const box=document.querySelector("#jsError");
+ if(box){box.textContent=`JS ERROR V5.3.8 // ${msg}`;box.classList.remove("hidden")}
+});
+
 const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
 const boot=["[BOOT] IT SUPPORT // DAILY SHIFT","[OK] Workstations inventory","[OK] Meeting rooms","[OK] File services","[OK] Ticket queue","[TIME] 08:58","[STATUS] Ready for another day."];
 let bl=0;(function b(){if(bl<boot.length){$("#bootlog").innerHTML+=boot[bl++]+"<br>";setTimeout(b,280)}else $("#toLore").classList.remove("hidden")})();$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{difficulty=$("#difficulty")?.value||"normal";show("game");reset();requestAnimationFrame(loop)};
@@ -313,10 +325,11 @@ function npcDestinationForActivity(n,activity){
  if(activity==="printer")return {x:1240+Math.random()*65,y:790+Math.random()*25,room:"STAMPANTI"};
  if(activity==="gallery")return {x:1080+Math.random()*80,y:650+Math.random()*30,room:"RIFUGIO DIGITALE"};
  if(activity==="coffee")return {x:920+Math.random()*110,y:810+Math.random()*25,room:"CUCINA"};
- if(activity==="bathroom")return ;
+ if(activity==="bathroom")return {x:900+Math.random()*55,y:650+Math.random()*20,room:"BAGNI"};
  return {x:n.homeX,y:n.homeY,room:"HOME"};
 }
 function routeViaHub(n,target){
+ target=safePoint(target,{x:n?.x||820,y:n?.y||705,room:"CORRIDOIO"});
  // Safe hub corridor system. The existing door/collision logic validates each segment.
  const route=[];
  const central=n.x>=350&&n.x<=720&&n.y>=360&&n.y<=650;
@@ -779,16 +792,51 @@ function bootWorkstation(){
 /* V5.3.2 — IT MANAGER DEDICATED PATH */
 
 function managerStartRoute(){
+ // SEGRETERIA -> porta -> corridoio basso -> porta IT -> postazione.
  return [
   {x:650,y:800,room:"INGRESSO / SEGRETERIA"},
-  {x:650,y:735,room:"INGRESSO / SEGRETERIA"},
-  {x:610,y:705,room:"CORRIDOIO"},
+  {x:650,y:705,room:"CORRIDOIO"},
   {x:500,y:705,room:"CORRIDOIO"},
-  {x:390,y:705,room:"CORRIDOIO"},
-  {x:300,y:675,room:"CORRIDOIO"},
-  {x:250,y:640,room:"IT"},
+  {x:350,y:705,room:"CORRIDOIO"},
+  {x:250,y:675,room:"PORTA IT"},
   {x:190,y:640,room:"IT"}
  ];
+}
+function managerITtoServerRoute(){
+ return [
+  {x:250,y:675,room:"PORTA IT"},
+  {x:500,y:705,room:"CORRIDOIO"},
+  {x:790,y:705,room:"DORSALE"},
+  {x:790,y:420,room:"DORSALE"},
+  {x:790,y:250,room:"PORTA SERVER"},
+  {x:735,y:235,room:"PORTA SERVER"},
+  {x:650,y:190,room:"SERVER"}
+ ];
+}
+function managerServerToITRoute(){
+ return [
+  {x:735,y:235,room:"PORTA SERVER"},
+  {x:790,y:250,room:"DORSALE"},
+  {x:790,y:420,room:"DORSALE"},
+  {x:790,y:705,room:"CORRIDOIO"},
+  {x:500,y:705,room:"CORRIDOIO"},
+  {x:250,y:675,room:"PORTA IT"},
+  {x:190,y:640,room:"IT"}
+ ];
+}
+function moveManagerRoute(n,dt){
+ if(!n.route||!n.route.length||n.routeIndex>=n.route.length)return true;
+ const p=n.route[n.routeIndex];
+ const dx=p.x-n.x,dy=p.y-n.y,d=Math.hypot(dx,dy);
+ if(d<6){
+   n.x=p.x;n.y=p.y;n.routeIndex++;
+   return n.routeIndex>=n.route.length;
+ }
+ const step=(n.speed||58)*dt;
+ // Percorso manuale già validato: niente collisione generica che lo incastra sui bordi porta.
+ if(Math.abs(dx)>0)n.x+=Math.sign(dx)*Math.min(Math.abs(dx),step);
+ if(Math.abs(dy)>0)n.y+=Math.sign(dy)*Math.min(Math.abs(dy),step);
+ return false;
 }
 
 function safeRoom(obj,fallback="CORRIDOIO"){return obj&&typeof obj.room==="string"&&obj.room?obj.room:fallback;}
@@ -813,7 +861,7 @@ function updateManager(dt){
  const m=npcs.find(n=>n.id==="manager");if(!m)return;
 
  if(m.state==="managerRace"){
-   if(moveNpcRoute(m,dt)){
+   if(moveManagerRoute(m,dt)){
      m.x=190;m.y=640;
      m.state="desk";
      // Se il player non ha ancora avviato il PC, il Manager ha vinto la corsa.
@@ -828,14 +876,14 @@ function updateManager(dt){
 
  // V5.3.2 FINAL: postazione IT fissa; solo IT <-> SERVER. Ticket globali.
  if(m.state==="managerTravel"){
-   if(moveNpcRoute(m,dt)){m.state="desk";m.x=190;m.y=640;
+   if(moveManagerRoute(m,dt)){m.state="desk";m.x=190;m.y=640;
      if(introStage==="reachPC"&&!managerRaceDone&&!managerPenaltyDone){managerPenaltyDone=true;state.stress+=4;state.rep=Math.max(0,state.rep-1);storyDialog("IT MANAGER","Buongiorno... il PC magari lo accendiamo? Ti stanno già cercando.")}
    }
  }
  if(introStage==="done"&&m.state==="desk"){
    m.moveTimer=(m.moveTimer??45)-dt;
    if(m.moveTimer<=0 && Math.random()<.18){
-     m.route=managerRouteTo({x:640,y:190,room:"SERVER"});
+     m.route=managerITtoServerRoute();
      m.routeIndex=0;m.state="managerServer";
      m.moveTimer=55+Math.random()*70;
    }else if(m.moveTimer<=0){
@@ -843,17 +891,17 @@ function updateManager(dt){
    }
  }
  if(m.state==="managerServer"){
-   if(moveNpcRoute(m,dt)){m.serverStay=8+Math.random()*10;m.state="managerServerStay"}
+   if(moveManagerRoute(m,dt)){m.serverStay=8+Math.random()*10;m.state="managerServerStay"}
  }
  if(m.state==="managerServerStay"){
    m.serverStay-=dt;
    if(m.serverStay<=0){
-     m.route=managerStartRoute();
+     m.route=managerServerToITRoute();
      m.routeIndex=0;m.state="managerReturnIT";
    }
  }
  if(m.state==="managerReturnIT"){
-   if(moveNpcRoute(m,dt)){m.x=190;m.y=640;m.state="desk";m.moveTimer=40+Math.random()*65}
+   if(moveManagerRoute(m,dt)){m.x=190;m.y=640;m.state="desk";m.moveTimer=40+Math.random()*65}
  }
  if(introStage==="done"&&state.min>560&&Math.random()<.00045&&tickets.length<difficultyConfig[difficulty].maxTickets){
    const levels=state.min>990?["MEDIUM","HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];
@@ -1277,6 +1325,7 @@ function newTicket(force,opts={}){
  const weighted=[...valid,...valid.filter(s=>s.room==="CENTRALE"),...valid.filter(s=>s.room==="CENTRALE")];
  if(level==="CRITICAL")p=[...valid].sort((a,b)=>Math.hypot(player.x-b.x,player.y-b.y)-Math.hypot(player.x-a.x,player.y-a.y))[0];
  else p=weighted[Math.floor(Math.random()*weighted.length)];
+ if(!p){console.warn("Ticket ignorato: nessuna postazione valida");return}
  let mins={LOW:110,MEDIUM:90,HIGH:70,CRITICAL:42}[level]*difficultyConfig[difficulty].timeMult;
  const useMini=true;
  tickets.push({id:crypto.randomUUID?crypto.randomUUID():Math.random()+"",level,p,due:Math.min(BOSS-.2,state.min+mins),q:null,taskType:taskTypeForStation(p),criticalFrom:level==="CRITICAL"?bosses[Math.floor(Math.random()*bosses.length)]:null,source:opts.source||"USER",expired:false});
@@ -1285,7 +1334,7 @@ function newTicket(force,opts={}){
 function renderTickets(){
  const tc=$("#ticketCount");if(tc)tc.textContent=tickets.length;
 
- $("#ticketText").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket ${t.level.toLowerCase()}"><b>${t.level}${t.source==="IT MANAGER"?" // MANAGER":t.criticalFrom?" // "+t.criticalFrom:""}</b><br>${safeRoom(t.p,"SEGNALAZIONE")} — ${t.p.id||t.p.kind||t.p.type}<br>${t.taskType?`<br><span class="taskKind">MINIGAME // ${t.taskType}</span>`:`<br><span class="taskKind">DIAGNOSI</span>`}<br>deadline ${fmt(t.due)}</div>`).join(""):"Nessun ticket aperto.";
+ $("#ticketText").innerHTML=tickets.length?tickets.map(t=>`<div class="ticket ${t.level.toLowerCase()}"><b>${t.level}${t.source==="IT MANAGER"?" // MANAGER":t.criticalFrom?" // "+t.criticalFrom:""}</b><br>${safeRoom(t.p,"SEGNALAZIONE")} — ${(t.p&&(t.p.id||t.p.kind||t.p.type))||"POSTAZIONE"}<br>${t.taskType?`<br><span class="taskKind">MINIGAME // ${t.taskType}</span>`:`<br><span class="taskKind">DIAGNOSI</span>`}<br>deadline ${fmt(t.due)}</div>`).join(""):"Nessun ticket aperto.";
 }
 
 const STUDIO_ENTRANCE={x:690,y:845,w:110,h:38};

@@ -59,3 +59,10 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 ## V5.3.7
 - Fix IT Manager bloccato in Segreteria: route ortogonale porta -> corridoio -> IT.
 - Fix crash `.room` su target/station mancanti con safeRoom/safePoint.
+
+## V5.3.8 — MANAGER + SCRIPT ERROR FIX
+- Ripristinata destinazione BAGNI per le routine NPC: eliminato crash target.room.
+- IT Manager usa un movimento dedicato lungo route manuali validate.
+- Route separate: Segreteria -> IT, IT -> SERVER, SERVER -> IT.
+- Ticket ignorati in sicurezza se manca una postazione valida.
+- Error reporter mobile mostra messaggio/linea reale invece del generico Script error.
