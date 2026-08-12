@@ -13,24 +13,23 @@ window.addEventListener("error",ev=>{
  const msg=ev?.error?.message||ev?.message||"Errore JavaScript";
  const line=ev?.lineno?` // line ${ev.lineno}`:"";
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V6.5 // ${msg}${line}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V7.0 // ${msg}${line}`;box.classList.remove("hidden")}
 });
 window.addEventListener("unhandledrejection",ev=>{
  const msg=ev?.reason?.message||String(ev?.reason||"Promise rejection");
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V6.5 // ${msg}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V7.0 // ${msg}`;box.classList.remove("hidden")}
 });
 
 const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
-const boot=["[BOOT] IT SUPPORT // DAILY SHIFT","[OK] Workstations inventory","[OK] Meeting rooms","[OK] File services","[OK] Ticket queue","[TIME] 08:58","[STATUS] Ready for another day."];
-let bl=0;(function b(){if(bl<boot.length){$("#bootlog").innerHTML+=boot[bl++]+"<br>";setTimeout(b,280)}else $("#toLore").classList.remove("hidden")})();$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{difficulty=$("#difficulty")?.value||"normal";show("game");reset();requestAnimationFrame(loop)};
+const boot=[];$("#toLore").classList.remove("hidden");$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{difficulty=$("#difficulty")?.value||"normal";show("game");reset();requestAnimationFrame(loop)};
 
 const rooms=[
 {name:"EDITORIA",x:30,y:55,w:250,h:210,f:"stone"},{name:"HR",x:300,y:55,w:205,h:210,f:"stone"},{name:"SERVER",x:525,y:55,w:230,h:210,f:"server"},
 {name:"BIM",x:30,y:310,w:210,h:185,f:"stone"},{name:"IT",x:30,y:535,w:210,h:180,f:"wood"},{name:"CENTRALE",x:315,y:310,w:440,h:355,f:"stone"},
 {name:"SALA MEET",x:840,y:55,w:190,h:270,f:"stone"},{name:"INTERIOR",x:1050,y:55,w:170,h:270,f:"wood"},{name:"RENDERISTI",x:1240,y:55,w:210,h:270,f:"wood"},
 {name:"SPAZIO A",x:840,y:365,w:300,h:185,f:"stone"},{name:"BAGNI",x:840,y:585,w:180,h:125,f:"tile"},{name:"RIFUGIO DIGITALE",x:1040,y:585,w:180,h:125,f:"wood"},
-{name:"SALA MEET CAPO",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO / SEGRETERIA",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:840,y:735,w:285,h:130,f:"tile"},{name:"STAMPANTI",x:1145,y:735,w:285,h:130,f:"stone"}];
+{name:"SALA MEET CAPO",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO / SEGRETERIA",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:805,y:705,w:340,h:160,f:"tile"},{name:"STAMPANTI",x:1145,y:735,w:285,h:130,f:"stone"}];
 // NAVIGATION LAYER: corridoi enormi e porte sovradimensionate. Nessun bordo grafico è una collisione.
 /*
  V2.1 NAVIGATION
@@ -91,7 +90,7 @@ doors.push(EXTERIOR_DOOR);
 const walkZones=[...roomFloors,...corridors,...doors];
 const obstacles=[
 {x:355,y:385,w:380,h:32},{x:355,y:505,w:380,h:32},{x:75,y:145,w:155,h:45},{x:340,y:145,w:120,h:55},{x:565,y:115,w:150,h:90},
-{x:75,y:385,w:125,h:55},{x:75,y:600,w:125,h:23},{x:885,y:160,w:105,h:115},{x:1080,y:155,w:100,h:60},{x:1280,y:155,w:125,h:70},{x:890,y:435,w:190,h:60},{x:1330,y:495,w:185,h:85},{x:885,y:775,w:180,h:55},{x:1190,y:775,w:190,h:60}
+{x:75,y:385,w:125,h:55},{x:75,y:600,w:125,h:23},{x:885,y:160,w:105,h:115},{x:1080,y:155,w:100,h:60},{x:1280,y:155,w:125,h:70},{x:890,y:435,w:190,h:60},{x:1330,y:495,w:185,h:85},{x:835,y:750,w:270,h:34},{x:835,y:815,w:270,h:34},{x:1190,y:775,w:190,h:60}
 ];
 const points=[
 {x:155,y:205,room:"EDITORIA",kind:"PC"},{x:400,y:205,room:"IT",kind:"PC"},{x:640,y:205,room:"SERVER",kind:"SERVER"},{x:140,y:450,room:"BIM",kind:"PC"},{x:140,y:660,room:"IT",kind:"PC"},
@@ -213,8 +212,8 @@ function drawQuestion(category){
 
 const npcDefs=[
  {id:"pao",name:"PAO",role:"BIMER",x:140,y:450,homeRoom:"BIM",homeX:140,homeY:450,tone:"mixed",shirt:"#536f8b",hunter:false,speed:58,state:"work"},
- {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,tone:"good",shirt:"#765d78"},
- {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51",hunter:true},{id:"hr",name:"BETTY",role:"HR",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:92,state:"outside"}];
+ {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,homeRoom:"INGRESSO / SEGRETERIA",homeX:685,homeY:815,tone:"good",shirt:"#765d78",state:"idle"},
+ {id:"don",name:"DON",role:"JOLLY",x:895,y:815,homeRoom:"CUCINA",homeX:895,homeY:815,tone:"good",shirt:"#566a51",hunter:true,state:"idle"},{id:"hr",name:"BETTY",role:"HR",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:118,state:"outside"}];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
 
 let bettySupportCooldown=0,bettyPinged=false,bettyLastStressBand=0;
@@ -252,45 +251,8 @@ const officeWaypoints=[
  {x:900,y:800},{x:1000,y:815}
 ];
 function buildRoute(n,toKitchen){
- const central=n.homeX>=360&&n.homeX<=690&&n.homeY>=380&&n.homeY<=590;
- const left=n.homeX<300;
-
- if(toKitchen){
-   if(central){
-     // Dentro CENTRALE: scendi sotto le scrivanie, raggiungi la porta in basso a destra,
-     // poi entra nel corridoio inferiore.
-     return [
-       {x:n.homeX,y:560},{x:670,y:560},{x:700,y:610},
-       {x:700,y:675},{x:780,y:705},{x:900,y:705},{x:900,y:805},{x:990,y:815}
-     ];
-   }
-   if(left){
-     return [
-       {x:250,y:n.homeY},{x:250,y:675},{x:350,y:705},
-       {x:700,y:705},{x:900,y:705},{x:900,y:805},{x:990,y:815}
-     ];
-   }
-   return [
-     {x:n.homeX,y:675},{x:1100,y:705},{x:900,y:705},{x:900,y:805},{x:990,y:815}
-   ];
- }
-
- if(central){
-   return [
-     {x:900,y:805},{x:900,y:705},{x:780,y:705},{x:700,y:675},
-     {x:700,y:610},{x:670,y:560},{x:n.homeX,y:560},{x:n.homeX,y:n.homeY}
-   ];
- }
- if(left){
-   return [
-     {x:900,y:805},{x:900,y:705},{x:700,y:705},{x:350,y:705},
-     {x:250,y:675},{x:250,y:n.homeY},{x:n.homeX,y:n.homeY}
-   ];
- }
- return [
-   {x:900,y:805},{x:900,y:705},{x:1100,y:705},
-   {x:n.homeX,y:675},{x:n.homeX,y:n.homeY}
- ];
+ const target=toKitchen?{x:965,y:790,room:"CUCINA"}:{x:n.homeX,y:n.homeY,room:n.homeRoom||roomAt(n.homeX,n.homeY)};
+ return findNpcPath({x:n.x,y:n.y},target);
 }
 
 
@@ -318,6 +280,85 @@ function npcDestinationForActivity(n,activity){
  if(activity==="bathroom")return {x:900+Math.random()*55,y:650+Math.random()*20,room:"BAGNI"};
  return {x:n.homeX,y:n.homeY,room:"HOME"};
 }
+
+/* =============================================================
+   V7 — NAVIGATION: geometry-first pathfinding
+   NPC can move only through room floor + real door zones + corridors.
+   They cannot use unrelated rooms as shortcuts.
+   ============================================================= */
+const V7_NAV_STEP=16;
+function navAreaAt(x,y){
+ if(corridors.some(z=>inside(z,x,y))||doors.some(z=>inside(z,x,y)))return "CORRIDOIO";
+ const r=rooms.find(r=>inside(r,x,y));return r?r.name:"VOID";
+}
+function navAllowedPoint(x,y,startRoom,destRoom){
+ if(!walkable(x,y))return false;
+ const a=navAreaAt(x,y);
+ return a==="CORRIDOIO"||a===startRoom||a===destRoom;
+}
+function nearestNavPoint(p,startRoom,destRoom){
+ if(navAllowedPoint(p.x,p.y,startRoom,destRoom))return {x:p.x,y:p.y};
+ for(let radius=V7_NAV_STEP;radius<=96;radius+=V7_NAV_STEP){
+  for(let dx=-radius;dx<=radius;dx+=V7_NAV_STEP){
+   for(const dy of [-radius,radius]){
+    if(navAllowedPoint(p.x+dx,p.y+dy,startRoom,destRoom))return {x:p.x+dx,y:p.y+dy};
+   }
+  }
+  for(let dy=-radius+V7_NAV_STEP;dy<radius;dy+=V7_NAV_STEP){
+   for(const dx of [-radius,radius]){
+    if(navAllowedPoint(p.x+dx,p.y+dy,startRoom,destRoom))return {x:p.x+dx,y:p.y+dy};
+   }
+  }
+ }
+ return null;
+}
+function findNpcPath(from,to){
+ to=safePoint(to,{x:from.x,y:from.y,room:roomAt(from.x,from.y)});
+ const startRoom=roomAt(from.x,from.y);
+ const declared=safeRoom(to,"");
+ const destRoom=rooms.some(r=>r.name===declared)?declared:roomAt(to.x,to.y);
+ const s0=nearestNavPoint({x:from.x,y:from.y},startRoom,destRoom);
+ const e0=nearestNavPoint({x:to.x,y:to.y},startRoom,destRoom);
+ if(!s0||!e0)return [];
+ const snap=v=>Math.round(v/V7_NAV_STEP)*V7_NAV_STEP;
+ const sx=snap(s0.x),sy=snap(s0.y),ex=snap(e0.x),ey=snap(e0.y);
+ const key=(x,y)=>x+","+y, q=[[sx,sy]], seen=new Set([key(sx,sy)]), prev=new Map();
+ const dirs=[[V7_NAV_STEP,0],[-V7_NAV_STEP,0],[0,V7_NAV_STEP],[0,-V7_NAV_STEP]];
+ let found=null, head=0;
+ while(head<q.length&&q.length<7000){
+  const [x,y]=q[head++];
+  if(Math.abs(x-ex)<=V7_NAV_STEP&&Math.abs(y-ey)<=V7_NAV_STEP){found=[x,y];break}
+  for(const [dx,dy] of dirs){
+   const nx=x+dx,ny=y+dy,k=key(nx,ny);
+   if(nx<8||nx>1592||ny<8||ny>892||seen.has(k))continue;
+   if(!navAllowedPoint(nx,ny,startRoom,destRoom))continue;
+   seen.add(k);prev.set(k,[x,y]);q.push([nx,ny]);
+  }
+ }
+ if(!found)return [];
+ const raw=[];let cur=found;
+ while(cur){raw.push({x:cur[0],y:cur[1],room:navAreaAt(cur[0],cur[1])});cur=prev.get(key(cur[0],cur[1]))}
+ raw.reverse();
+ // Compress collinear nodes while preserving exact route through doors.
+ const out=[];
+ for(let i=0;i<raw.length;i++){
+  if(i===0||i===raw.length-1){out.push(raw[i]);continue}
+  const a=raw[i-1],b=raw[i],c=raw[i+1];
+  if((a.x===b.x&&b.x===c.x)||(a.y===b.y&&b.y===c.y))continue;
+  out.push(b);
+ }
+ if(navAllowedPoint(to.x,to.y,startRoom,destRoom))out.push({x:to.x,y:to.y,room:destRoom});
+ return out;
+}
+function routeNpcTo(n,target){
+ const dest=safeRoom(target,"CORRIDOIO");
+ if(PRIVATE_ROOMS.has(dest)&&!["hr","manager","zia"].includes(n.id)){
+   target={x:n.homeX,y:n.homeY,room:n.homeRoom};
+ }
+ const route=findNpcPath({x:n.x,y:n.y},target);
+ n.routeGoal={...target};n.route=route;n.routeIndex=0;n.stuckFor=0;
+ return route;
+}
 const PRIVATE_ROOMS=new Set(["HR","IT","INGRESSO / SEGRETERIA"]);
 const ROOM_EXITS={
  "EDITORIA":{x:250,y:265},"HR":{x:455,y:265},"SERVER":{x:755,y:250},"BIM":{x:240,y:430},"IT":{x:250,y:675},
@@ -337,26 +378,35 @@ function corridorRoute(from,to){
  return out;
 }
 function routeViaHub(n,target){
- target=safePoint(target,{x:n?.homeX||790,y:n?.homeY||705,room:n?.homeRoom||"CORRIDOIO"});
- const route=[];const current=roomAt(n.x,n.y);const dest=safeRoom(target,"CORRIDOIO");
- // Le stanze private non sono destinazioni di wandering.
- if(PRIVATE_ROOMS.has(dest)&&!["hr","manager","zia"].includes(n.id)) return routeNpcHome(n);
- const exitA=ROOM_EXITS[current],exitB=ROOM_EXITS[dest];
- if(exitA)route.push({...exitA,room:"CORRIDOIO"});
- if(exitA&&exitB)route.push(...corridorRoute(exitA,exitB));
- else if(exitB)route.push(...corridorRoute({x:n.x,y:n.y,room:"CORRIDOIO"},exitB));
- if(exitB)route.push({...exitB,room:dest});
- route.push(target);return route;
+ target=safePoint(target,{x:n?.homeX||n?.x||790,y:n?.homeY||n?.y||705,room:n?.homeRoom||"CORRIDOIO"});
+ const dest=safeRoom(target,"CORRIDOIO");
+ if(PRIVATE_ROOMS.has(dest)&&!["hr","manager","zia"].includes(n.id)){
+   target={x:n.homeX,y:n.homeY,room:n.homeRoom};
+ }
+ return findNpcPath({x:n.x,y:n.y},target);
 }
 function moveNpcRoute(n,dt){
  if(!n.route||n.routeIndex>=n.route.length)return true;
- const p=n.route[n.routeIndex],dx=p.x-n.x,dy=p.y-n.y,d=Math.hypot(dx,dy);
- if(d<7){n.x=p.x;n.y=p.y;n.routeIndex++;n.stuckFor=0;if(n.routeIndex>=n.route.length)n.currentRoom=safeRoom(p,n.currentRoom);return n.routeIndex>=n.route.length;}
+ let p=n.route[n.routeIndex];
+ if(!p){n.routeIndex++;return n.routeIndex>=n.route.length}
+ const dx=p.x-n.x,dy=p.y-n.y,d=Math.hypot(dx,dy);
+ if(d<5){
+   n.x=p.x;n.y=p.y;n.routeIndex++;n.stuckFor=0;
+   if(n.routeIndex>=n.route.length){n.currentRoom=roomAt(n.x,n.y);return true}
+   return false;
+ }
  const step=(n.speed||56)*dt;
- // Route V6 già vincolata a porte/corridoi: movimento ortogonale senza collisione dei mobili.
- if(Math.abs(dx)>=Math.abs(dy))n.x+=Math.sign(dx)*Math.min(Math.abs(dx),step);else n.y+=Math.sign(dy)*Math.min(Math.abs(dy),step);
- const moved=Math.min(d,step);n.stuckFor=moved<.2?(n.stuckFor||0)+dt:0;
- if(n.stuckFor>1.2){n.x=p.x;n.y=p.y;n.routeIndex++;n.stuckFor=0;}
+ let nx=n.x,ny=n.y;
+ if(Math.abs(dx)>=Math.abs(dy))nx+=Math.sign(dx)*Math.min(Math.abs(dx),step);
+ else ny+=Math.sign(dy)*Math.min(Math.abs(dy),step);
+ const can=walkable(nx,ny);
+ if(can){n.x=nx;n.y=ny;n.stuckFor=0}
+ else n.stuckFor=(n.stuckFor||0)+dt;
+ if(n.stuckFor>.55){
+   const goal=n.routeGoal||n.route[n.route.length-1]||{x:n.homeX,y:n.homeY,room:n.homeRoom};
+   n.route=findNpcPath({x:n.x,y:n.y},goal);n.routeIndex=0;n.stuckFor=0;
+   if(!n.route.length){n.state=n.state==="return"?"work":n.state;n.timer=8+Math.random()*8}
+ }
  return n.routeIndex>=n.route.length;
 }
 function generateNpcActivityTicket(n){
@@ -419,14 +469,14 @@ function updateAmbient(dt){
      n.activity=r<.24?"coffee":r<.44?"meeting":r<.61?"printer":r<.72?"gallery":r<.82?"bathroom":"wander";
      if(n.activity==="wander"){n.timer=8+Math.random()*16;continue}
      n.target=npcDestinationForActivity(n,n.activity);
-     n.route=routeViaHub(n,n.target);n.routeIndex=0;n.state="activityTravel";n.activityTicket=false;
+     n.routeGoal={...n.target};n.route=routeViaHub(n,n.target);n.routeIndex=0;n.state="activityTravel";n.activityTicket=false;
    }else if(n.state==="activityTravel"){
      ambientCorridorEncounter(n);
      if(moveNpcRoute(n,dt)){n.state="activity";n.timer=10+Math.random()*14}
    }else if(n.state==="activity"){
      if(n.activity==="meeting"&&n.timer<8&&!n.activityTicket&&Math.random()<.27)generateNpcActivityTicket(n); else if(n.activity!=="meeting"&&n.activity!=="bathroom"&&n.activity!=="coffee"&&n.timer<7&&!n.activityTicket&&Math.random()<.05)generateNpcActivityTicket(n);
      if(n.timer<=0){
-       n.state="return";n.route=buildRoute(n,false);n.routeIndex=0;
+       n.state="return";n.routeGoal={x:n.homeX,y:n.homeY,room:n.homeRoom};n.route=buildRoute(n,false);n.routeIndex=0;
      }
    }else if(n.state==="return"){
      if(moveNpcRoute(n,dt)){n.x=n.homeX;n.y=n.homeY;n.state="work";n.activity=null;n.timer=20+Math.random()*45}
@@ -452,11 +502,16 @@ function pokemonEncounter(n){
  },1100);
 }
 function phoneMessage(sender,text){
- const box=$("#phoneNotification"); if(!box)return;
+ const box=$("#phoneNotification");if(!box)return;
+ // During a minigame/result, queue non-critical messages instead of covering UI.
+ if((!$("#modal")?.classList.contains("hidden")||!$("#rewardOverlay")?.classList.contains("hidden"))){
+   deferredDialogs.push({who:sender,text,cb:null,phoneOnly:true});
+   return;
+ }
  $("#phoneSender").textContent=sender;$("#phoneText").textContent=text;
  box.classList.add("on");clearTimeout(box._t);
- const important=["ZIA ALE","IT MANAGER","CAPO","DIREZIONE","IT TASK"].includes(sender);
- const duration=important?10000:5200;
+ const important=["ZIA ALE","IT MANAGER","CAPO","DIREZIONE","IT TASK","BETTY"].includes(sender);
+ const duration=important?11000:5600;
  box._t=setTimeout(()=>box.classList.remove("on"),duration);
 }
 function updateInventoryUI(){
@@ -576,6 +631,24 @@ function spawnNPCs(){
 function nearestNPC(){
  const all=mokasa?[...npcs,mokasa]:npcs;
  return all.map(n=>({n,d:Math.hypot(player.x-n.x,player.y-n.y)})).sort((a,b)=>a.d-b.d)[0];
+}
+
+function updateCapoRoutine(dt){
+ if(!mokasa||introStage!=="done")return;
+ mokasa.life=Infinity;
+ if(isLunch()){
+   if(mokasa.state!=="capoHome"){mokasa.state="capoHome";mokasa.route=findNpcPath({x:mokasa.x,y:mokasa.y},{x:mokasa.homeX,y:mokasa.homeY,room:"SALA MEET CAPO"});mokasa.routeIndex=0}
+ }else{
+   mokasa.capoTimer=(mokasa.capoTimer??45)-dt;
+   if((!mokasa.route||mokasa.routeIndex>=mokasa.route.length)&&mokasa.capoTimer<=0){
+     const opts=Math.random()<.62?
+       [{x:1435,y:555,room:"SALA MEET CAPO"},{x:925,y:220,room:"SALA MEET"}]:
+       [{x:1435,y:555,room:"SALA MEET CAPO"},{x:1030,y:480,room:"SPAZIO A"}];
+     const target=opts[Math.floor(Math.random()*opts.length)];
+     mokasa.routeGoal={...target};mokasa.route=findNpcPath({x:mokasa.x,y:mokasa.y},target);mokasa.routeIndex=0;mokasa.state="capoTravel";mokasa.capoTimer=38+Math.random()*55;
+   }
+ }
+ if(mokasa.route&&mokasa.routeIndex<mokasa.route.length)moveNpcRoute(mokasa,dt);
 }
 function spawnMokasa(){
  if(Math.random()<.28){
@@ -769,7 +842,11 @@ const IT_PC={x:140,y:660,room:"IT"};
 const OUTSIDE_ZONE={x:500,y:850,w:225,h:70};
 walkZones.push(OUTSIDE_ZONE,{x:605,y:825,w:100,h:95});
 let deferredDialogs=[];
-function flushDeferredDialog(){if(!deferredDialogs.length||!$("#modal")?.classList.contains("hidden")||storyOpen)return;const d=deferredDialogs.shift();storyDialog(d.who,d.text,d.cb)}
+function flushDeferredDialog(){
+ if(!deferredDialogs.length||!$("#modal")?.classList.contains("hidden")||!$("#rewardOverlay")?.classList.contains("hidden")||storyOpen)return;
+ const d=deferredDialogs.shift();
+ if(d.phoneOnly)phoneMessage(d.who,d.text);else storyDialog(d.who,d.text,d.cb);
+}
 function storyDialog(who,text,cb=null){
  if(!$("#modal")?.classList.contains("hidden")){deferredDialogs.push({who,text,cb});phoneMessage(who,text);return}
  storyOpen=true;storyCallback=cb;keys={};
@@ -813,37 +890,13 @@ function bootWorkstation(){
 /* V5.3.2 — IT MANAGER DEDICATED PATH */
 
 function managerStartRoute(){
- // SEGRETERIA -> porta -> corridoio basso -> porta IT -> postazione.
- return [
-  {x:650,y:800,room:"INGRESSO / SEGRETERIA"},
-  {x:650,y:705,room:"CORRIDOIO"},
-  {x:500,y:705,room:"CORRIDOIO"},
-  {x:350,y:705,room:"CORRIDOIO"},
-  {x:250,y:675,room:"PORTA IT"},
-  {x:190,y:640,room:"IT"}
- ];
+ return findNpcPath({x:650,y:800},{x:190,y:640,room:"IT"});
 }
 function managerITtoServerRoute(){
- return [
-  {x:250,y:675,room:"PORTA IT"},
-  {x:500,y:705,room:"CORRIDOIO"},
-  {x:790,y:705,room:"DORSALE"},
-  {x:790,y:420,room:"DORSALE"},
-  {x:790,y:250,room:"PORTA SERVER"},
-  {x:735,y:235,room:"PORTA SERVER"},
-  {x:650,y:190,room:"SERVER"}
- ];
+ return findNpcPath({x:190,y:640},{x:650,y:190,room:"SERVER"});
 }
 function managerServerToITRoute(){
- return [
-  {x:735,y:235,room:"PORTA SERVER"},
-  {x:790,y:250,room:"DORSALE"},
-  {x:790,y:420,room:"DORSALE"},
-  {x:790,y:705,room:"CORRIDOIO"},
-  {x:500,y:705,room:"CORRIDOIO"},
-  {x:250,y:675,room:"PORTA IT"},
-  {x:190,y:640,room:"IT"}
- ];
+ return findNpcPath({x:650,y:190},{x:190,y:640,room:"IT"});
 }
 function moveManagerRoute(n,dt){
  if(!n.route||!n.route.length||n.routeIndex>=n.route.length)return true;
@@ -945,13 +998,8 @@ function updateManager(dt){
 function lunchRouteFor(n,i){
  const target=lunchSpotFor(n,i);
  if(n.id==="manager"||n.id==="hr")return [target];
- const route=[];
- if(n.y<300)route.push({x:n.x,y:300});
- else if(n.y<690)route.push({x:n.x,y:690});
- if(n.x<760)route.push({x:700,y:705},{x:790,y:705});
- else if(n.x>1180)route.push({x:1200,y:705},{x:1080,y:705});
- route.push(target);
- return route;
+ n.routeGoal={...target};
+ return findNpcPath({x:n.x,y:n.y},target);
 }
 function beginLunchMigration(){
  if(dayFlags.lunchMigration)return;dayFlags.lunchMigration=true;
@@ -983,11 +1031,10 @@ function updateLunchMigration(dt){
  npcs.forEach(n=>{if(n.state==="specialReturn"&&moveNpcRoute(n,dt))n.state="idle"});
 }
 function randomizeMiniLayout(){
- const box=document.querySelector('.miniGame');if(!box)return;
- const children=[...box.children].filter(x=>x.tagName==='BUTTON'||x.classList.contains('pixelItem'));
- children.forEach(x=>x.style.order=Math.floor(Math.random()*50));
- const cols=2+Math.floor(Math.random()*3);box.style.gridTemplateColumns=`repeat(${cols},minmax(72px,1fr))`;
- box.classList.add('v5Random');
+ const box=document.querySelector(".miniGame");if(!box)return;
+ const children=[...box.children].filter(x=>x.tagName==="BUTTON"||x.classList.contains("pixelItem"));
+ children.forEach(x=>x.style.order=Math.floor(Math.random()*100));
+ box.classList.add("v7MiniGrid");
 }
 
 /* =============================================================
@@ -995,14 +1042,20 @@ function randomizeMiniLayout(){
    ============================================================= */
 const LUNCH_START=13*60,LUNCH_END=14*60,LATE_START=17*60+30;
 const LUNCH_SPOTS=[
- {x:905,y:770,room:"CUCINA",seat:true},{x:947,y:770,room:"CUCINA",seat:true},{x:989,y:770,room:"CUCINA",seat:true},{x:1031,y:770,room:"CUCINA",seat:true},
- {x:905,y:844,room:"CUCINA",seat:true},{x:947,y:844,room:"CUCINA",seat:true},{x:989,y:844,room:"CUCINA",seat:true},{x:1031,y:844,room:"CUCINA",seat:true},
- {x:785,y:745,room:"BREAK",seat:false},{x:1100,y:705,room:"BREAK",seat:false},{x:1170,y:705,room:"BREAK",seat:false}
+ // 16 real dining seats around two tables
+ {x:855,y:735,room:"CUCINA",seat:true},{x:915,y:735,room:"CUCINA",seat:true},{x:975,y:735,room:"CUCINA",seat:true},{x:1035,y:735,room:"CUCINA",seat:true},
+ {x:855,y:795,room:"CUCINA",seat:true},{x:915,y:795,room:"CUCINA",seat:true},{x:975,y:795,room:"CUCINA",seat:true},{x:1035,y:795,room:"CUCINA",seat:true},
+ {x:855,y:805,room:"CUCINA",seat:true},{x:915,y:805,room:"CUCINA",seat:true},{x:975,y:805,room:"CUCINA",seat:true},{x:1035,y:805,room:"CUCINA",seat:true},
+ {x:855,y:860,room:"CUCINA",seat:true},{x:915,y:860,room:"CUCINA",seat:true},{x:975,y:860,room:"CUCINA",seat:true},{x:1035,y:860,room:"CUCINA",seat:true},
+ // overflow break positions: no overlap if staff exceeds kitchen capacity
+ {x:780,y:700,room:"CORRIDOIO",seat:false},{x:1160,y:700,room:"CORRIDOIO",seat:false},
+ {x:1090,y:650,room:"RIFUGIO DIGITALE",seat:false},{x:1140,y:650,room:"RIFUGIO DIGITALE",seat:false},
+ {x:930,y:470,room:"SPAZIO A",seat:false},{x:1080,y:470,room:"SPAZIO A",seat:false}
 ];
 function lunchSpotFor(n,i){
- if(n.id==="manager")return {x:190,y:640};
- if(n.id==="hr")return {x:405,y:205};
- if(n.id==="zia")return {x:835,y:790};
+ if(n.id==="manager")return {x:190,y:640,room:"IT"};
+ if(n.id==="hr")return {x:405,y:205,room:"HR"};
+ if(n.id==="zia")return {x:685,y:815,room:"INGRESSO / SEGRETERIA"};
  return {...LUNCH_SPOTS[i%LUNCH_SPOTS.length]};
 }
 let dayFlags={},lunchMode=false,fullMap=false;
@@ -1078,14 +1131,14 @@ function refreshPDA(){
  const p=$("#pdaBody");if(!p||!state)return;
  const active=tickets.map((t,i)=>`<button class="pdaTicketRow" data-ticket="${i}"><b class="prio ${t.level.toLowerCase()}">${t.level}</b><span>${t.p?.id||t.p?.type||"POSTAZIONE"}</span><span>${safeRoom(t.p,"SEGNALAZIONE")}</span><span>${t.taskType||"DIAGNOSI"}</span><small>${fmt(t.due)}</small></button>`).join("");
  const carry=carryMission?`<div class="pdaCarry"><b>${carryMission.item}</b><span>${carryMission.stage==="pickup"?"RITIRO: "+safeRoom(carryMission.pickup,"IT"):"CONSEGNA: "+(carryMission.recipient?carryMission.recipient.name:safeRoom(carryMission.to,"POSTAZIONE"))}</span></div>`:"";
- const people=[...ambientNPCs,...npcs].filter(n=>n.id&&n.id!=="manager"&&n.id!=="zia");
+ const people=[...new Map([...ambientNPCs,...npcs,mokasa].filter(Boolean).filter(n=>n.id&&n.id!=="manager").map(n=>[n.id,n])).values()];
  const rel=people.map(n=>{const v=ensureRelation(n),tier=v>=45?"AMICO":v>=15?"SIMPATIA":v<=-45?"NEMICO":v<=-15?"ANTIPATIA":"NEUTRALE";const pct=Math.round((v+100)/2);return `<div class="relRow ${v>=45?"friend":v<=-45?"enemy":""}"><b>${n.name}</b><span>${tier}</span><i><em style="width:${pct}%"></em></i><small>${v>0?"+":""}${v}</small></div>`}).join("");
  const tabs=["TASK","INVENTARIO","RAPPORTI","STATO"].map(t=>`<button class="tabletTab ${pdaTab===t?"active":""}" data-tab="${t}">${t}</button>`).join("");
  let body="";
  if(pdaTab==="TASK") body=`<section class="ticketWindow"><div class="windowTitle"><span>Gestione ticket IT</span><small>Windows // Service Desk</small></div><div class="ticketColumns"><b>PRIORITÀ</b><b>ID</b><b>REPARTO</b><b>PROBLEMA</b><b>SCADENZA</b></div>${carry||active||"<div class='pdaEmpty'>NESSUN TICKET APERTO</div>"}</section>`;
  else if(pdaTab==="INVENTARIO") body=`<section><h4>INVENTARIO</h4><div class="inventoryPda">${inventory.length?inventory.map(x=>`<div>${x}</div>`).join(""):"NESSUN OGGETTO"}</div></section>`;
  else if(pdaTab==="RAPPORTI") body=`<section><h4>RAPPORTI // STUDIO</h4><div class="relationshipList">${rel}</div></section>`;
- else body=`<section class="tabletState"><h4>STATO OPERATORE</h4><div class="stateCards"><b>STRESS ${Math.round(state.stress)}%</b><b>ERRORI ${state.strikes}/${state.maxStrikes}</b><b>INCIDENT ${Math.round(state.incident)}%</b><b>XP ${state.xp}</b></div><p>${state.stress>=65?"BETTY // Se sei al limite, passa in HR.":"Nessun bonus attivo."}</p></section>`;
+ else body=`<section class="tabletState"><h4>STATO OPERATORE</h4><div class="stateCards"><b>STRESS ${Math.round(state.stress)}%</b><b>ERRORI ${state.strikes}/${state.maxStrikes}</b><b>INCIDENT ${Math.round(state.incident)}%</b><b>XP ${state.xp}</b><b>REPUTAZIONE ${"★".repeat(Math.max(0,Math.round(state.rep)))}</b><b>BETTY ${bettySupportCooldown>0?"COOLDOWN":"DISPONIBILE"}</b></div><p>${state.stress>=42?"BETTY // Passa in HR: può aiutarti a recuperare stress.":"Turno sotto controllo."}</p></section>`;
  p.innerHTML=`<div class="tabletTabs">${tabs}</div>${body}`;
  p.querySelectorAll(".tabletTab").forEach(b=>b.onclick=()=>{pdaTab=b.dataset.tab;refreshPDA()});
  p.querySelectorAll(".pdaTicketRow").forEach(b=>b.onclick=()=>{const t=tickets[+b.dataset.ticket];if(!t)return;const mac=safeRoom(t.p)==="EDITORIA";$("#modalBody").innerHTML=`<div class="ticketDetail ${mac?"macWindow":"winWindow"}"><div class="osTitle">${mac?"● ● ●  Supporto Mac":"▣  Service Desk // Windows"}</div><h2>${t.level} // ${t.p?.id||"TICKET"}</h2><p><b>Reparto:</b> ${safeRoom(t.p,"SEGNALAZIONE")}</p><p><b>Problema:</b> ${t.taskType||"DIAGNOSI"}</p><p><b>Scadenza:</b> ${fmt(t.due)}</p><button class="choice" onclick="document.querySelector('#modal').classList.add('hidden')">PRENDI IN CARICO</button></div>`;$("#modal").classList.remove("hidden")});
@@ -1141,6 +1194,35 @@ function beginEntranceWalk(){
  toast("RAGGIUNGI L'INGRESSO // E — ENTRA");
 }
 
+
+function runV7Audit(){
+ const issues=[];
+ const workRooms=["EDITORIA","BIM","INTERIOR","RENDERISTI"];
+ for(const room of workRooms){
+  const pc=stations.filter(s=>s.room===room&&["HP Z","MAC"].includes(s.type)).length;
+  const staff=ambientNPCs.filter(n=>n.homeRoom===room).length;
+  if(pc>4)issues.push(`${room}: ${pc} PC > 4`);
+  if(staff>pc)issues.push(`${room}: ${staff} NPC > ${pc} PC`);
+ }
+ const centralPC=stations.filter(s=>s.room==="CENTRALE"&&s.type==="HP Z").length;
+ const centralStaff=ambientNPCs.filter(n=>n.homeRoom==="CENTRALE").length;
+ if(centralPC!==12)issues.push(`CENTRALE: ${centralPC} PC, attesi 12`);
+ if(centralStaff!==12)issues.push(`CENTRALE: ${centralStaff} NPC, attesi 12`);
+ if(ambientNPCs.some(n=>PRIVATE_ROOMS.has(n.homeRoom)))issues.push("NPC ambient in stanza privata");
+ if(stations.some(s=>s.room==="CUCINA"&&["HP Z","MAC"].includes(s.type)))issues.push("PC presenti in CUCINA");
+ if(stations.some(s=>s.room==="BAGNI"&&["HP Z","MAC"].includes(s.type)))issues.push("PC presenti in BAGNI");
+ const pao=npcs.find(n=>n.id==="pao");if(!pao||pao.homeRoom!=="BIM")issues.push("PAO homeRoom != BIM");
+ const hr=npcs.find(n=>n.id==="hr");if(!hr||hr.homeRoom!=="HR")issues.push("BETTY homeRoom != HR");
+ const mgr=npcs.find(n=>n.id==="manager");if(!mgr||mgr.homeX!==190)issues.push("IT MANAGER home non valida");
+ if(!mokasa||mokasa.homeRoom!=="SALA MEET CAPO")issues.push("CAPO non persistente in SALA MEET CAPO");
+ // Connectivity smoke test from each home to corridor/own common destinations.
+ for(const n of ambientNPCs.slice(0,40)){
+  const p=findNpcPath({x:n.homeX,y:n.homeY},{x:790,y:705,room:"CORRIDOIO"});
+  if(!p.length)issues.push(`PATH: ${n.name}/${n.homeRoom} non raggiunge corridoio`);
+ }
+ console.log("V7 AUDIT:",issues.length?issues:"OK");
+ return issues;
+}
 function runV6Audit(){
  const issues=[];const workRooms=["EDITORIA","BIM","INTERIOR","RENDERISTI"];
  for(const room of workRooms){const count=stations.filter(s=>s.room===room&&["HP Z","MAC"].includes(s.type)).length;if(count>4)issues.push(`${room}: ${count} PC (>4)`)}
@@ -1148,7 +1230,7 @@ function runV6Audit(){
  if(stations.filter(s=>s.room==="HR").length!==1)issues.push("HR deve avere una sola postazione");
  const privateAmbient=ambientNPCs.filter(n=>PRIVATE_ROOMS.has(n.homeRoom));if(privateAmbient.length)issues.push("NPC ambient assegnati a stanze private");
  const kitchenPC=stations.filter(s=>s.room==="CUCINA"&&["HP Z","MAC"].includes(s.type));if(kitchenPC.length)issues.push("PC presenti in cucina");
- console.log("V6 AUDIT:",issues.length?issues:"OK");return issues;
+ console.log("V7 AUDIT:",issues.length?issues:"OK");return issues;
 }
 function reset(){
  bettySupportCooldown=0;bettyPinged=false;bettyLastStressBand=0;
@@ -1156,7 +1238,7 @@ function reset(){
  Object.keys(npcRelations).forEach(k=>delete npcRelations[k]);
 
  introFreeWalk=false;entranceOpened=false;enteredStudio=false;window.__entranceDialogReady=false;
-const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();runV6Audit();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio."),250));}
+const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();runV7Audit();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio."),250));}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x, y) {
   if (!walkZones.some(z => inside(z, x, y))) {
@@ -1243,40 +1325,69 @@ function miniHeader(t,title,subtitle){
  </div>`;
 }
 
+
+function showRewardResult(title,rows,kind="success"){
+ const ov=$("#rewardOverlay"),box=$("#rewardRows"),ttl=$("#rewardTitle");
+ if(!ov||!box||!ttl){toast(title+" // "+rows.join(" · "));return}
+ ttl.textContent=title;ttl.className=kind;
+ box.innerHTML=rows.map(x=>`<div>${x}</div>`).join("");
+ ov.classList.remove("hidden");
+ $("#rewardContinue").onclick=()=>{ov.classList.add("hidden");setTimeout(flushDeferredDialog,80)};
+}
 function miniSuccess(i,label,skipContext=false){
  if(i<0||i>=tickets.length)return;
  if(!skipContext){
    const t=tickets[i];
-   if(t&&!t.contextChecked){
-     t.contextChecked=true;
-     maybeContextCheck(i,()=>miniSuccess(i,label,true));
-     return;
-   }
+   if(t&&!t.contextChecked){t.contextChecked=true;maybeContextCheck(i,()=>miniSuccess(i,label,true));return}
  }
- const t=tickets[i];
- const xp={LOW:120,MEDIUM:290,HIGH:560,CRITICAL:820}[t.level];
- tickets.splice(i,1);
- activeMiniGame=null;
- $("#modal").classList.add("hidden");setTimeout(flushDeferredDialog,80);
+ const t=tickets[i],xp={LOW:120,MEDIUM:290,HIGH:560,CRITICAL:820}[t.level];
+ tickets.splice(i,1);activeMiniGame=null;$("#modal").classList.add("hidden");
+ const stressBefore=state.stress;
  state.xp+=xp;state.solved++;state.stress=Math.max(0,state.stress-4);
  state.incident=Math.max(0,state.incident-({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]));
- toast(`${label} // TASK COMPLETE +${xp} XP`);
- const srcNpc=[...ambientNPCs,...npcs].find(n=>n.name===t.source||n.id===t.source);if(srcNpc)changeRelation(srcNpc,6);
+ const srcNpc=[...ambientNPCs,...npcs].find(n=>n.name===t.source||n.id===t.source);
+ let relRow="";
+ if(srcNpc){changeRelation(srcNpc,6);relRow=`${srcNpc.name} RAPPORTO +6`}
  renderTickets();updateTaskProgress();hud();
+ showRewardResult("INTERVENTO COMPLETATO",[
+   `${label}`,
+   `XP +${xp}`,
+   `STRESS -${Math.round(stressBefore-state.stress)}`,
+   relRow
+ ].filter(Boolean),"success");
 }
 
 function failMiniGameCurrent(){
- if(!activeMiniGame)return;const i=activeMiniGame.index,t=tickets[i];
- if(t){tickets.splice(i,1);state.rep-=t.level==="CRITICAL"?2:1;state.incident+=({LOW:5,MEDIUM:8,HIGH:12,CRITICAL:16}[t.level]||6)*difficultyConfig[difficulty].incidentMult;}
- activeMiniGame=null;$("#modal").classList.add("hidden");toast("INTERVENTO FALLITO // TROPPI ERRORI");renderTickets();hud();checkEarlyEnd();setTimeout(flushDeferredDialog,80);
+ if(!activeMiniGame)return;
+ const i=activeMiniGame.index,t=tickets[i];
+ let repLoss=0;
+ if(t){
+   tickets.splice(i,1);repLoss=t.level==="CRITICAL"?2:1;state.rep-=repLoss;
+   state.incident+=({LOW:5,MEDIUM:8,HIGH:12,CRITICAL:16}[t.level]||6)*difficultyConfig[difficulty].incidentMult;
+ }
+ activeMiniGame=null;$("#modal").classList.add("hidden");renderTickets();hud();checkEarlyEnd();
+ showRewardResult("INTERVENTO FALLITO",[
+   "3 ERRORI NELLO STESSO INTERVENTO",
+   `REPUTAZIONE -${repLoss}`,
+   `ERRORI ${state.strikes}/${state.maxStrikes}`,
+   `INCIDENT ${Math.round(state.incident)}%`
+ ],"failure");
 }
 function miniMistake(text="ERRORE"){
  if(!activeMiniGame)return;
- activeMiniGame.errors=(activeMiniGame.errors||0)+1;state.strikes++;
- const t=tickets[activeMiniGame.index],severity=t?({LOW:4,MEDIUM:6,HIGH:9,CRITICAL:12}[t.level]||5):5;
- state.stress+=severity*difficultyConfig[difficulty].stressMult;state.incident+=2*difficultyConfig[difficulty].incidentMult;
- const e=$("#miniError");if(e){e.textContent=`${text} // ERRORE ${activeMiniGame.errors}/3`;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),750)}
- clamp();hud();checkEarlyEnd();if(activeMiniGame&&activeMiniGame.errors>=3)failMiniGameCurrent();
+ activeMiniGame.errors=(activeMiniGame.errors||0)+1;
+ state.strikes++;
+ const t=tickets[activeMiniGame.index],severity=t?({LOW:5,MEDIUM:8,HIGH:11,CRITICAL:15}[t.level]||6):6;
+ state.stress+=severity*difficultyConfig[difficulty].stressMult;
+ state.incident+=3*difficultyConfig[difficulty].incidentMult;
+ const e=$("#miniError");
+ if(e){
+   e.textContent=`✕ ${text} // ERRORE ${activeMiniGame.errors}/3`;
+   e.classList.add("on","v7Mistake");setTimeout(()=>e.classList.remove("on","v7Mistake"),950);
+ }
+ const game=document.querySelector(".miniGame");if(game){game.classList.add("mistakeFlash");setTimeout(()=>game.classList.remove("mistakeFlash"),220)}
+ clamp();hud();checkEarlyEnd();
+ if(activeMiniGame&&activeMiniGame.errors>=3)failMiniGameCurrent();
 }
 
 
@@ -1445,12 +1556,17 @@ function startMiniGame(i){
    $("#missingFile").onclick=()=>{$("#missingFile").classList.add("selected");$("#relinkBtn").disabled=false};
    $("#relinkBtn").onclick=()=>miniSuccess(i,"MEDIA RELINKED");
   } else {
-   const bad=Math.floor(Math.random()*3);
-   body.innerHTML=miniHeader(t,"PROCESS CHECK","Termina solo il processo bloccato.")+
+   const processPool=["DesktopConnector.exe","Revit.exe","SyncAgent.exe","AdobeCC.exe","Teams.exe"];
+   const visible=[...processPool].sort(()=>Math.random()-.5).slice(0,4+Math.floor(Math.random()*2));
+   const badProcess=visible[Math.floor(Math.random()*visible.length)];
+   body.innerHTML=miniHeader(t,"PROCESS CHECK","Termina solo il processo bloccato. Ogni processo sano chiuso conta come errore.")+
    `<div class="miniGame processGame">
-   ${["DesktopConnector.exe","Revit.exe","SyncAgent.exe","AdobeCC.exe","Teams.exe"].sort(()=>Math.random()-.5).slice(0,3+Math.floor(Math.random()*3)).map((x,n)=>`<button class="processRow" data-ok="${n===bad?1:0}">${x}<i>${n===bad?"NOT RESPONDING":"RUNNING"}</i></button>`).join("")}
+    ${visible.map(x=>`<button class="processRow" data-ok="${x===badProcess?1:0}"><span>${x}</span><i>${x===badProcess?"NOT RESPONDING":"RUNNING"}</i></button>`).join("")}
    </div><div id="miniError"></div>`;
-   document.querySelectorAll(".processRow").forEach(b=>b.onclick=()=>b.dataset.ok==="1"?miniSuccess(i,"PROCESSO RIPRISTINATO"):miniMistake("PROCESSO SANO"));
+   document.querySelectorAll(".processRow").forEach(b=>b.onclick=()=>{
+    if(b.dataset.ok==="1"){b.classList.add("fixed");b.disabled=true;miniSuccess(i,"PROCESSO RIPRISTINATO")}
+    else{b.classList.add("wrong");miniMistake("PROCESSO SANO");setTimeout(()=>b.classList.remove("wrong"),350)}
+   });
   }
  }
  setTimeout(randomizeMiniLayout,0);
@@ -1715,10 +1831,13 @@ function monitorEntranceIntro(){
 function updateWorkloadStress(dt){
  if(!state||introStage!=="done"||state.phase!=="shift")return;
  const open=tickets.length,critical=tickets.filter(t=>t.level==="CRITICAL").length,high=tickets.filter(t=>t.level==="HIGH").length;
- const pressure=Math.max(0,open-1)*0.36+high*0.30+critical*0.65+(state.incident/100)*0.22;
+ const hostile=[...ambientNPCs,...npcs].filter(n=>ensureRelation(n)<=-15).length;
+ const deadline=tickets.filter(t=>t.due-state.min<25).length;
+ const pressure=Math.max(0,open-1)*0.62+high*0.55+critical*1.10+deadline*.55+hostile*.025+(state.incident/100)*.42;
  if(pressure>0)state.stress+=pressure*dt*difficultyConfig[difficulty].stressMult;
- // recupero naturale minimo solo quando la coda è quasi vuota.
- if(open===0&&!isLunch())state.stress=Math.max(0,state.stress-.10*dt);
+ if(open===0&&!isLunch())state.stress=Math.max(0,state.stress-.055*dt);
+ if(isLunch()&&open<2)state.stress=Math.max(0,state.stress-.16*dt);
+ clamp();
 }
 function update(dt) {
  updateBettySupport(dt);
@@ -1757,7 +1876,7 @@ function update(dt) {
  }
  mokasaTimer+=dt*difficultyConfig[difficulty].timeSpeed;
  if(introStage==="done"&&!isLunch()&&!mokasa&&state.min>960&&mokasaTimer>70&&Math.random()<.0022){spawnMokasa();mokasaTimer=0}
- if(mokasa){mokasa.life-=dt*difficultyConfig[difficulty].timeSpeed;if(mokasa.life<=0)mokasa=null}
+ if(mokasa){mokasa.life=Infinity;updateCapoRoutine(dt)}
  updateAmbient(dt);
  if(!isLunch()) for(const n of npcs.filter(x=>x.hunter)){
    // PAO deve essere un incontro occasionale, DON un po' più mobile.
@@ -1953,12 +2072,20 @@ function drawHRRoom(){
 }
 
 function drawDiningTable(){
- const x=885,y=790,w=190;
- g.fillStyle="#171311";g.fillRect(x+4,y+5,w,32);g.fillStyle="#6b4224";g.fillRect(x,y,w,27);g.fillStyle="#8a5a31";g.fillRect(x,y,w,4);
- // otto sedute, nessun PC.
- for(let sx=x+18;sx<x+w-12;sx+=42){g.fillStyle="#303631";g.fillRect(sx,y-20,22,14);g.fillRect(sx,y+34,22,14)}
- // piano cucina / frigo sul fondo
- g.fillStyle="#39423d";g.fillRect(855,748,215,24);g.fillStyle="#79867f";g.fillRect(858,751,50,18);g.fillStyle="#202724";g.fillRect(1018,750,48,20);
+ // V7: vera cucina, due tavoli da pranzo, 16 sedute, zero PC.
+ const tables=[{x:835,y:750,w:270},{x:835,y:815,w:270}];
+ // kitchen counter / fridge
+ g.fillStyle="#39423d";g.fillRect(818,715,310,22);
+ g.fillStyle="#76847d";g.fillRect(822,718,52,16);
+ g.fillStyle="#202724";g.fillRect(1068,717,54,18);
+ tables.forEach(t=>{
+  g.fillStyle="#171311";g.fillRect(t.x+4,t.y+5,t.w,30);
+  g.fillStyle="#6b4224";g.fillRect(t.x,t.y,t.w,25);
+  g.fillStyle="#8a5a31";g.fillRect(t.x,t.y,t.w,4);
+  for(const sx of [t.x+20,t.x+82,t.x+144,t.x+206]){
+   g.fillStyle="#303631";g.fillRect(sx,t.y-17,25,13);g.fillRect(sx,t.y+31,25,13);
+  }
+ });
 }
 function furniture(){
  // Reparti normali compatti; CENTRALE V6.5: due tavoli distinti da 6.
@@ -2208,31 +2335,7 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  drawPixelPerson(player.x,player.y,"#284f3a","#d0a887","#17231d");
 
 
- if(debug){
-  const dbgManager=(typeof itManager!=="undefined"&&itManager)?itManager:npcs.find(n=>n.id==="manager");
-  if(dbgManager&&Array.isArray(dbgManager.route)&&dbgManager.route.length){
-    g.save();
-    g.strokeStyle="#ffd84a";g.lineWidth=3;g.beginPath();
-    g.moveTo(dbgManager.x,dbgManager.y);
-    for(let ri=dbgManager.routeIndex||0;ri<dbgManager.route.length;ri++){
-      const wp=dbgManager.route[ri];
-      g.lineTo(wp.x,wp.y);
-    }
-    g.stroke();
-    for(let ri=dbgManager.routeIndex||0;ri<dbgManager.route.length;ri++){
-      const wp=dbgManager.route[ri];
-      g.fillStyle="#ffd84a";g.fillRect(wp.x-4,wp.y-4,8,8);
-    }
-    g.restore();
-  }
-
-  g.globalAlpha=.24;
-  g.fillStyle="#37ff82";roomFloors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
-  g.fillStyle="#2aa8ff";corridors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
-  g.fillStyle="#ffe14a";doors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
-  g.fillStyle="#ff3040";obstacles.forEach(o=>g.fillRect(o.x,o.y,o.w,o.h));
-  g.globalAlpha=1;
- }
+ if(debug)drawV7Debug();
 
  if(useCam)g.restore();
  drawMiniMap();
@@ -2242,6 +2345,30 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
    grad.addColorStop(1,"rgba(0,0,0,.48)");
    g.fillStyle=grad;g.fillRect(0,0,W,H);
  }
+}
+
+function drawV7Debug(){
+ try{
+  g.save();g.globalAlpha=.24;
+  g.fillStyle="#37ff82";roomFloors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
+  g.fillStyle="#2aa8ff";corridors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
+  g.fillStyle="#ffe14a";doors.forEach(z=>g.fillRect(z.x,z.y,z.w,z.h));
+  g.fillStyle="#ff3040";obstacles.forEach(o=>g.fillRect(o.x,o.y,o.w,o.h));
+  g.globalAlpha=1;
+  const all=[...ambientNPCs,...npcs,...(mokasa?[mokasa]:[])].filter(Boolean);
+  for(const n of all){
+   if(Array.isArray(n.route)&&n.route.length){
+    g.strokeStyle=n.stuckFor>.3?"#ff4545":"#64e9ff";g.lineWidth=2;g.beginPath();g.moveTo(n.x,n.y);
+    for(let ri=n.routeIndex||0;ri<n.route.length;ri++){const p=n.route[ri];if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y))g.lineTo(p.x,p.y)}
+    g.stroke();
+   }
+   g.fillStyle="#050706";g.fillRect(n.x-45,n.y+20,90,25);
+   g.fillStyle=n.stuckFor>.3?"#ff5a55":"#d6f7df";g.font="7px monospace";
+   g.fillText(`${n.name} // ${n.state||"-"} // ${n.homeRoom||"-"}`,n.x-42,n.y+31);
+   if(n.stuckFor>.3)g.fillText("STUCK",n.x-42,n.y+41);
+  }
+  g.restore();
+ }catch(err){console.warn("DEBUG DRAW SKIPPED",err)}
 }
 function loop(n){let dt=Math.min(.05,(n-last)/1000);last=n;update(dt);draw();requestAnimationFrame(loop)}
 function toast(s){let t=$("#toast");t.textContent=s;t.classList.add("on");clearTimeout(t.q);t.q=setTimeout(()=>t.classList.remove("on"),1800)}
@@ -2402,6 +2529,6 @@ window.addEventListener("error",function(ev){
  let old=document.getElementById("runtimeError");
  if(old)return;
  let d=document.createElement("div");d.id="runtimeError";
- d.textContent="JS ERROR V6.5 // "+(ev.message||"errore sconosciuto");
+ d.textContent="JS ERROR V7.0 // "+(ev.message||"errore sconosciuto");
  document.body.appendChild(d);
 });

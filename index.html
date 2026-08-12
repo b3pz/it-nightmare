@@ -1,12 +1,47 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>V6.5 // IT NIGHTMARE — STUDIO CONSOLIDATION</title><link rel="stylesheet" href="style.css?v=6.5"></head>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>V7.0 // IT SHIFT — A DAY IN IT SUPPORT</title><link rel="stylesheet" href="style.css?v=7.0"></head>
 <body>
-<section id="boot" class="screen active"><div class="card terminal"><h1>IT NIGHTMARE</h1><div class="subtitle">A DAY IN IT SUPPORT</div><div id="bootlog"></div><button id="toLore" class="mainbtn hidden">CONTINUA</button></div></section>
-<section id="lore" class="screen"><div class="card lore"><div class="kicker">SHIFT // 08:58</div><h2>Una normale giornata nel reparto IT.</h2><p>Utenti, sale meeting, workstation, server, stampanti e richieste che arrivano sempre nel momento peggiore.</p><p>Lo studio vive intorno a te: le persone lavorano, si spostano, vanno alle riunioni, ti fermano nei corridoi e alle 13:00 vanno realmente a pranzo.</p><blockquote>Obiettivo: porta il reparto IT fino alle 19:00 senza perdere il controllo.</blockquote><div class="difficulty-box"><label for="difficulty">DIFFICOLTÀ</label><select id="difficulty"><option value="easy">EASY — rilassata, max 2 ticket</option><option value="normal" selected>NORMAL — giornata standard</option><option value="hard">HARD — molte urgenze</option><option value="nightmare">NIGHTMARE — giornata infernale</option></select></div><button id="start" class="mainbtn">ENTRA IN GIOCO — 08:58</button></div></section>
+<section id="boot" class="screen active">
+ <div class="v7Home">
+  <div class="v7HomeWorld">
+   <div class="v7Sky"></div>
+   <div class="v7Building">
+    <div class="v7Window w1"></div><div class="v7Window w2"></div><div class="v7Window w3"></div>
+    <div class="v7Door"></div>
+   </div>
+   <div class="v7Street"></div>
+   <div class="v7Sprite s1"></div><div class="v7Sprite s2"></div>
+  </div>
+  <div class="v7HomeCard">
+   <div class="v7Time">08:58 // MARTEDÌ</div>
+   <h1>IT SHIFT</h1>
+   <div class="subtitle">A DAY IN IT SUPPORT</div>
+   <p class="v7Tagline">Un altro giorno in studio. Per ora sembra tutto tranquillo.</p>
+   <div id="bootlog" class="v7BootHint">STUDIO APERTO · SERVER ONLINE · CAFFÈ NON GARANTITO</div>
+   <button id="toLore" class="mainbtn">INIZIA LA GIORNATA</button>
+  </div>
+ </div>
+</section>
+<section id="lore" class="screen">
+ <div class="card lore v7Setup">
+  <div class="kicker">TURNO // 09:00 → 19:00</div>
+  <h2>Una giornata nel supporto IT.</h2>
+  <p>Ticket, persone, meeting, workstation, server e richieste che arrivano mentre stai già facendo altro.</p>
+  <div class="difficulty-box"><label for="difficulty">DIFFICOLTÀ</label>
+   <select id="difficulty">
+    <option value="easy">EASY — giornata tranquilla</option>
+    <option value="normal" selected>NORMAL — giornata standard</option>
+    <option value="hard">HARD — pressione alta</option>
+    <option value="nightmare">CAOS — nessuno ti lascia in pace</option>
+   </select>
+  </div>
+  <button id="start" class="mainbtn">ENTRA IN STUDIO — 08:58</button>
+ </div>
+</section>
 <section id="gameScreen" class="screen"><header id="hud"><div><b id="clock">09:00</b><small>TIME</small></div><div><b id="stress">0%</b><small>STRESS</small></div><div><b id="rep">★★★★★</b><small>REPUTAZIONE</small></div><div><b id="strikes">0/3</b><small>ERRORI</small></div><div><b id="xp">0</b><small>XP</small></div><div><b id="incident">0%</b><small>INCIDENT</small></div></header>
 <div id="taskProgressWrap"><span>TASK PROGRESS</span><div id="taskProgress"><i id="taskProgressFill"></i></div><b id="taskProgressText">0%</b></div>
 <main>
 <div id="viewportFrame"><canvas id="game" width="1600" height="900"></canvas></div>
-<div id="miniMapWrap"><div class="mapTitle">IT STUDIO // MAP</div><canvas id="miniMap" width="260" height="150"></canvas></div>
+<div id="miniMapWrap"><div class="mapTitle">STUDIO // MAP</div><canvas id="miniMap" width="260" height="150"></canvas></div>
 <div id="pda" class="hidden"><div class="pdaHead"><b>TABLET IT</b><span>TAB · TASK / INVENTARIO / RAPPORTI / STATO</span></div><div id="pdaBody"></div></div>
 <div id="encounterOverlay"><div class="encBang">!</div><div id="encounterName">PAO</div><small>ORA CHE TI VEDO...</small></div>
 <div id="storyDialog" class="hidden"><div id="storyWho"></div><div id="storyText"></div><small>ENTER / E — CONTINUA</small></div><div id="phoneNotification"><div class="phoneApp">MESSAGGIO</div><b id="phoneSender">ZIA ALE</b><span id="phoneText"></span></div>
@@ -20,6 +55,9 @@
     <div class="anomaly-tag">ANOMALIA RILEVATA</div>
     <div id="anomalyText"></div>
   </div>
+</div><div id="rewardOverlay" class="hidden">
+ <div class="rewardCard"><div id="rewardTitle"></div><div id="rewardRows"></div>
+ <button id="rewardContinue" type="button">CONTINUA</button></div>
 </div><div id="mobile">
 <div id="joy"><i></i></div>
 <div id="dpad">
@@ -30,5 +68,5 @@
 </div>
 <button id="debugTouch" type="button">DEBUG</button>
 <button id="act">E<span>INTERAGISCI</span></button>
-</div></main><footer><b>V6.5</b> · WASD/FRECCE — MUOVITI · E — INTERAGISCI · TAB — TABLET IT · M — MAP · F2 — DEBUG</footer></section>
-<div id="jsError" class="hidden"></div><div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=6.5"></script></body></html>
+</div></main><footer><b>V7.0</b> · WASD/FRECCE — MUOVITI · E — INTERAGISCI · TAB — TABLET IT · M — MAP · F2 — DEBUG</footer></section>
+<div id="jsError" class="hidden"></div><div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=7.0"></script></body></html>

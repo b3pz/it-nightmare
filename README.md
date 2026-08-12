@@ -96,3 +96,21 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Check rapidi con risposte randomizzate.
 - Stress ribilanciato in base a coda, urgenze e incident.
 - Audit interno V6 su postazioni, stanze private e cucina.
+
+# V7.0 — IT SHIFT
+- Rebranding: IT SHIFT — A DAY IN IT SUPPORT; home pixel-art HTML/CSS, niente boot horror.
+- Navigation geometry-first con pathfinding su walkZones/doors/corridors e anti-stuck senza teleport.
+- NPC non possono usare stanze non pertinenti come scorciatoie.
+- CENTRALE confermata: 12 PC / 12 NPC, due tavoli da 6.
+- PAO homeRoom BIM; Betty HR; Zia Ale Segreteria; IT Manager IT; CAPO persistente dalla mattina.
+- CAPO ha routine Sala Meet Capo / Sala Meet / Spazio A senza despawn.
+- Cucina ampliata, due tavoli, 16 sedute, zero PC; overflow pranzo distribuito.
+- PROCESS CHECK rifatto: un processo bloccato certo, errore reale a ogni processo sano, 3 errori = fallimento.
+- Errori minigiochi: stress/incident/errori globali con feedback visibile.
+- Reward overlay chiaro per successo/fallimento.
+- Minigiochi con asset/layout coerente e responsive.
+- Messaggi accodati durante minigiochi/risultati.
+- Tablet IT: rapporti deduplicati, stato Betty/reputazione più leggibile.
+- Stress più sensibile a coda, deadline, HIGH/CRITICAL e NPC ostili.
+- DEBUG F2 protetto e ampliato con route/stato/homeRoom/STUCK di tutti gli NPC.
+- Audit V7 su PC/NPC/stanze private/Cucina/Bagni/homeRoom/path principali.
