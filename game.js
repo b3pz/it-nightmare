@@ -13,11 +13,11 @@ const boot=["[BOOT] IT SUPPORT // DAILY SHIFT","[OK] Workstations inventory","[O
 let bl=0;(function b(){if(bl<boot.length){$("#bootlog").innerHTML+=boot[bl++]+"<br>";setTimeout(b,280)}else $("#toLore").classList.remove("hidden")})();$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{difficulty=$("#difficulty")?.value||"normal";show("game");reset();requestAnimationFrame(loop)};
 
 const rooms=[
-{name:"GRAFICA",x:30,y:55,w:250,h:210,f:"stone"},{name:"LOFT",x:300,y:55,w:205,h:210,f:"stone"},{name:"SERVER",x:525,y:55,w:230,h:210,f:"server"},
-{name:"ABA",x:30,y:310,w:210,h:185,f:"stone"},{name:"IT",x:30,y:535,w:210,h:180,f:"wood"},{name:"CENTRALE",x:315,y:310,w:440,h:355,f:"stone"},
-{name:"SALA MEET",x:840,y:55,w:190,h:270,f:"stone"},{name:"THE BUNKER",x:1050,y:55,w:170,h:270,f:"wood"},{name:"PANTHEON",x:1240,y:55,w:210,h:270,f:"wood"},
+{name:"EDITORIA",x:30,y:55,w:250,h:210,f:"stone"},{name:"LOFT",x:300,y:55,w:205,h:210,f:"stone"},{name:"SERVER",x:525,y:55,w:230,h:210,f:"server"},
+{name:"BIM",x:30,y:310,w:210,h:185,f:"stone"},{name:"IT",x:30,y:535,w:210,h:180,f:"wood"},{name:"CENTRALE",x:315,y:310,w:440,h:355,f:"stone"},
+{name:"SALA MEET",x:840,y:55,w:190,h:270,f:"stone"},{name:"THE BUNKER",x:1050,y:55,w:170,h:270,f:"wood"},{name:"RENDERISTI",x:1240,y:55,w:210,h:270,f:"wood"},
 {name:"SPAZIO A",x:840,y:365,w:300,h:185,f:"stone"},{name:"BAGNI",x:840,y:585,w:180,h:125,f:"tile"},{name:"RIFUGIO DIGITALE",x:1040,y:585,w:180,h:125,f:"wood"},
-{name:"SALA CORTE",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO / SEGRETERIA",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:840,y:735,w:285,h:130,f:"tile"},{name:"STAMPANTI",x:1145,y:735,w:285,h:130,f:"stone"}];
+{name:"SALA MEET CAPO",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO / SEGRETERIA",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:840,y:735,w:285,h:130,f:"tile"},{name:"STAMPANTI",x:1145,y:735,w:285,h:130,f:"stone"}];
 // NAVIGATION LAYER: corridoi enormi e porte sovradimensionate. Nessun bordo grafico è una collisione.
 /*
  V2.1 NAVIGATION
@@ -34,17 +34,17 @@ const corridors=[
  {x:1205,y:300,w:100,h:455},     // dorsale destra
  {x:1260,y:665,w:205,h:95}       // raccordo sala corte
 ,
- {x:245,y:265,w:58,h:430},        // V2.6.2 LEFT SPINE: black gap beside ABA / IT
+ {x:245,y:265,w:58,h:430},        // V2.6.2 LEFT SPINE: black gap beside BIM / IT
  {x:245,y:675,w:110,h:85}         // raccordo sinistro verso corridoio basso
 ];
 const doors=[
- // GRAFICA -> corridoio
+ // EDITORIA -> corridoio
  {x:245,y:235,w:75,h:105},
  // CENTRALE -> corridoio
  {x:455,y:235,w:85,h:105},
  // SERVER -> dorsale centrale
  {x:710,y:180,w:145,h:105},
- // ABA -> corridoio alto e LOFT -> corridoio basso
+ // BIM -> corridoio alto e LOFT -> corridoio basso
  {x:205,y:330,w:95,h:120},{x:205,y:595,w:95,h:130},
  // IT -> corridoio alto, dorsale, corridoio basso
  {x:285,y:265,w:105,h:105},{x:700,y:300,w:155,h:130},{x:690,y:610,w:165,h:135},
@@ -52,21 +52,21 @@ const doors=[
  {x:800,y:210,w:105,h:135},
  // CONTRATTI -> corridoio alto dx
  {x:1020,y:260,w:100,h:130},
- // PANTHEON -> corridoio alto dx
+ // RENDERISTI -> corridoio alto dx
  {x:1190,y:255,w:120,h:140},
  // SPAZIO A -> corridoio alto dx + dorsale destra
  {x:805,y:350,w:105,h:125},{x:1095,y:430,w:150,h:130},
  // BAGNI / RIFUGIO -> corridoio basso dx
  {x:805,y:620,w:105,h:135},{x:900,y:665,w:110,h:105},{x:1080,y:660,w:120,h:110},
- // SALA CORTE -> dorsale destra / raccordo basso
+ // SALA MEET CAPO -> dorsale destra / raccordo basso
  {x:1240,y:500,w:115,h:135},{x:1240,y:640,w:130,h:125},
  // INGRESSO -> corridoio basso sinistra + dorsale
  {x:650,y:675,w:150,h:130},{x:735,y:735,w:120,h:125},
  // CUCINA / STAMPANTI -> corridoio basso dx
  {x:805,y:720,w:120,h:140},{x:1080,y:710,w:120,h:150},{x:1370,y:710,w:100,h:150}
 ,
- {x:235,y:245,w:80,h:85},          // GRAFICA / upper corridor -> LEFT SPINE
- {x:215,y:345,w:95,h:105},         // ABA -> LEFT SPINE
+ {x:235,y:245,w:80,h:85},          // EDITORIA / upper corridor -> LEFT SPINE
+ {x:215,y:345,w:95,h:105},         // BIM -> LEFT SPINE
  {x:215,y:565,w:95,h:135},         // IT -> LEFT SPINE
  {x:235,y:655,w:125,h:125}         // LEFT SPINE -> lower corridor
 ];
@@ -76,17 +76,17 @@ const obstacles=[
 {x:75,y:385,w:125,h:55},{x:75,y:600,w:125,h:23},{x:885,y:160,w:105,h:115},{x:1080,y:155,w:100,h:60},{x:1280,y:155,w:125,h:70},{x:890,y:435,w:190,h:60},{x:1330,y:495,w:185,h:85},{x:885,y:775,w:180,h:55},{x:1190,y:775,w:190,h:60}
 ];
 const points=[
-{x:155,y:205,room:"GRAFICA",kind:"PC"},{x:400,y:205,room:"IT",kind:"PC"},{x:640,y:205,room:"SERVER",kind:"SERVER"},{x:140,y:450,room:"ABA",kind:"PC"},{x:140,y:660,room:"IT",kind:"PC"},
-{x:535,y:560,room:"CENTRALE",kind:"PC"},{x:940,y:285,room:"SALA MEET",kind:"MEETING"},{x:1135,y:285,room:"THE BUNKER",kind:"PC"},{x:1345,y:285,room:"PANTHEON",kind:"PC"},{x:1010,y:520,room:"SPAZIO A",kind:"PC"},
-{x:1120,y:680,room:"RIFUGIO DIGITALE",kind:"PC"},{x:1430,y:650,room:"SALA CORTE",kind:"MEETING"},{x:1020,y:835,room:"CUCINA",kind:"COFFEE"},{x:1290,y:835,room:"STAMPANTI",kind:"PRINTER"}];
+{x:155,y:205,room:"EDITORIA",kind:"PC"},{x:400,y:205,room:"IT",kind:"PC"},{x:640,y:205,room:"SERVER",kind:"SERVER"},{x:140,y:450,room:"BIM",kind:"PC"},{x:140,y:660,room:"IT",kind:"PC"},
+{x:535,y:560,room:"CENTRALE",kind:"PC"},{x:940,y:285,room:"SALA MEET",kind:"MEETING"},{x:1135,y:285,room:"THE BUNKER",kind:"PC"},{x:1345,y:285,room:"RENDERISTI",kind:"PC"},{x:1010,y:520,room:"SPAZIO A",kind:"PC"},
+{x:1120,y:680,room:"RIFUGIO DIGITALE",kind:"PC"},{x:1430,y:650,room:"SALA MEET CAPO",kind:"MEETING"},{x:1020,y:835,room:"CUCINA",kind:"COFFEE"},{x:1290,y:835,room:"STAMPANTI",kind:"PRINTER"}];
 const bosses=["DIREZIONE","PRESIDENZA","CAPO ASSOLUTO"];
 const questionBanks={"MAC_ADOBE": [["Creative Cloud su macOS mostra l'utente disconnesso. Primo controllo?", ["Verificare sessione Adobe, rete e stato Creative Cloud", "Cancellare la cartella System", "Resettare il domain controller", "Cambiare VLAN"], 0], ["InDesign segnala font mancanti aprendo un progetto. Cosa verifichi?", ["Font richiesti, attivazione Adobe Fonts e Font Book", "DNS del server", "Driver GPU del server", "Spooler Windows"], 0], ["Photoshop non vede più un disco di memoria virtuale disponibile. Primo controllo?", ["Spazio libero e impostazioni Scratch Disks", "GPO Windows", "Porta HDMI", "Licenza Revit"], 0], ["Illustrator apre un file con collegamenti mancanti. Cosa controlli?", ["Percorsi e file collegati nel pannello Links", "DHCP", "Account Autodesk", "Firmware switch"], 0], ["Acrobat non stampa correttamente un PDF complesso. Primo test?", ["Provare stampa come immagine/altro PDF e verificare driver/coda", "Formattare il Mac", "Cambiare DNS aziendale", "Resettare Revit"], 0], ["Creative Cloud resta bloccato su sincronizzazione. Approccio corretto?", ["Controllare rete, account, stato servizi e log prima del reset", "Cancellare tutti i file Adobe", "Spegnere il NAS", "Cambiare monitor"], 0], ["Un Mac non monta una share SMB che gli altri vedono. Primo controllo?", ["Connettività, percorso smb:// e credenziali", "Reinstallare Photoshop", "Cambiare mouse", "Reset Pixera"], 0], ["InDesign esporta un PDF con immagini a bassa qualità. Cosa controlli?", ["Preset di esportazione e risoluzione delle immagini sorgenti", "DNS", "Bluetooth", "GPO"], 0], ["Font Book segnala un font duplicato. Cosa fai?", ["Valuti duplicati e disattivi/rimuovi quello errato", "Riavvii il server", "Resetti Desktop Connector", "Cambi IP"], 0], ["Un Mac ha pochissimo spazio libero e Adobe è lento. Prima azione?", ["Individuare cosa occupa spazio e liberare cache/file sicuri", "Cancellare /System", "Spegnere lo switch", "Cambiare VLAN"], 0], ["Photoshop non usa correttamente l'accelerazione grafica. Cosa verifichi?", ["Impostazioni GPU, compatibilità e aggiornamenti", "Permessi stampante", "DNS reverse", "Pixera"], 0], ["Un PDF esportato da InDesign ha font sostituiti. Causa probabile?", ["Font non disponibili/incorporabili o sostituiti nel documento", "Gateway errato", "Cavo HDMI", "DHCP esaurito"], 0]], "WORKSTATION": [["Una HP Z non naviga ma le altre sì. Primo controllo?", ["IP, gateway, DNS e link della singola workstation", "Riavviare tutti i server", "Formattare", "Cambiare switch core"], 0], ["Revit è molto lento solo su una workstation. Primo approccio?", ["Verificare risorse, modello, add-in e stato locale prima di interventi invasivi", "Reset dominio", "Cambiare stampante", "Spegnere NAS"], 0], ["Desktop Connector non sincronizza su un solo PC. Cosa controlli?", ["Account, stato client, cache e log", "Cancellare il progetto cloud", "Cambiare GPU", "Riavviare DHCP"], 0], ["Windows mostra disco C quasi pieno. Prima azione?", ["Analizzare occupazione e pulire file/cache sicuri", "Cancellare Windows", "Reset DNS", "Disinstallare driver rete"], 0], ["Una HP Z non vede il secondo monitor. Primo controllo?", ["Input, cavo, porta GPU e rilevamento display", "Active Directory", "Licenza Adobe", "Spooler"], 0], ["Office chiede continuamente autenticazione. Cosa controlli?", ["Account, token/credenziali e connettività ai servizi", "HDMI", "Driver plotter", "Pixera"], 0], ["Un'applicazione si chiude solo per un utente Windows. Primo test?", ["Verificare profilo, log evento e riproducibilità", "Riavviare tutti gli switch", "Cambiare VLAN globale", "Formattare server"], 0], ["La workstation non riceve policy aggiornate. Cosa puoi verificare?", ["Connettività dominio e gpupdate /force con eventuali errori", "Photoshop", "HDMI", "Toner"], 0], ["Il PC è acceso da molti giorni e ha comportamenti strani. Informazione utile?", ["Uptime e stato aggiornamenti prima di riavviare", "Numero di PDF", "Luminosità TV", "Pixera"], 0], ["Una periferica USB non viene rilevata. Primo approccio?", ["Provare porta/cavo/periferica e Gestione dispositivi", "Cambiare DNS", "Reset Autodesk", "Spegnere server"], 0], ["Revit non trova una stampante che Windows vede. Cosa controlli?", ["Driver, stampante predefinita e sessione/app", "DHCP server", "Adobe Fonts", "HDMI"], 0], ["Desktop Connector mostra file in conflitto. Cosa fai?", ["Identificare versione/stato sync prima di sovrascrivere", "Cancellare entrambe le copie", "Reset dominio", "Cambiare GPU"], 0]], "NETWORK": [["Ping IP funziona ma il nome server no. Sospetto principale?", ["DNS", "GPU", "HDMI", "Bluetooth"], 0], ["Più utenti perdono una share nello stesso momento. Priorità?", ["Capire ampiezza e verificare rete/server/servizio", "Formattare un client", "Cambiare mouse", "Reinstallare Adobe"], 0], ["Un client ha indirizzo 169.254.x.x. Cosa indica spesso?", ["Mancata assegnazione DHCP", "Errore GPU", "Problema PDF", "Licenza Autodesk"], 0], ["La rete cablata cade solo su una postazione. Primo controllo?", ["Cavo, presa, link e configurazione NIC", "Riavvio domain controller", "Reset Pixera", "Cambiare toner"], 0], ["Gateway risponde ma Internet no su più PC. Cosa verifichi?", ["DNS, routing/firewall e connettività a monte", "Mouse", "InDesign", "Monitor"], 0], ["Una share funziona per tutti tranne un utente. Cosa controlli?", ["Permessi, credenziali, mapping e connettività utente", "Switch core subito", "Formattare server", "HDMI"], 0], ["Una porta di rete non dà link. Primo test?", ["Cavo/patch/porta switch e stato fisico", "Adobe Fonts", "Revit cache", "Spooler"], 0], ["Connessione intermittente verso un server. Dato utile?", ["Ping continuo/log/perdita pacchetti e percorso", "Colore desktop", "Versione Acrobat", "Toner"], 0], ["DNS risolve un IP vecchio. Possibile causa?", ["Record/cache DNS non aggiornati", "GPU", "USB", "HDMI"], 0], ["Un servizio è raggiungibile localmente ma non dai client. Cosa controlli?", ["Firewall, binding, porta e routing", "Font Book", "Stampante USB", "Luminosità"], 0], ["Due dispositivi hanno lo stesso IP. Sintomo possibile?", ["Connettività intermittente/conflitto ARP", "PDF sgranati", "Revit lento", "Audio basso"], 0], ["Wi‑Fi funziona ma Ethernet no su un PC. Primo confronto?", ["Configurazione NIC, link e IP delle due interfacce", "Reset dominio", "Pixera", "Adobe"], 0]], "MEETING": [["TV accesa ma nessuna immagine dal PC. Primo controllo?", ["Input selezionato, sorgente e cavo HDMI", "DNS", "Revit", "Spooler"], 0], ["Zoom vede video ma non sente il microfono. Cosa controlli?", ["Dispositivo input e permessi microfono", "DHCP", "Adobe Fonts", "Plotter"], 0], ["Teams usa l'altoparlante sbagliato. Dove intervieni?", ["Selezione dispositivo audio in Teams/sistema", "DNS server", "Desktop Connector", "Pixera"], 0], ["Il mirroring non trova il display. Primo approccio?", ["Rete, receiver e compatibilità/stato servizio", "Formattare PC", "Reset dominio", "Cambiare toner"], 0], ["La webcam non compare nell'app meeting. Primo test?", ["Permessi, collegamento e altra app che la sta usando", "Revit cache", "DNS reverse", "Adobe"], 0], ["Immagine HDMI presente ma senza audio. Cosa controlli?", ["Output audio selezionato e capacità HDMI/display", "DHCP", "Stampante", "Font"], 0], ["Presentazione tagliata ai bordi sul TV. Cosa verifichi?", ["Risoluzione/scaling/aspect ratio", "Account Autodesk", "Spooler", "Gateway"], 0], ["Il telecomando della sala non risponde. Primo controllo?", ["Batterie e puntamento/stato dispositivo", "DNS", "Revit", "Creative Cloud"], 0], ["Il display cambia input da solo. Cosa indaghi?", ["Auto input/CEC/configurazione professionale", "Font Book", "DHCP", "Toner"], 0], ["Audio in videoconferenza produce eco. Prima correzione?", ["Evitare doppi microfoni/speaker e verificare dispositivi attivi", "Cambiare VLAN", "Reset Adobe", "Reinstallare Revit"], 0], ["PC collegato via USB-C non manda video. Cosa verifichi?", ["Supporto video della porta/adattatore e cavo", "DNS", "Spooler", "Licenza Acrobat"], 0], ["Sala meeting offline ma PC naviga. Cosa controlli?", ["IP/rete del dispositivo AV e servizio receiver", "Formattare PC", "Cambiare mouse", "Reset font"], 0]], "SERVER": [["Un servizio server non risponde. Primo approccio?", ["Verificare host, rete, servizio e log", "Riavviare tutto senza verifiche", "Cancellare DNS", "Cambiare monitor"], 0], ["Spazio disco server quasi esaurito. Prima azione?", ["Identificare volumi/cartelle in crescita e causa", "Cancellare log a caso", "Formattare", "Spegnere switch"], 0], ["Molti utenti non autenticano. Cosa controlli?", ["Servizi dominio, DNS, connettività e log", "HDMI", "Adobe", "Toner"], 0], ["Una share server è improvvisamente read-only. Cosa verifichi?", ["Permessi, filesystem/spazio e stato servizio", "GPU client", "Pixera", "Bluetooth"], 0], ["Backup segnala fallimento. Primo passo?", ["Leggere errore/log e verificare destinazione/spazio/connettività", "Ignorarlo", "Cancellare backup precedenti subito", "Riavviare ogni PC"], 0], ["Server raggiungibile via IP ma non hostname. Cosa controlli?", ["DNS", "GPU", "USB", "Adobe Fonts"], 0], ["CPU server al 100%. Prima di terminare processi?", ["Identificare processo/carico e raccogliere evidenze", "Spegnere server", "Cancellare profili", "Cambiare VLAN"], 0], ["Un volume storage è degradato. Priorità?", ["Verificare stato array/dischi e protezione dati", "Reinstallare Office", "Reset TV", "Cambiare mouse"], 0], ["Un servizio si arresta ripetutamente. Cosa cerchi?", ["Event log/log applicativo, dipendenze e causa", "Toner", "HDMI", "Font"], 0], ["Una porta TCP applicativa non risponde. Cosa verifichi?", ["Servizio in ascolto, firewall e percorso rete", "Photoshop", "Mouse", "Display"], 0], ["Permessi di una cartella sono cambiati. Prima azione?", ["Verificare ACL, audit e modifica prima di sovrascrivere", "Formattare server", "Reset DHCP", "Cambiare monitor"], 0], ["Dopo un riavvio un servizio non parte automaticamente. Cosa controlli?", ["Startup type, dipendenze e log di avvio", "Adobe", "HDMI", "Stampante"], 0]], "PRINT": [["Stampante di rete offline per tutti. Primo controllo?", ["Alimentazione, rete/IP e raggiungibilità", "Formattare client", "Reset dominio", "Revit"], 0], ["Coda di stampa bloccata su un PC. Cosa controlli?", ["Coda/spooler e job problematico", "DNS globale", "Pixera", "Adobe Fonts"], 0], ["Plotter stampa formato errato. Cosa verifichi?", ["Formato carta, driver e impostazioni applicazione", "DHCP", "Account Autodesk", "GPU server"], 0], ["PDF esce con caratteri strani. Primo test?", ["Altro PDF/driver e incorporamento font", "Reset switch", "Cambiare VLAN", "Revit cache"], 0], ["Solo un utente non vede la stampante condivisa. Cosa controlli?", ["Connessione/mapping, driver e permessi utente", "Spegnere server", "HDMI", "Pixera"], 0], ["Stampante ha IP diverso dal configurato sul PC. Soluzione?", ["Correggere porta TCP/IP o indirizzamento", "Formattare PC", "Reset Adobe", "Cambiare mouse"], 0], ["Job enorme blocca la coda. Approccio?", ["Identificare/rimuovere job e verificare spooler", "Riavviare dominio", "Cancellare DNS", "Spegnere NAS"], 0], ["Stampa molto lenta da un solo file. Cosa confronti?", ["Complessità file, driver e stampa come immagine", "DHCP", "Revit licensing", "Bluetooth"], 0], ["Plotter segnala carta ma il rotolo è presente. Primo controllo?", ["Caricamento/sensori/formato selezionato", "DNS", "Adobe", "Windows Update"], 0], ["Colori molto diversi in stampa. Cosa indaghi?", ["Profilo colore, driver e impostazioni applicazione", "Gateway", "Active Directory", "Pixera"], 0], ["Driver vecchio causa crash applicazione. Cosa fai?", ["Verificare/aggiornare driver compatibile", "Reset dominio", "Cancellare share", "Cambiare HDMI"], 0], ["Stampante risponde al ping ma Windows la mostra offline. Cosa controlli?", ["Porta, SNMP/stato, spooler e driver", "DNS soltanto", "GPU", "Font Book"], 0]], "PIXERA": [["Un monitor del Rifugio Digitale è nero. Primo controllo?", ["Alimentazione, input, segnale e player/Pixera", "Domain controller", "Revit", "Spooler"], 0], ["Pixera vede il player ma non manda contenuto. Cosa controlli?", ["Timeline/output/mapping e stato del player", "Adobe Fonts", "DHCP client casuale", "Mouse"], 0], ["Due display non sono sincronizzati. Cosa indaghi?", ["Sync, rete, timing e configurazione output", "Revit cache", "Toner", "Office"], 0], ["Il contenuto ha risoluzione errata. Cosa controlli?", ["Canvas/output resolution e mapping display", "DNS reverse", "Account Windows", "Stampante"], 0], ["Un player Pixera risulta offline. Primo test?", ["Rete/IP, alimentazione e servizio player", "Photoshop", "HDMI del laptop", "GPO"], 0], ["Il monitor mostra desktop invece del contenuto. Cosa verifichi?", ["Output assegnato/fullscreen e configurazione player", "DHCP server", "Revit", "Toner"], 0], ["Contenuto scatta su un display. Cosa controlli?", ["Prestazioni player, codec/media e rete", "Font Book", "Spooler", "Mouse"], 0], ["Pixera perde connessione dopo standby display. Cosa indaghi?", ["Power management, rete e handshake/output", "Adobe", "DNS cache client", "Revit"], 0], ["Un file media non viene riprodotto. Primo controllo?", ["Codec/formato, percorso e accessibilità del file", "Domain controller", "Stampante", "USB mouse"], 0], ["Display wall mostra ordine sbagliato. Cosa correggi?", ["Mapping/assegnazione output", "DNS", "Creative Cloud", "DHCP"], 0], ["Tutti i display diventano neri insieme. Priorità?", ["Verificare player/master, rete e distribuzione segnale", "Cambiare ogni monitor", "Reset font", "Revit"], 0], ["Pixera segnala media missing. Cosa fai?", ["Verificare percorso, storage e relink dei media", "Formattare player", "Reset dominio", "Cambiare toner"], 0]], "IT": [["Devi diagnosticare un PC lento. Quale dato raccogli per primo?", ["CPU/RAM/disco, uptime e processi", "Colore wallpaper", "Numero di monitor", "Versione PDF"], 0], ["Un utente non riesce a fare login. Primo approccio?", ["Verificare errore, rete, account e dominio", "Formattare PC", "Cambiare HDMI", "Reset Pixera"], 0], ["gpupdate /force restituisce errore. Cosa fai?", ["Leggere errore e verificare connettività/DNS/dominio", "Cancellare Windows", "Reset Adobe", "Cambiare stampante"], 0], ["Devi liberare spazio senza rischiare dati utente. Approccio?", ["Analizzare e pulire cache/temp sicure, non dati di lavoro", "Cancellare Desktop", "Formattare", "Eliminare profilo"], 0], ["Un software non parte dopo aggiornamento. Primo controllo?", ["Log/errore, compatibilità e dipendenze", "Riavviare switch", "Cambiare VLAN", "Toner"], 0], ["Devi capire se un servizio remoto risponde su una porta. Cosa verifichi?", ["Connettività host e test della porta specifica", "Photoshop", "HDMI", "Font"], 0], ["Utente ha password scaduta. Intervento corretto?", ["Gestire reset/cambio secondo policy e verificare account", "Creare account condiviso", "Disabilitare dominio", "Formattare"], 0], ["PC non applica una nuova configurazione. Cosa confronti?", ["Policy/config effettiva, log e riavvio se necessario", "Toner", "Pixera", "Illustrator"], 0], ["Un'app richiede admin per funzionare. Prima di concederlo?", ["Capire requisito e trovare soluzione a minimo privilegio", "Dare Domain Admin", "Disabilitare UAC ovunque", "Condividere password IT"], 0], ["Un utente segnala 'Internet rotto'. Prima domanda utile?", ["Capire cosa non funziona e se riguarda altri servizi/utenti", "Formattare", "Reset server", "Cambiare monitor"], 0], ["Devi riavviare un PC remoto dopo intervento. Cosa è importante?", ["Verificare lavoro utente e comunicare prima del riavvio", "Spegnere senza avviso", "Cancellare profilo", "Cambiare IP"], 0], ["Un errore compare dopo login solo per un utente. Cosa sospetti tra le prime cose?", ["Profilo/configurazione utente o startup specifico", "Switch core", "Pixera", "Plotter"], 0]]};
 const questionDecks={};
 function categoryForStation(s){
  if(!s)return "WORKSTATION";
- if(s.room==="GRAFICA"||s.room==="THE BUNKER")return "MAC_ADOBE";
+ if(s.room==="EDITORIA"||s.room==="THE BUNKER")return "MAC_ADOBE";
  if(s.room==="SERVER")return "SERVER";
- if(["SALA MEET","SPAZIO A","SALA CORTE"].includes(s.room))return "MEETING";
+ if(["SALA MEET","SPAZIO A","SALA MEET CAPO"].includes(s.room))return "MEETING";
  if(s.room==="RIFUGIO DIGITALE")return "PIXERA";
  if(s.room==="STAMPANTI")return "PRINT";
  if(s.room==="IT")return "IT";
@@ -487,7 +487,7 @@ function nearestNPC(){
 }
 function spawnMokasa(){
  if(Math.random()<.28){
-   mokasa={id:"mokasa",name:"CAPO",role:"SALA CORTE // EXTREME",x:1450,y:570,tone:"bad",shirt:"#75483d",life:95,court:true};
+   mokasa={id:"mokasa",name:"CAPO",role:"SALA MEET CAPO // EXTREME",x:1450,y:570,tone:"bad",shirt:"#75483d",life:95,court:true};
    phoneMessage("DIREZIONE","Il CAPO è in Sala Corte. Ha una richiesta urgente.");
  }else{
    const candidates=stations.filter(s=>s.room!=="SERVER");
@@ -630,15 +630,15 @@ function validateMap(){
 const stations=[
  ...[[405,405],[455,405],[505,405],[555,405],[605,405],[655,405],
      [405,480],[455,480],[505,480],[555,480],[605,480],[655,480]].map((p,i)=>({id:"C"+String(i+1).padStart(2,"0"),room:"CENTRALE",type:"HP Z",x:p[0],y:p[1]})),
- ...[[95,155],[145,155],[195,155],[120,205]].map((p,i)=>({id:"G"+String(i+1).padStart(2,"0"),room:"GRAFICA",type:"MAC",x:p[0],y:p[1]})),
+ ...[[95,155],[145,155],[195,155],[120,205]].map((p,i)=>({id:"G"+String(i+1).padStart(2,"0"),room:"EDITORIA",type:"MAC",x:p[0],y:p[1]})),
  ...[[1080,170],[1130,170],[1170,220]].map((p,i)=>({id:"B"+String(i+1).padStart(2,"0"),room:"THE BUNKER",type:"MAC",x:p[0],y:p[1]})),
  ...[[350,155],[405,155],[455,205]].map((p,i)=>({id:"L"+String(i+1).padStart(2,"0"),room:"LOFT",type:"HP Z",x:p[0],y:p[1]})),
- ...[[110,385],[165,385],[135,450]].map((p,i)=>({id:"A"+String(i+1).padStart(2,"0"),room:"ABA",type:"HP Z",x:p[0],y:p[1]})),
- ...[[1300,165],[1360,165],[1415,215]].map((p,i)=>({id:"P"+String(i+1).padStart(2,"0"),room:"PANTHEON",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[110,385],[165,385],[135,450]].map((p,i)=>({id:"A"+String(i+1).padStart(2,"0"),room:"BIM",type:"HP Z",x:p[0],y:p[1]})),
+ ...[[1300,165],[1360,165],[1415,215]].map((p,i)=>({id:"P"+String(i+1).padStart(2,"0"),room:"RENDERISTI",type:"HP Z",x:p[0],y:p[1]})),
  ...[[95,600],[150,600],[195,650]].map((p,i)=>({id:"IT"+String(i+1).padStart(2,"0"),room:"IT",type:"HP Z",x:p[0],y:p[1]})),
  {id:"MEET-TV",room:"SALA MEET",type:"AV",x:925,y:205},
  {id:"SPAZIO-TV",room:"SPAZIO A",type:"AV",x:1030,y:480},
- {id:"CORTE-TV",room:"SALA CORTE",type:"AV",x:1395,y:535},
+ {id:"CORTE-TV",room:"SALA MEET CAPO",type:"AV",x:1395,y:535},
  {id:"PIX-01",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1080,y:635},
  {id:"PIX-02",room:"RIFUGIO DIGITALE",type:"PIXERA",x:1130,y:635},
  {id:"SRV-01",room:"SERVER",type:"SERVER",x:610,y:145},
@@ -800,6 +800,20 @@ function drawMiniMap(){
  m.fillStyle="#67ff87";m.fillRect(player.x*sx-3,player.y*sy-3,7,7);
  // anomalies intentionally never appear here.
 }
+function setupMiniMapControls(){
+ const w=$("#miniMapWrap");if(!w||w.dataset.ready)return;w.dataset.ready="1";
+ let size=1,drag=false,ox=0,oy=0,moved=false;
+ const sizes=["mini","medium","large"];
+ const apply=()=>{w.classList.remove(...sizes);w.classList.add(sizes[size]);};apply();
+ w.addEventListener("click",e=>{if(moved){moved=false;return} if(e.detail===1){size=(size+1)%3;apply()}});
+ w.addEventListener("dblclick",e=>{e.preventDefault();w.style.left="";w.style.top="";w.style.right="14px";size=0;apply()});
+ const down=e=>{const t=e.touches?e.touches[0]:e;drag=true;moved=false;const r=w.getBoundingClientRect();ox=t.clientX-r.left;oy=t.clientY-r.top;w.style.right="auto"};
+ const move=e=>{if(!drag)return;const t=e.touches?e.touches[0]:e;moved=true;w.style.left=Math.max(0,t.clientX-ox)+"px";w.style.top=Math.max(85,t.clientY-oy)+"px";if(e.cancelable)e.preventDefault()};
+ const up=()=>drag=false;
+ w.addEventListener("mousedown",down);document.addEventListener("mousemove",move);document.addEventListener("mouseup",up);
+ w.addEventListener("touchstart",down,{passive:true});document.addEventListener("touchmove",move,{passive:false});document.addEventListener("touchend",up);
+}
+
 function refreshPDA(){
  const p=$("#pdaBody");if(!p||!state)return;
  const active=tickets.map(t=>`<div class="pdaTask"><b>${t.level} // ${t.p.room}</b><span>${t.p.id||t.p.type||"POSTAZIONE"}</span><small>${t.taskType?"INTERVENTO // "+t.taskType:"DIAGNOSI"} · ${fmt(t.due)}</small></div>`).join("");
@@ -831,7 +845,7 @@ function leaveLunch(){
  npcs.forEach(n=>{if(homes[n.id]){n.x=homes[n.id].x;n.y=homes[n.id].y;n.seeking=false}});
 }
 function updateLunchState(){ updateLunchMigration(1/60); }
-function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio."),250));}
+function reset(){const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:610,y:885,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside"}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio. // Raggiungi la porta e premi E."),250));}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x, y) {
   if (!walkZones.some(z => inside(z, x, y))) {
@@ -992,17 +1006,17 @@ function startMiniGame(i){
  }
 
  else if(type==="AV"){
-  body.innerHTML=miniHeader(t,"SIGNAL ROUTING","Imposta la catena video corretta.")+
-  `<div class="miniGame avGame">
-    <div class="avNode">LAPTOP</div>
-    <button class="avChoice" data-ok="0">→ VGA</button>
-    <button class="avChoice" data-ok="1">→ USB-C / HDMI</button>
-    <button class="avChoice" data-ok="0">→ AUDIO ONLY</button>
-    <div class="avNode">DISPLAY</div>
-   </div><div id="miniError"></div>`;
+  const variants=[
+   {fault:"TX/RX",correct:"PC → HDMI → TX → CAT6 → RX → HDMI → DISPLAY",opts:["PC → HDMI → RX → CAT6 → TX → DISPLAY","PC → HDMI → TX → CAT6 → RX → HDMI → DISPLAY","PC → USB → TX → HDMI → RX → DISPLAY"]},
+   {fault:"ALIMENTAZIONE RX",correct:"ALIMENTA RX",opts:["CAMBIA DNS","ALIMENTA RX","RESET STAMPANTE","DISABILITA DHCP"]},
+   {fault:"INPUT DISPLAY",correct:"HDMI 2",opts:["DP 1","HDMI 2","TV","USB"]}
+  ];
+  const v=variants[Math.floor(Math.random()*variants.length)],opts=[...v.opts].sort(()=>Math.random()-.5);
+  body.innerHTML=miniHeader(t,"HDMI EXTENDER // "+v.fault,"Ripristina la catena video della sala meeting.")+
+  `<div class="miniGame avGame">${opts.map(x=>`<button class="avChoice" data-v="${x}">${x}</button>`).join("")}</div><div class="pixelSequence">TX ⇄ CAT6 ⇄ RX</div><div id="miniError"></div>`;
   document.querySelectorAll(".avChoice").forEach(b=>b.onclick=()=>{
-   if(b.dataset.ok==="1"){b.classList.add("done");setTimeout(()=>miniSuccess(i,"SEGNALE RIPRISTINATO"),260)}
-   else miniMistake("NESSUN SEGNALE");
+   if(b.dataset.v===v.correct){b.classList.add("done");setTimeout(()=>miniSuccess(i,"SALA MEET OPERATIVA"),260)}
+   else miniMistake("CATENA / INPUT ERRATO");
   });
  }
 
@@ -1084,6 +1098,7 @@ function renderTickets(){
 function interact(){
  if(storyOpen){closeStory();return}
  if(state.phase!=="shift")return;
+ if(introStage==="outside"&&Math.hypot(player.x-650,player.y-842)<72){startShiftFromEntrance();return}
  if(bootWorkstation())return;
  if(interactCarry())return;
  let i=tickets.findIndex(t=>Math.hypot(player.x-t.p.x,player.y-t.p.y)<75);
@@ -1200,7 +1215,7 @@ function update(dt) {
   let dx=(keys.d||keys.arrowright||virtualKeys.right?1:0)-(keys.a||keys.arrowleft||virtualKeys.left?1:0)+(joyActive?joyX:0),
       dy=(keys.s||keys.arrowdown||virtualKeys.down?1:0)-(keys.w||keys.arrowup||virtualKeys.up?1:0)+(joyActive?joyY:0);
   if(Math.abs(dx)>.04||Math.abs(dy)>.04){let l=Math.max(1,Math.hypot(dx,dy)),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(playerCanMove(player.x,player.y,player.x+vx,player.y))player.x+=vx;if(playerCanMove(player.x,player.y,player.x,player.y+vy))player.y+=vy}
-  if(shiftStarted)state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed); if(!shiftStarted&&introStage==="outside"&&player.y<855){startShiftFromEntrance()} if(state.min>=BOSS){startBoss();hud();return}
+  if(shiftStarted)state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed); if(state.min>=BOSS){startBoss();hud();return}
   spawnTimer+=dt;anomTimer+=dt;
  updateLunchMigration(dt);
  updateManager(dt);
@@ -1478,6 +1493,15 @@ function draw(){
  if(useCam){g.save();g.scale(cam.zoom,cam.zoom);g.translate(-cam.x,-cam.y)}
  g.fillStyle="#050706";g.fillRect(0,0,W,H);
  corridors.forEach(visualCorridor);
+ // V5.1 — ingresso esterno realmente giocabile
+ if(introStage==="outside"){
+   g.fillStyle="#1a1d1b";g.fillRect(520,855,185,45);
+   g.strokeStyle="#49534d";g.lineWidth=3;g.strokeRect(520,855,185,45);
+   g.fillStyle="#2b1c11";g.fillRect(615,825,70,35);
+   g.fillStyle="#9a6a3c";g.fillRect(620,827,60,8);
+   g.fillStyle="#d6e0d8";g.font="bold 10px monospace";g.fillText("INGRESSO STUDIO",598,817);
+   if(Math.hypot(player.x-650,player.y-842)<90){g.fillStyle="#ffd447";g.font="bold 12px monospace";g.fillText("E — ENTRA",620,850)}
+ }
  rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  rooms.forEach(drawRoomWalls);
  doors.forEach(visualDoor);

@@ -1,3 +1,3 @@
-# IT NIGHTMARE V5 — A DAY IN IT SUPPORT
+# IT NIGHTMARE V5.1 HOTFIX
 
-V5 converts the project into a living IT-workday simulator. Camera/minimap from V4 retained; no ARC_VOID main lore; CAPO and IT MANAGER drive realistic urgency; playable 08:58 entrance; first workstation boot race; walking lunch migration; contextual NPC encounters; procedural minigame layouts; realistic final presentation emergency.
+Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanze aggiornati, minimappa ridimensionabile/spostabile, HDMI extender contestuale per sale meeting, correzioni UI e base NPC/lunch preservata.

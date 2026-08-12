@@ -163,3 +163,11 @@ body{background:#010201;overflow:hidden}
 .miniGame.v5Random{display:grid!important;gap:12px!important;align-items:stretch}.miniGame.v5Random>*{min-height:54px}.mapTitle{color:#9fc5ad!important}
 /* Player is identified by sprite only: no debug selection frame in normal play. */
 @media(max-width:700px){#storyDialog{bottom:150px;font-size:15px;padding:12px;width:86vw}}
+
+/* V5.1 HOTFIX */
+#storyDialog{bottom:28px;width:min(680px,76vw);padding:10px 16px;font-size:15px;border-width:4px;max-height:18vh;overflow:auto}
+#storyWho{font-size:11px;margin-bottom:5px}#storyDialog small{margin-top:5px}
+#miniMapWrap{cursor:move;user-select:none;touch-action:none;transition:width .15s ease,opacity .15s ease}
+#miniMapWrap.mini{width:165px;opacity:.82}#miniMapWrap.medium{width:230px;opacity:.9}#miniMapWrap.large{width:310px;opacity:.96}
+#modal:not(.hidden)~* #miniMapWrap{opacity:.45}
+@media(max-width:700px){#storyDialog{bottom:132px;width:78vw;max-height:16vh;font-size:12px;padding:8px 12px}#miniMapWrap.mini{width:120px}#miniMapWrap.medium{width:155px}#miniMapWrap.large{width:205px}}
