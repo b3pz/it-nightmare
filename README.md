@@ -20,3 +20,15 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - IT MANAGER può spostarsi tra IT, corridoio, Sala Meet Capo e Stampanti.
 - Più oggetti inventario: cuffie, mouse, tastiera, adattatore, Ethernet, alimentatore, toner, USB.
 - Sale meeting/Server/Stampanti/Editoria/BIM/Rifugio usano pool di minigiochi coerenti con la stanza.
+
+## V5.3.2 — IT MANAGER PATH FIX
+- IT Manager usa una route dedicata.
+- Uscita obbligata da Ingresso/Segreteria attraverso la porta e la dorsale principale.
+- Percorsi distinti verso IT, Sala Meet Capo, Stampanti e Cucina.
+
+## V5.3.2 FINAL — IT MANAGER
+- Corsa iniziale con il PG invariata.
+- Durante il turno resta alla postazione nel REPARTO IT.
+- Unico percorso lavorativo: REPARTO IT <-> SERVER/CED.
+- Dopo una visita al SERVER torna automaticamente alla postazione.
+- Continua a ricevere e inoltrare ticket di qualsiasi reparto.

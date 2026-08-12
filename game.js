@@ -752,7 +752,26 @@ function bootWorkstation(){
  };
  return true;
 }
+
+/* V5.3.2 — IT MANAGER DEDICATED PATH */
+function managerRouteTo(target){
+ const route=[];
+ if(target.room==="SERVER"){
+   route.push(
+    {x:260,y:640},{x:360,y:560},{x:420,y:420},
+    {x:520,y:320},{x:650,y:320},{x:target.x,y:target.y}
+   );
+ }else{
+   route.push(
+    {x:650,y:320},{x:520,y:320},{x:420,y:420},
+    {x:360,y:560},{x:260,y:640},{x:190,y:640}
+   );
+ }
+ return route;
+}
 function updateManager(dt){
+ // V5.3.2 FINAL: postazione IT fissa; solo IT <-> SERVER. Ticket globali.
+
  const m=npcs.find(n=>n.id==="manager");if(!m)return;
  if(m.state==="managerTravel"){
    if(moveNpcRoute(m,dt)){m.state="desk";m.x=190;m.y=640;
@@ -760,20 +779,27 @@ function updateManager(dt){
    }
  }
  if(introStage==="done"&&m.state==="desk"){
-   m.moveTimer=(m.moveTimer??18)-dt;
-   if(m.moveTimer<=0){
-     const dests=[
-       {x:190,y:640,room:"IT"},
-       {x:700,y:705,room:"CORRIDOIO"},
-       {x:900,y:705,room:"CORRIDOIO"},
-       {x:1100,y:705,room:"CORRIDOIO"}
-     ];
-     const d=dests[Math.floor(Math.random()*dests.length)];
-     m.route=routeViaHub(m,d);m.routeIndex=0;m.state="managerRoam";m.moveTimer=18+Math.random()*28;
+   m.moveTimer=(m.moveTimer??45)-dt;
+   if(m.moveTimer<=0 && Math.random()<.18){
+     m.route=managerRouteTo({x:640,y:190,room:"SERVER"});
+     m.routeIndex=0;m.state="managerServer";
+     m.moveTimer=55+Math.random()*70;
+   }else if(m.moveTimer<=0){
+     m.moveTimer=35+Math.random()*55;
    }
  }
- if(m.state==="managerRoam"){
-   if(moveNpcRoute(m,dt)){m.state="desk";m.moveTimer=15+Math.random()*25}
+ if(m.state==="managerServer"){
+   if(moveNpcRoute(m,dt)){m.serverStay=8+Math.random()*10;m.state="managerServerStay"}
+ }
+ if(m.state==="managerServerStay"){
+   m.serverStay-=dt;
+   if(m.serverStay<=0){
+     m.route=managerRouteTo({x:190,y:640,room:"IT"});
+     m.routeIndex=0;m.state="managerReturnIT";
+   }
+ }
+ if(m.state==="managerReturnIT"){
+   if(moveNpcRoute(m,dt)){m.x=190;m.y=640;m.state="desk";m.moveTimer=40+Math.random()*65}
  }
  if(introStage==="done"&&state.min>560&&Math.random()<.00045&&tickets.length<difficultyConfig[difficulty].maxTickets){
    const levels=state.min>990?["MEDIUM","HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];
