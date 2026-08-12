@@ -312,7 +312,7 @@ function npcDestinationForActivity(n,activity){
  if(activity==="printer")return {x:1240+Math.random()*65,y:790+Math.random()*25,room:"STAMPANTI"};
  if(activity==="gallery")return {x:1080+Math.random()*80,y:650+Math.random()*30,room:"RIFUGIO DIGITALE"};
  if(activity==="coffee")return {x:920+Math.random()*110,y:810+Math.random()*25,room:"CUCINA"};
- if(activity==="bathroom")return {x:900+Math.random()*70,y:650+Math.random()*25,room:"BAGNI"};
+ if(activity==="bathroom")return ;
  return {x:n.homeX,y:n.homeY,room:"HOME"};
 }
 function routeViaHub(n,target){
@@ -811,6 +811,8 @@ function managerRouteTo(target){
  return route;
 }
 function updateManager(dt){
+ const m=npcs.find(n=>n.id==="manager");if(!m)return;
+
  if(m.state==="managerRace"){
    if(moveNpcRoute(m,dt)){
      m.x=190;m.y=640;
@@ -826,8 +828,6 @@ function updateManager(dt){
  }
 
  // V5.3.2 FINAL: postazione IT fissa; solo IT <-> SERVER. Ticket globali.
-
- const m=npcs.find(n=>n.id==="manager");if(!m)return;
  if(m.state==="managerTravel"){
    if(moveNpcRoute(m,dt)){m.state="desk";m.x=190;m.y=640;
      if(introStage==="reachPC"&&!managerRaceDone&&!managerPenaltyDone){managerPenaltyDone=true;state.stress+=4;state.rep=Math.max(0,state.rep-1);storyDialog("IT MANAGER","Buongiorno... il PC magari lo accendiamo? Ti stanno già cercando.")}
@@ -1675,9 +1675,26 @@ function printer(x,y){
  g.fillStyle="#d0d0c5";g.fillRect(x,y,30,34);g.fillStyle="#8d928d";g.fillRect(x+4,y+5,22,9);
  g.fillStyle="#2c3431";g.fillRect(x+8,y+20,14,7);g.fillStyle="#f2eee0";g.fillRect(x+7,y-5,16,8);
 }
+
+function drawHRRoom(){
+ // V5.3.5: HR minimale — una sola persona, una sola scrivania, un solo monitor.
+ const x=360,y=185,w=88;
+ g.fillStyle="#171311";g.fillRect(x+4,y+5,w,32);
+ g.fillStyle="#6b4224";g.fillRect(x,y,w,27);
+ g.fillStyle="#8a5a31";g.fillRect(x,y,w,4);
+
+ // Un solo monitor
+ g.fillStyle="#111815";g.fillRect(x+30,y-22,28,20);
+ g.fillStyle="#58a0b8";g.fillRect(x+34,y-18,20,12);
+ g.fillStyle="#0b0d0c";g.fillRect(x+42,y-2,4,8);
+
+ // Una sola sedia
+ g.fillStyle="#252b28";g.fillRect(x+33,y+34,22,16);
+}
+
 function furniture(){
  // EDITORIA / BIM / HR / RENDERISTI: postazioni ordinate, non sovrapposte.
- desk(72,185,160); desk(355,185,92); // HR: una sola postazione
+ desk(72,185,160); drawHRRoom(); // HR: una sola postazione
  desk(70,405,135); desk(1280,205,135);
 
  // CENTRALE: due file pulite e distanziate.
@@ -1721,18 +1738,17 @@ function meetingRoomSetup(x,y,w,screenX,screenY){
  g.strokeStyle="#74a6b5";g.strokeRect(x+w/2-18,y+7,36,16);
 }
 function drawBathroomFixtures(){
- // V5.3: zona comune pulita. I sanitari non sono visibili: solo due porte WC.
- const y=625;
- for(const x of [870,940]){
-   g.fillStyle="#1a1713";g.fillRect(x,y,48,66);
-   g.strokeStyle="#8b5a31";g.lineWidth=4;g.strokeRect(x,y,48,66);
-   g.fillStyle="#d5c7ac";g.font="bold 9px monospace";g.fillText("WC",x+16,y+18);
-   g.fillStyle="#c09155";g.fillRect(x+38,y+34,4,4);
- }
- // piccolo lavabo comune
- g.fillStyle="#d8ddd8";g.fillRect(965,602,34,12);
- g.fillStyle="#8aa3a0";g.fillRect(968,580,28,18);
- g.strokeStyle="#cbd7d3";g.strokeRect(968,580,28,18);
+ // V5.3.5: BAGNI puliti — soltanto due porte WC.
+ const doors=[
+   {x:875,y:625,w:48,h:72,label:"WC"},
+   {x:945,y:625,w:48,h:72,label:"WC"}
+ ];
+ doors.forEach(d=>{
+   g.fillStyle="#17110d";g.fillRect(d.x,d.y,d.w,d.h);
+   g.strokeStyle="#9b6738";g.lineWidth=4;g.strokeRect(d.x,d.y,d.w,d.h);
+   g.fillStyle="#d8d0bb";g.font="bold 11px monospace";g.fillText(d.label,d.x+14,d.y+25);
+   g.fillStyle="#d6b46e";g.fillRect(d.x+d.w-10,d.y+38,4,4);
+ });
 }
 
 function label(r){

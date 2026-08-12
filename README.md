@@ -44,3 +44,14 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Il Manager si allinea alla porta prima di attraversarla, evitando il muro.
 - Aggiunto stato managerRace dedicato.
 - F2 mostra la route corrente del Manager in giallo.
+
+## V5.3.5 — HR / BAGNI CLEANUP
+- HR: una sola postazione, un solo monitor, un solo NPC fisso.
+- Rimossi eventuali NPC HR duplicati.
+- BAGNI: soltanto due porte WC scenografiche.
+- Rimossi monitor/PC/stazioni IT dalla stanza BAGNI.
+
+## V5.3.6 — CRASH FIX
+- Corretto ReferenceError: Cannot access 'm' before initialization.
+- La variabile IT Manager viene ora inizializzata all'inizio di updateManager().
+- Nessuna modifica al gameplay della V5.3.5.
