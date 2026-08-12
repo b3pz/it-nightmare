@@ -74,3 +74,11 @@ Hotfix della V5.0: ingresso giocabile con porta/E, dialoghi compatti, nomi stanz
 - Pranzo distribuito: cucina meno affollata; Betty resta HR e Manager resta IT.
 - Meeting NPC in Sala Meet, Spazio A e Sala Meet Capo.
 - I meeting possono generare ticket AV/CABLE nella sala reale; Sala Meet Capo più severa.
+
+## V5.4.0 — CONTEXT & BETTY SUPPORT
+- Micro-domande tecniche integrate dentro una parte dei minigiochi, mai come quiz separato.
+- Le domande sono obbligatoriamente coerenti con la stanza/problema.
+- Risposte brevi e selezionabili anche con 1/2/3 da tastiera.
+- Betty monitora lo stress con soglie 42/60/80 e può invitarti in HR.
+- Interagendo con Betty: consiglio + riduzione stress; ai livelli alti anche XP/reputazione.
+- Cooldown anti-abuso per evitare bonus infiniti.

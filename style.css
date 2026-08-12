@@ -187,3 +187,11 @@ body{background:#010201;overflow:hidden}
 @media(max-width:700px){.bootGame{grid-template-columns:1fr}.bootScreen{min-height:100px}}
 
 .relationshipFriend{color:#8cff7a}.relationshipEnemy{color:#ff6a64}
+
+/* V5.4.0 — contextual checks */
+.contextCheck{margin-top:14px;padding:12px;background:#070b08;border:3px solid #425149;box-shadow:4px 4px #000}
+.contextCheckTitle{font:700 9px monospace;color:#6ee7ff;letter-spacing:2px;margin-bottom:8px}
+.contextCheckQ{font:700 13px monospace;color:#f0f4f1;margin-bottom:10px}
+.contextCheckAnswers{display:grid;gap:7px}
+.contextCheckAnswers button{padding:10px;text-align:left;background:#0e1511;color:#dfe9e2;border:2px solid #39473f;font:700 10px monospace;cursor:pointer}
+.contextCheckAnswers button:hover{border-color:#b7ff4a}

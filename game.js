@@ -13,12 +13,12 @@ window.addEventListener("error",ev=>{
  const msg=ev?.error?.message||ev?.message||"Errore JavaScript";
  const line=ev?.lineno?` // line ${ev.lineno}`:"";
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V5.3.9 // ${msg}${line}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V5.4.0 // ${msg}${line}`;box.classList.remove("hidden")}
 });
 window.addEventListener("unhandledrejection",ev=>{
  const msg=ev?.reason?.message||String(ev?.reason||"Promise rejection");
  const box=document.querySelector("#jsError");
- if(box){box.textContent=`JS ERROR V5.3.9 // ${msg}`;box.classList.remove("hidden")}
+ if(box){box.textContent=`JS ERROR V5.4.0 // ${msg}`;box.classList.remove("hidden")}
 });
 
 const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
@@ -217,6 +217,7 @@ const npcDefs=[
  {id:"don",name:"DON",role:"JOLLY",x:895,y:815,tone:"good",shirt:"#566a51",hunter:true},{id:"hr",name:"BETTY",role:"HR",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:92,state:"outside"}];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
 
+let bettySupportCooldown=0,bettyPinged=false,bettyLastStressBand=0;
 const npcRelations={};
 function ensureRelation(n){if(!n||!n.id)return 0;if(npcRelations[n.id]===undefined)npcRelations[n.id]=0;return npcRelations[n.id]}
 function relationTier(n){const v=ensureRelation(n);return v>=45?"friend":v<=-45?"enemy":"neutral"}
@@ -1131,6 +1132,8 @@ function beginEntranceWalk(){
 }
 
 function reset(){
+ bettySupportCooldown=0;bettyPinged=false;bettyLastStressBand=0;
+
  Object.keys(npcRelations).forEach(k=>delete npcRelations[k]);
 
  introFreeWalk=false;entranceOpened=false;enteredStudio=false;window.__entranceDialogReady=false;
@@ -1221,8 +1224,16 @@ function miniHeader(t,title,subtitle){
  </div>`;
 }
 
-function miniSuccess(i,label){
+function miniSuccess(i,label,skipContext=false){
  if(i<0||i>=tickets.length)return;
+ if(!skipContext){
+   const t=tickets[i];
+   if(t&&!t.contextChecked){
+     t.contextChecked=true;
+     maybeContextCheck(i,()=>miniSuccess(i,label,true));
+     return;
+   }
+ }
  const t=tickets[i];
  const xp={LOW:120,MEDIUM:290,HIGH:560,CRITICAL:820}[t.level];
  tickets.splice(i,1);
@@ -1230,8 +1241,9 @@ function miniSuccess(i,label){
  $("#modal").classList.add("hidden");
  state.xp+=xp;state.solved++;state.stress=Math.max(0,state.stress-4);
  state.incident=Math.max(0,state.incident-({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]));
- toast(`${label} // TASK COMPLETE +${xp} XP`);const srcNpc=[...ambientNPCs,...npcs].find(n=>n.name===t.source||n.id===t.source);if(srcNpc)changeRelation(srcNpc,6);
- renderTickets();updateTaskProgress();hud();updateTaskProgress();
+ toast(`${label} // TASK COMPLETE +${xp} XP`);
+ const srcNpc=[...ambientNPCs,...npcs].find(n=>n.name===t.source||n.id===t.source);if(srcNpc)changeRelation(srcNpc,6);
+ renderTickets();updateTaskProgress();hud();
 }
 
 function miniMistake(text="ERRORE"){
@@ -1244,6 +1256,96 @@ function miniMistake(text="ERRORE"){
    activeMiniGame.errors=0;
  }
  clamp();hud();
+}
+
+
+/* ============================================================
+   V5.4.0 — CONTEXTUAL MICRO QUESTIONS
+   Non sono quiz separati: sono micro-scelte tecniche dentro il
+   minigioco e solo quando hanno senso per stanza/problema.
+   ============================================================ */
+const contextChecks={
+ "SERVER":[
+  {q:"Prima di intervenire su un servizio fermo, cosa controlli?",a:["Log e dipendenze","Riavvio completo server","Cambio DNS client"],ok:0},
+  {q:"Una porta switch è DOWN. Primo controllo?",a:["Link/cavo e porta fisica","Reinstallare Windows","Cambiare VLAN a caso"],ok:0}
+ ],
+ "SALA MEET":[
+  {q:"Monitor acceso ma NO SIGNAL. Primo controllo?",a:["Sorgente e catena HDMI","Riavviare il file server","Cambiare password utente"],ok:0}
+ ],
+ "SPAZIO A":[
+  {q:"USB-C collegata ma niente video. Primo controllo?",a:["Supporto video/adapter/input","Reset stampante","Cambio DNS"],ok:0}
+ ],
+ "SALA MEET CAPO":[
+  {q:"Presentazione urgente, display nero. Prima verifica?",a:["Input e extender TX/RX","Riavvio dominio","Reinstallazione Teams"],ok:0}
+ ],
+ "STAMPANTI":[
+  {q:"Stampante raggiungibile ma job fermo. Primo controllo?",a:["Coda/spooler","Gateway","Driver GPU"],ok:0}
+ ],
+ "EDITORIA":[
+  {q:"Adobe segnala media offline. Primo tentativo?",a:["Relink al file corretto","Reinstallare Adobe","Cambiare utente macOS"],ok:0}
+ ],
+ "THE BUNKER":[
+  {q:"File Adobe apre con font mancanti. Prima cosa?",a:["Verificare font/link","Cancellare progetto","Reset rete"],ok:0}
+ ],
+ "BIM":[
+  {q:"Revit lento su un solo modello. Prima verifica?",a:["Modello/link/warning","Cambio monitor","Reset stampante"],ok:0}
+ ],
+ "RENDERISTI":[
+  {q:"Render node non risponde. Primo controllo?",a:["Processo/rete/licenza","Riavvio stampante","Cambio VLAN utente"],ok:0}
+ ],
+ "CENTRALE":[
+  {q:"PC senza rete con 169.254.x.x. Primo controllo?",a:["DHCP/link","DNS pubblico","Driver audio"],ok:0}
+ ],
+ "RIFUGIO DIGITALE":[
+  {q:"Un output Pixera è fuori sync. Primo controllo?",a:["Mapping/output/timing","Cambiare mouse","Reset spooler"],ok:0}
+ ],
+ "IT":[
+  {q:"Un ticket è poco chiaro. Prima mossa?",a:["Definire il sintomo","Reinstallare tutto","Chiudere il ticket"],ok:0}
+ ]
+};
+
+function maybeContextCheck(i,onDone){
+ const t=tickets[i];if(!t){onDone();return}
+ const bank=contextChecks[safeRoom(t.p,"IT")]||[];
+ // Solo una parte dei minigiochi: non deve spezzare il ritmo.
+ if(!bank.length||Math.random()>.42){onDone();return}
+ const c=bank[Math.floor(Math.random()*bank.length)];
+ const body=$("#modalBody");
+ const panel=document.createElement("div");
+ panel.className="contextCheck";
+ panel.innerHTML=`<div class="contextCheckTitle">CHECK RAPIDO // ${safeRoom(t.p,"IT")}</div>
+ <div class="contextCheckQ">${c.q}</div>
+ <div class="contextCheckAnswers">${c.a.map((x,n)=>`<button data-n="${n}">[${n+1}] ${x}</button>`).join("")}</div>`;
+ body.appendChild(panel);
+
+ const finish=()=>{
+   panel.remove();
+   onDone();
+ };
+ panel.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+   const n=+b.dataset.n;
+   if(n===c.ok){
+     state.xp+=25;
+     toast("CHECK CORRETTO // +25 XP");
+     finish();
+   }else{
+     state.stress+=2*difficultyConfig[difficulty].stressMult;
+     state.incident+=1;
+     toast("CHECK ERRATO // +STRESS");
+     clamp();hud();
+     finish();
+   }
+ });
+
+ // numeri da tastiera per il check rapido
+ const handler=e=>{
+   if(!panel.isConnected)return window.removeEventListener("keydown",handler);
+   if(/^[1-9]$/.test(e.key)){
+     const n=+e.key-1,btn=panel.querySelectorAll("button")[n];
+     if(btn){e.preventDefault();btn.click()}
+   }
+ };
+ window.addEventListener("keydown",handler);
 }
 
 function startMiniGame(i){
@@ -1409,12 +1511,75 @@ function tryStudioEntrance(){
 }
 
 
-function hrAdvice(){
- const hr=npcs.find(n=>n.id==="hr");
- if(!hr||Math.hypot(player.x-hr.x,player.y-hr.y)>72)return false;
- const tips=["Se hai tre cose insieme, parti da quella che blocca più persone.","Chiedi sempre quanto è urgente davvero.","Se una richiesta non è chiara, falla spiegare prima di correre.","Controlla il PDA: gli urgenti scadono più in fretta."];
- changeRelation(hr,2);storyDialog("BETTY",tips[Math.floor(Math.random()*tips.length)]);return true;
+
+function bettyStressBand(){
+ if(!state)return 0;
+ if(state.stress>=80)return 3;
+ if(state.stress>=60)return 2;
+ if(state.stress>=42)return 1;
+ return 0;
 }
+function updateBettySupport(dt){
+ if(!state||introStage!=="done")return;
+ bettySupportCooldown=Math.max(0,bettySupportCooldown-dt);
+ const band=bettyStressBand();
+
+ // Betty non spamma: una chiamata quando si supera una nuova soglia.
+ if(band>0&&band>bettyLastStressBand&&!bettyPinged&&bettySupportCooldown<=0){
+   bettyPinged=true;bettyLastStressBand=band;
+   phoneMessage("BETTY",band>=3?"Passa da me un attimo. Sei al limite.":"Quando hai un minuto passa in HR.");
+ }
+ if(band===0){bettyLastStressBand=0;bettyPinged=false}
+}
+function bettySupport(){
+ const hr=npcs.find(n=>n.id==="hr");
+ if(!hr||Math.hypot(player.x-hr.x,player.y-hr.y)>76)return false;
+ const band=bettyStressBand();
+ const rel=ensureRelation(hr);
+
+ if(bettySupportCooldown>0){
+   storyDialog("BETTY","Respira e vai per priorità. Una cosa alla volta.");
+   return true;
+ }
+
+ const tips=[
+  "Se tutti dicono urgente, chiedi chi è davvero bloccato.",
+  "Prima chiudi quello che blocca più persone, poi il resto.",
+  "Se una richiesta non è chiara, falla spiegare prima di correre.",
+  "Non devi risolvere tre problemi insieme: ordinali."
+ ];
+ const tip=tips[Math.floor(Math.random()*tips.length)];
+
+ if(band>=3){
+   state.stress=Math.max(0,state.stress-24);
+   state.rep=Math.min(5,state.rep+1);
+   state.xp+=80;
+   bettySupportCooldown=120;
+   bettyPinged=false;
+   changeRelation(hr,4);
+   storyDialog("BETTY",`${tip} Ti copro io cinque minuti. // STRESS -24 · +80 XP`);
+ }else if(band>=2){
+   state.stress=Math.max(0,state.stress-16);
+   state.xp+=45;
+   bettySupportCooldown=95;
+   bettyPinged=false;
+   changeRelation(hr,3);
+   storyDialog("BETTY",`${tip} // STRESS -16 · +45 XP`);
+ }else if(band>=1){
+   state.stress=Math.max(0,state.stress-9);
+   bettySupportCooldown=75;
+   bettyPinged=false;
+   changeRelation(hr,2);
+   storyDialog("BETTY",`${tip} // STRESS -9`);
+ }else{
+   changeRelation(hr,1);
+   storyDialog("BETTY",tip);
+ }
+ clamp();hud();
+ return true;
+}
+
+function hrAdvice(){return bettySupport();}
 
 function interact(){
  if(hrAdvice())return;
@@ -1559,6 +1724,8 @@ function monitorEntranceIntro(){
 }
 
 function update(dt) {
+ updateBettySupport(dt);
+
  updateLunchReturn(dt);
 
  monitorEntranceIntro();
