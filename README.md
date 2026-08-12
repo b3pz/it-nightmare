@@ -210,3 +210,19 @@ Build di consolidamento.
 - Gara IT Manager su route dedicata validata, senza fallback attraverso i muri.
 - Room labels rese più compatte per non coprire NPC e nomi.
 - Fine giornata con riepilogo e restart completo: RIPROVA SUBITO / NUOVA GIORNATA.
+
+## V10.2.0 — BALANCE HOTFIX
+- Route gara IT Manager semplificata con meno waypoint e meno zig-zag.
+- Velocità Manager leggermente ridotta per rendere la corsa più naturale ma ancora competitiva.
+- Stress ribilanciato:
+  - 0-2 ticket quasi neutri;
+  - 3-4 ticket pressione leggera;
+  - 5+ ticket, HIGH, CRITICAL e deadline aumentano davvero lo stress;
+  - pranzo recupera stress;
+  - periodi tranquilli recuperano lentamente;
+  - errori minigiochi meno devastanti;
+  - completare una task riduce più stress.
+- Target di bilanciamento:
+  - run normale 30-55%;
+  - giornata difficile 60-80%;
+  - oltre 90% solo in situazioni realmente critiche.

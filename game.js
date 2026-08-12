@@ -9,7 +9,7 @@ function v911ShowError(message,source="",line=0,col=0){
  }
  const bar=document.getElementById("jsError");
  if(bar){
-   bar.textContent=`JS ERROR V10.1.0 // ${txt}${line?` @ ${line}:${col}`:""}`;
+   bar.textContent=`JS ERROR V10.2.0 // ${txt}${line?` @ ${line}:${col}`:""}`;
    bar.classList.remove("hidden");
  }
  console.error("V9.1 runtime error:",message,source,line,col);
@@ -1115,20 +1115,22 @@ function storyDialog(who,text,cb=null){
 function closeStory(){if(!storyOpen)return;storyOpen=false;$("#storyDialog")?.classList.add("hidden");const cb=storyCallback;storyCallback=null;if(cb)cb();setTimeout(flushDeferredDialog,80)}
 function managerRaceRoute(m){
  const goal={x:190,y:640,room:"IT"};
- const points=[
+ // V10.2: percorso più naturale, meno zig-zag.
+ // I nodi sono solo sui corridoi principali; ogni tratto viene validato dal pathfinder.
+ const anchors=[
    {x:m.x,y:m.y,room:navAreaAt(m.x,m.y)},
-   {x:650,y:900,room:"CORRIDOIO"},
    {x:650,y:760,room:"CORRIDOIO"},
-   {x:500,y:720,room:"CORRIDOIO"},
-   {x:350,y:700,room:"CORRIDOIO"},
+   {x:420,y:705,room:"CORRIDOIO"},
    {x:250,y:675,room:"CORRIDOIO"},
    goal
  ];
  const out=[];
- for(let i=1;i<points.length;i++){
-   const start=out.length?out[out.length-1]:points[0];
-   const seg=findNpcPath(start,points[i]);
+ for(let i=1;i<anchors.length;i++){
+   const start=out.length?out[out.length-1]:anchors[0];
+   const seg=findNpcPath(start,anchors[i]);
    if(!seg.length)return [];
+   // avoid duplicate first node between segments
+   if(out.length&&seg.length&&Math.hypot(out[out.length-1].x-seg[0].x,out[out.length-1].y-seg[0].y)<2)seg.shift();
    out.push(...seg);
  }
  return out;
@@ -1140,7 +1142,7 @@ function startShiftFromEntrance(){
  const m=npcs.find(n=>n.id==="manager");
  if(m){
    m.exclaimUntil=performance.now()+1800;m.state="managerRace";
-   m.raceSpeed=Math.max(m.raceSpeed||0,132);m.speed=m.raceSpeed;
+   m.raceSpeed=Math.max(m.raceSpeed||0,122);m.speed=m.raceSpeed;
    m.routeGoal={x:190,y:640,room:"IT"};m.route=managerRaceRoute(m);
    m.routeIndex=0;m.stuckFor=0;m.blockedFor=0;
    if(!m.route.length){
@@ -1430,7 +1432,7 @@ function refreshPDA(){
  if(pdaTab==="TASK") body=`<section class="ticketWindow"><div class="windowTitle"><span>Gestione ticket IT</span><small>Windows // Service Desk</small></div><div class="ticketColumns"><b>PRIORITÀ</b><b>ID</b><b>REPARTO</b><b>PROBLEMA</b><b>SCADENZA</b></div>${carry||active||"<div class='pdaEmpty'>NESSUN TICKET APERTO</div>"}</section>`;
  else if(pdaTab==="INVENTARIO") body=`<section><h4>INVENTARIO</h4><div class="inventoryPda">${inventory.length?inventory.map(x=>`<div>${x}</div>`).join(""):"NESSUN OGGETTO"}</div></section>`;
  else if(pdaTab==="RAPPORTI") body=`<section><h4>RAPPORTI // STUDIO</h4><div class="relationshipList">${rel}</div></section>`;
- else body=`<section class="tabletState"><h4>STATO OPERATORE</h4><div class="stateCards"><b>STRESS ${Math.round(state.stress)}%</b><b>ERRORI ${state.strikes}/${state.maxStrikes}</b><b>INCIDENT ${Math.round(state.incident)}%</b><b>XP ${state.xp}</b><b>REPUTAZIONE ${"★".repeat(Math.max(0,Math.round(state.rep)))}</b><b>BETTY ${bettySupportCooldown>0?"COOLDOWN":"DISPONIBILE"}</b></div><p>${state.stress>=42?"BETTY // Passa in HR: può aiutarti a recuperare stress.":"Turno sotto controllo."}</p></section>`;
+ else body=`<section class="tabletState"><h4>STATO OPERATORE</h4><div class="stateCards"><b>STRESS ${Math.round(state.stress)}%</b><b>ERRORI ${state.strikes}/${state.maxStrikes}</b><b>INCIDENT ${Math.round(state.incident)}%</b><b>XP ${state.xp}</b><b>REPUTAZIONE ${"★".repeat(Math.max(0,Math.round(state.rep)))}</b><b>BETTY ${bettySupportCooldown>0?"COOLDOWN":"DISPONIBILE"}</b></div><p>${state.stress>=50?"BETTY // Passa in HR: può aiutarti a recuperare stress.":"Turno sotto controllo."}</p></section>`;
  p.innerHTML=`<div class="tabletTabs">${tabs}</div>${body}`;
  p.querySelectorAll(".tabletTab").forEach(b=>b.onclick=()=>{pdaTab=b.dataset.tab;refreshPDA()});
  p.querySelectorAll(".pdaTicketRow").forEach(b=>b.onclick=()=>{const t=tickets[+b.dataset.ticket];if(!t)return;const mac=safeRoom(t.p)==="EDITORIA";$("#modalBody").innerHTML=`<div class="ticketDetail ${mac?"macWindow":"winWindow"}"><div class="osTitle">${mac?"● ● ●  Supporto Mac":"▣  Service Desk // Windows"}</div><h2>${t.level} // ${t.p?.id||"TICKET"}</h2><p><b>Reparto:</b> ${safeRoom(t.p,"SEGNALAZIONE")}</p><p><b>Problema:</b> ${t.taskType||"DIAGNOSI"}</p><p><b>Scadenza:</b> ${fmt(t.due)}</p><button class="choice" onclick="document.querySelector('#modal').classList.add('hidden')">PRENDI IN CARICO</button></div>`;$("#modal").classList.remove("hidden")});
@@ -1646,7 +1648,7 @@ function miniSuccess(i,label,skipContext=false){
  const t=tickets[i],xp={LOW:120,MEDIUM:290,HIGH:560,CRITICAL:820}[t.level];
  tickets.splice(i,1);activeMiniGame=null;$("#modal").classList.add("hidden");
  const stressBefore=state.stress;
- state.xp+=xp;state.solved++;state.stress=Math.max(0,state.stress-4);
+ state.xp+=xp;state.solved++;state.stress=Math.max(0,state.stress-6);
  state.incident=Math.max(0,state.incident-({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]));
  const srcNpc=[...ambientNPCs,...npcs].find(n=>n.name===t.source||n.id===t.source);
  let relRow="";
@@ -1680,7 +1682,7 @@ function miniMistake(text="ERRORE"){
  if(!activeMiniGame)return;
  activeMiniGame.errors=(activeMiniGame.errors||0)+1;
  state.strikes++;
- const t=tickets[activeMiniGame.index],severity=t?({LOW:5,MEDIUM:8,HIGH:11,CRITICAL:15}[t.level]||6):6;
+ const t=tickets[activeMiniGame.index],severity=t?({LOW:3,MEDIUM:5,HIGH:7,CRITICAL:10}[t.level]||4):4;
  state.stress+=severity*difficultyConfig[difficulty].stressMult;
  state.incident+=3*difficultyConfig[difficulty].incidentMult;
  const e=$("#miniError");
@@ -2154,13 +2156,51 @@ function monitorEntranceIntro(){
 
 function updateWorkloadStress(dt){
  if(!state||introStage!=="done"||state.phase!=="shift")return;
- const open=tickets.length,critical=tickets.filter(t=>t.level==="CRITICAL").length,high=tickets.filter(t=>t.level==="HIGH").length;
+
+ const open=tickets.length;
+ const critical=tickets.filter(t=>t.level==="CRITICAL").length;
+ const high=tickets.filter(t=>t.level==="HIGH").length;
+ const deadline=tickets.filter(t=>t.due-state.min<20).length;
  const hostile=[...ambientNPCs,...npcs].filter(n=>ensureRelation(n)<=-15).length;
- const deadline=tickets.filter(t=>t.due-state.min<25).length;
- const pressure=.035+open*.30+Math.max(0,open-1)*.52+high*.62+critical*1.18+deadline*.60+hostile*.03+(state.incident/100)*.48;
- if(pressure>0)state.stress+=pressure*dt*difficultyConfig[difficulty].stressMult;
- if(open===0&&!isLunch())state.stress=Math.max(0,state.stress-.055*dt);
- if(isLunch()&&open<2)state.stress=Math.max(0,state.stress-.16*dt);
+
+ // V10.2 BALANCE:
+ // 0-2 ticket => quasi nessuna pressione.
+ // 3-4 => pressione leggera.
+ // 5+ / HIGH / CRITICAL / deadline => pressione reale.
+ let pressure=0;
+ if(open>=3)pressure+=(open-2)*0.16;
+ if(open>=5)pressure+=(open-4)*0.12;
+ pressure+=high*0.18;
+ pressure+=critical*0.42;
+ pressure+=deadline*0.15;
+ pressure+=hostile*0.006;
+ pressure+=(state.incident/100)*0.08;
+
+ // Difficulty still matters, but much less aggressively.
+ const mult={
+   easy:0.55,
+   normal:0.78,
+   hard:1.00,
+   nightmare:1.22
+ }[difficulty]||0.78;
+
+ if(pressure>0){
+   state.stress+=pressure*dt*mult;
+ }else{
+   // Quiet periods slowly recover stress.
+   state.stress=Math.max(0,state.stress-0.035*dt);
+ }
+
+ // Lunch is an actual recovery window.
+ if(isLunch()){
+   state.stress=Math.max(0,state.stress-(open<=2?0.14:0.07)*dt);
+ }
+
+ // Low stress should remain stable instead of creeping upward.
+ if(state.stress<40&&open<=2){
+   state.stress=Math.max(0,state.stress-0.025*dt);
+ }
+
  clamp();
 }
 function update(dt) {
@@ -2875,8 +2915,8 @@ function v911StartupSelfTest(){
      if(!cfg.table||!cfg.screen||!Array.isArray(cfg.seats))problems.push("meeting config "+name);
    }
  }catch(e){problems.push(e.message)}
- if(problems.length)console.error("V10.1.0 SELF TEST",problems);
- else console.log("V10.1.0 SELF TEST // OK");
+ if(problems.length)console.error("V10.2.0 SELF TEST",problems);
+ else console.log("V10.2.0 SELF TEST // OK");
  return problems;
 }
 
