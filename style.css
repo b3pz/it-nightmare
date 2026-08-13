@@ -392,3 +392,60 @@ body{background:#010201;overflow:hidden}
 #missionBanner span{font-size:10px;line-height:1.35}
 #missionBanner em{font-size:9px;margin-top:8px}
 #missionBanner small{font-size:8px;letter-spacing:2px}
+
+.sideMessage,.side-message,#sideMessage{max-width:340px!important;width:min(340px,28vw)!important;padding:10px 12px!important;font-size:11px!important;line-height:1.35!important}
+
+/* V12 CLEAN.4.2 — Home diagnostics containment */
+.bootIntel,
+.bootIntelGrid,
+.bootLog{
+  box-sizing:border-box;
+  max-width:100%;
+  overflow:hidden;
+}
+.bootIntelGrid{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+}
+.bootIntelGrid div{
+  grid-template-columns:82px minmax(0,1fr);
+  min-width:0;
+}
+.bootIntelGrid b,
+.bootIntelGrid span,
+.bootLog div{
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.bootLog{
+  max-height:118px;
+  overflow:auto;
+  scrollbar-width:thin;
+}
+@media(max-width:900px){
+  .bootIntelGrid{grid-template-columns:1fr}
+}
+
+/* V12 CLEAN.4.2 — facade/window reflection stays visually stable */
+.facadeReflection,.windowReflection,.glassReflection,.reflectionSweep{
+  animation:none!important;
+  transform:none!important;
+}
+
+/* V12 CLEAN.4.3 — lunch seating visual hint */
+.lunchSeatDebug{display:none}
+
+/* V12 CLEAN.4.5 — facade fully static */
+#boot *,.facadeReflection,.windowReflection,.glassReflection,.reflectionSweep{
+  animation-play-state:paused!important;
+}
+.facadeReflection,.windowReflection,.glassReflection,.reflectionSweep{
+  animation:none!important;
+  transform:none!important;
+  transition:none!important;
+}
+
+.facadeReflection,.windowReflection,.glassReflection,.reflectionSweep,
+#boot .reflection,#boot .shine,#boot .glint{
+ animation:none!important;transition:none!important;transform:none!important;
+}

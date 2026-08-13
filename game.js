@@ -9,7 +9,7 @@ function v911ShowError(message,source="",line=0,col=0){
  }
  const bar=document.getElementById("jsError");
  if(bar){
-   bar.textContent=`JS ERROR V12 CLEAN // ${txt}${line?` @ ${line}:${col}`:""}`;
+   bar.textContent=`JS ERROR VERSIONE1ITSHIFT 1.0.18 // ${txt}${line?` @ ${line}:${col}`:""}`;
    bar.classList.remove("hidden");
  }
  console.error("V9.1 runtime error:",message,source,line,col);
@@ -40,9 +40,25 @@ let difficulty="normal";
 const screens={boot:$("#boot"),lore:$("#lore"),game:$("#gameScreen")};function show(k){Object.values(screens).forEach(x=>x.classList.remove("active"));screens[k].classList.add("active")}
 const boot=[];$("#toLore").classList.remove("hidden");$("#toLore").onclick=()=>show("lore");$("#start").onclick=()=>{difficulty=$("#difficulty")?.value||"normal";show("game");reset();requestAnimationFrame(loop)};
 
+
+/* V12 CLEAN.4.5 — IT LAB / MAGAZZINO */
+const V12C45_LAB={
+ name:"SERVER",
+ x:1110,y:145,w:230,h:220
+};
+const V12C45_LAB_DROP={x:650,y:220,room:"SERVER"};
+const V12C45_LAB_BENCH={x:715,y:220,room:"SERVER"};
+const V12C45_LAB_SHELVES=[
+ {x:340,y:215,label:"CAVI"},
+ {x:395,y:215,label:"CUFFIE"},
+ {x:450,y:215,label:"HDMI"},
+ {x:505,y:215,label:"ALIMENTATORI"},
+ {x:715,y:215,label:"RICAMBI"}
+];
+
 const rooms=[
-{name:"EDITORIA",x:30,y:55,w:250,h:210,f:"stone"},{name:"HR",x:300,y:55,w:205,h:210,f:"stone"},{name:"SERVER",x:525,y:55,w:230,h:210,f:"server"},
-{name:"BIM",x:30,y:310,w:210,h:185,f:"stone"},{name:"IT",x:30,y:535,w:210,h:180,f:"wood"},{name:"CENTRALE",x:315,y:310,w:440,h:355,f:"stone"},
+{name:"EDITORIA",x:30,y:310,w:210,h:185,f:"stone"},{name:"HR",x:30,y:55,w:250,h:210,f:"stone"},{name:"SERVER",x:300,y:55,w:455,h:210,f:"server"},
+{name:"BIM",x:30,y:535,w:210,h:180,f:"stone"},{name:"IT",x:30,y:735,w:210,h:180,f:"wood"},{name:"CENTRALE",x:315,y:310,w:440,h:355,f:"stone"},
 {name:"SALA MEET",x:840,y:55,w:190,h:270,f:"stone"},{name:"INTERIOR",x:1050,y:55,w:170,h:270,f:"wood"},{name:"RENDERISTI",x:1240,y:55,w:210,h:270,f:"wood"},
 {name:"SPAZIO A",x:840,y:365,w:300,h:185,f:"stone"},{name:"BAGNI",x:840,y:565,w:180,h:120,f:"tile"},{name:"RIFUGIO DIGITALE",x:1040,y:565,w:180,h:120,f:"wood"},
 {name:"SALA MEET CAPO",x:1290,y:400,w:280,h:290,f:"wood"},{name:"INGRESSO / SEGRETERIA",x:410,y:735,w:345,h:130,f:"stone"},{name:"CUCINA",x:805,y:755,w:340,h:180,f:"tile"},{name:"STAMPANTI",x:1145,y:755,w:285,h:180,f:"stone"},{name:"STAMPA 3D",x:1435,y:755,w:155,h:180,f:"stone"}];
@@ -69,7 +85,9 @@ const corridors=[
  // V10.1 real corridor between bathrooms/refuge and kitchen
  {x:805,y:685,w:655,h:70},
  {x:1180,y:380,w:125,h:555},{x:760,y:520,w:115,h:255},{x:245,y:265,w:58,h:430},
- {x:245,y:675,w:110,h:85},{x:650,y:900,w:110,h:90}
+ {x:245,y:675,w:110,h:85},
+ {x:235,y:735,w:180,h:130}, // V1.0.5 accesso nuovo REPARTO IT
+ {x:650,y:900,w:110,h:90}
 ];
 const doors=[
  {x:245,y:235,w:75,h:105},{x:455,y:235,w:85,h:105},{x:710,y:180,w:145,h:105},
@@ -83,6 +101,7 @@ const doors=[
  {x:850,y:710,w:95,h:90},{x:1070,y:710,w:95,h:90},{x:1225,y:710,w:100,h:90},
  {x:1450,y:710,w:95,h:90},
  {x:235,y:245,w:80,h:85},{x:215,y:345,w:95,h:105},{x:215,y:565,w:95,h:135},{x:235,y:655,w:125,h:125},
+ {x:210,y:770,w:105,h:105}, // V1.0.5 porta nuovo REPARTO IT
  {x:650,y:920,w:110,h:100}
 ];
 const EXTERIOR_DOOR={x:605,y:845,w:100,h:65};
@@ -96,6 +115,9 @@ const V9_MEETINGS={
 let meetingSeatClaims={};
 
 const obstacles=[
+ {x:590,y:800,w:125,h:20}, // V1.0.6 scrivania ZIA ALE
+ // V1.0.5 collisioni scrivanie nuovo IT
+ {x:84,y:795,w:132,h:20},{x:84,y:865,w:132,h:20},
  // V9: solo ingombri che il giocatore VEDE realmente. Hitbox leggermente più piccole del mobile.
  {x:82,y:188,w:135,h:20},{x:350,y:188,w:108,h:28},{x:80,y:408,w:115,h:28},
  {x:1085,y:208,w:105,h:20},{x:1285,y:208,w:135,h:20},
@@ -108,7 +130,7 @@ const obstacles=[
  {x:570,y:120,w:135,h:72}
 ];
 const points=[
-{x:155,y:205,room:"EDITORIA",kind:"PC"},{x:400,y:205,room:"IT",kind:"PC"},{x:640,y:205,room:"SERVER",kind:"SERVER"},{x:140,y:450,room:"BIM",kind:"PC"},{x:140,y:660,room:"IT",kind:"PC"},
+{x:155,y:460,room:"EDITORIA",kind:"PC"},{x:400,y:405,room:"IT",kind:"PC"},{x:640,y:205,room:"SERVER",kind:"SERVER"},{x:140,y:675,room:"BIM",kind:"PC"},{x:140,y:860,room:"IT",kind:"PC"},
 {x:535,y:560,room:"CENTRALE",kind:"PC"},{x:940,y:285,room:"SALA MEET",kind:"MEETING"},{x:1135,y:285,room:"INTERIOR",kind:"PC"},{x:1345,y:285,room:"RENDERISTI",kind:"PC"},{x:1010,y:520,room:"SPAZIO A",kind:"MEETING"},
 {x:1120,y:680,room:"RIFUGIO DIGITALE",kind:"PC"},{x:1430,y:650,room:"SALA MEET CAPO",kind:"MEETING"},{x:1020,y:875,room:"CUCINA",kind:"COFFEE"},{x:1290,y:835,room:"STAMPANTI",kind:"PRINTER"}];
 const bosses=["DIREZIONE","PRESIDENZA","CAPO ASSOLUTO"];
@@ -226,16 +248,23 @@ function drawQuestion(category){
 
 
 const npcDefs=[
- {id:"pao",name:"PAO",role:"BIMER",x:140,y:450,homeRoom:"BIM",homeX:140,homeY:450,tone:"mixed",shirt:"#536f8b",hunter:false,speed:58,state:"work"},
- {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:685,y:815,homeRoom:"INGRESSO / SEGRETERIA",homeX:685,homeY:815,tone:"good",shirt:"#765d78",state:"idle"},
- {id:"don",name:"DON",role:"JOLLY",x:895,y:855,homeRoom:"CUCINA",homeX:895,homeY:855,tone:"good",shirt:"#566a51",skin:"#8b5a3c",hair:"#17120f",hunter:true,state:"idle"},{id:"hr",name:"BETTY",role:"HR",x:405,y:205,homeX:405,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:800,homeX:190,homeY:640,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:118,state:"outside"}];
+ {id:"pao",name:"PAO",role:"BIMER",x:140,y:675,homeRoom:"BIM",homeX:140,homeY:675,tone:"mixed",shirt:"#536f8b",hunter:false,speed:58,state:"work"},
+ {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:650,y:805,homeRoom:"INGRESSO / SEGRETERIA",homeX:650,homeY:805,tone:"good",shirt:"#765d78",state:"idle"},
+ {id:"don",name:"DON",role:"JOLLY",x:1045,y:880,homeRoom:"CUCINA",homeX:1045,homeY:880,tone:"good",shirt:"#566a51",skin:"#6b432f",skin:"#8b5a3c",hair:"#17120f",hunter:false,state:"idle"},{id:"hr",name:"BETTY",role:"HR",x:155,y:205,homeX:155,homeY:205,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle",homeRoom:"HR"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:585,y:760,homeX:185,homeY:842,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:118,state:"outside"}];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
 
 let bettySupportCooldown=0,bettyPinged=false,bettyLastStressBand=0;
 const npcRelations={};
-function ensureRelation(n){if(!n||!n.id)return 0;if(npcRelations[n.id]===undefined)npcRelations[n.id]=0;return npcRelations[n.id]}
+function ensureRelation(n){
+ if(!n)return 0;
+ if(typeof n.rapporto!=="number")n.rapporto=v12c4InitialRelation(n);
+ n.rapporto=v12c4ClampRelation(n.rapporto);n.relation=n.rapporto;return n.rapporto;
+}
 function relationTier(n){const v=ensureRelation(n);return v>=45?"friend":v<=-45?"enemy":"neutral"}
-function changeRelation(n,d){if(!n||!n.id)return;ensureRelation(n);npcRelations[n.id]=Math.max(-100,Math.min(100,npcRelations[n.id]+d));toast(`${n.name||"NPC"} // RAPPORTO ${d>0?"+":""}${d}`)}
+function changeRelation(n,delta){
+ if(!n)return 0;
+ n.rapporto=v12c4ClampRelation(ensureRelation(n)+delta);n.relation=n.rapporto;return n.rapporto;
+}
 function relationTicketAdjust(n,level,mins){
  const tier=relationTier(n);
  if(tier==="friend")return {level,mins:Math.round(mins*1.22),stress:0};
@@ -253,6 +282,82 @@ function relationOpening(n){
 }
 
 let ambientNPCs=[];
+
+/* ============================================================
+   V12 CLEAN.4.3 — WORKDAY AI
+   NPCs mostly work at assigned desks and move asynchronously.
+   ============================================================ */
+let v12c43LunchSeats=[];
+
+function v12c43AllWorkers(){
+ return (([...ambientNPCs,...npcs].filter(n=>n&&n.id!=="manager"&&n.id!=="zia"&&n.id!=="hr")).filter(n=>n&&n.id!=="pao"&&n.id!=="don")).filter(n=>n&&n.id!=="mokasa");
+}
+function v12c43EnsureDesk(n){
+ if(!n)return;
+ if(typeof n.deskX!=="number")n.deskX=n.homeX??n.x;
+ if(typeof n.deskY!=="number")n.deskY=n.homeY??n.y;
+ if(!n.homeRoom)n.homeRoom=roomAt(n.deskX,n.deskY)?.name||roomAt(n.x,n.y)?.name||"CENTRALE";
+ if(typeof n.workBias!=="number")n.workBias=0.72+Math.random()*0.14; // 72–86%
+ if(typeof n.activityCooldown!=="number")n.activityCooldown=25+Math.random()*65;
+ if(typeof n.workTimer!=="number")n.workTimer=35+Math.random()*85;
+}
+function v12c43AtDesk(n){
+ v12c43EnsureDesk(n);
+ return Math.hypot(n.x-n.deskX,n.y-n.deskY)<28;
+}
+function v12c43RouteToDesk(n){
+ v12c43EnsureDesk(n);
+ const target={x:n.deskX,y:n.deskY,room:n.homeRoom};
+ n.routeGoal=target;
+ n.route=(v12c44IsPao(n)&&n.homeRoom==="BIM"&&target.room!=="BIM")?v12c44PaoExitRoute(n,target):findNpcPath({x:n.x,y:n.y},target);
+ n.routeIndex=0;
+ n.state="returnDesk";
+}
+function v12c43ShouldStayWorking(n){
+ v12c43EnsureDesk(n);
+ return Math.random()<n.workBias;
+}
+function v12c43InitWorkday(){
+ for(const n of v12c43AllWorkers()){
+   v12c43EnsureDesk(n);
+   n.state="work";
+   n.route=null;
+   n.routeIndex=0;
+   n.workTimer=30+Math.random()*95;
+   n.activityCooldown=30+Math.random()*80;
+ }
+ v12c43BuildLunchSeats();
+}
+function v12c43BuildLunchSeats(){
+ const workers=v12c43AllWorkers();
+ v12c43LunchSeats=[];
+ const left=785,right=1095,topY=705,bottomY=875;
+ const count=workers.length;
+ const perSide=Math.ceil(count/2);
+ const spacing=Math.max(28,Math.min(44,(right-left)/Math.max(1,perSide-1)));
+ for(let i=0;i<count;i++){
+   const side=i<perSide?0:1;
+   const idx=side===0?i:i-perSide;
+   v12c43LunchSeats.push({
+     id:i,
+     x:left+idx*spacing,
+     y:side===0?topY:bottomY,
+     room:"CUCINA"
+   });
+ }
+ workers.forEach((n,i)=>n.lunchSeatId=i);
+}
+function v12c43LunchSeat(n){
+ if(typeof n.lunchSeatId!=="number")return null;
+ return v12c43LunchSeats[n.lunchSeatId]||null;
+}
+function v12c43WorkerCanGenerateTicket(n){
+ if(!n)return false;
+ if(isLunch())return false;
+ if(n.state==="meeting"||n.state==="meetingTravel"||n.state==="bathroom"||n.state==="coffee")return false;
+ return v12c43AtDesk(n);
+}
+
 function spawnAmbient(){
  const seats=stations.filter(s=>["HP Z","MAC"].includes(s.type)&&!["HR","IT","INGRESSO / SEGRETERIA"].includes(s.room));
  const seatY=s=>{if(s.room==="CENTRALE")return s.y+30;if(s.room==="EDITORIA")return s.y+55;if(s.room==="INTERIOR"||s.room==="RENDERISTI")return s.y+58;if(s.room==="BIM")return s.y+48;return s.y+38};
@@ -325,9 +430,15 @@ const V914_LANES={
   ]
 };
 function npcOthers(n){
-  return [...ambientNPCs,...npcs,...(mokasa?[mokasa]:[])].filter(x=>x&&x!==n);
+ return [...ambientNPCs,...npcs].filter(x=>x&&x!==n&&x.id!=="mokasa"&&x.name!=="CAPO");
 }
+
+/* AUDIT removed obsolete v12c43ReservedPaoExit */
+
+
 function npcCanStand(n,x,y){
+ if(n&&n.id!=="hr"&&x>=70&&x<=240&&y>=90&&y<=260)return false;
+ if(v12c44PaoExitReserved(x,y,n))return false;
   if(!walkable(x,y))return false;
   // Keep NPCs from occupying the exact same choke point.
   return !npcOthers(n).some(o=>Math.hypot(o.x-x,o.y-y)<18);
@@ -382,7 +493,19 @@ function nearestNavPoint(p,startRoom,destRoom){
  }
  return null;
 }
+
+function v1ServerLabConnector(from,to){
+ const fr=safeRoom(from,""),tr=safeRoom(to,"");
+ const ok=(fr==="SERVER"&&tr==="SERVER")||(fr==="SERVER"&&tr==="SERVER");
+ if(!ok)return null;
+ return fr==="SERVER"
+ ?[{x:760,y:125,room:"SERVER"},{x:800,y:125,room:"SERVER"},{x:820,y:125,room:"SERVER"},{x:925,y:115,room:"SERVER"}]
+ :[{x:925,y:115,room:"SERVER"},{x:820,y:125,room:"SERVER"},{x:800,y:125,room:"SERVER"},{x:760,y:125,room:"SERVER"}];
+}
+
 function findNpcPath(from,to){
+ const labRoute=v102LabRoute(from,to);if(labRoute)return labRoute;
+ const v1sl=v1ServerLabConnector(from,to);if(v1sl)return v1sl;
  to=safePoint(to,{x:from.x,y:from.y,room:roomAt(from.x,from.y)});
  const startRoom=roomAt(from.x,from.y);
  const declared=safeRoom(to,"");
@@ -436,7 +559,7 @@ const ROOM_EXITS={
  "SPAZIO A":{x:840,y:520},"BAGNI":{x:900,y:625},"RIFUGIO DIGITALE":{x:1100,y:625},"SALA MEET CAPO":{x:1290,y:650},
  "INGRESSO / SEGRETERIA":{x:790,y:718},"CUCINA":{x:970,y:790},"STAMPANTI":{x:1210,y:790}
 };
-function roomAt(x,y){const r=rooms.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);return r?r.name:"CORRIDOIO"}
+/* AUDIT: obsolete roomAt string version removed */
 function corridorRoute(from,to){
  const a=safePoint(from),b=safePoint(to);const out=[];
  // backbone: lower corridor y=705, central vertical x=790, upper corridor y=300.
@@ -456,75 +579,62 @@ function routeViaHub(n,target){
  return findNpcPath({x:n.x,y:n.y},target);
 }
 function moveNpcRoute(n,dt){
- if(!n.route||n.routeIndex>=n.route.length)return true;
- let p=n.route[n.routeIndex];
- if(!p){n.routeIndex++;return n.routeIndex>=n.route.length}
+ if(!n||!Array.isArray(n.route)||!n.route.length)return true;
+ if(n.route.length>80)n.route=n.route.slice(0,80);
+ if(!Number.isFinite(n.routeIndex))n.routeIndex=0;
+ if(n.routeIndex>=n.route.length)return true;
 
- const dx=p.x-n.x,dy=p.y-n.y,d=Math.hypot(dx,dy);
- if(d<5){
-   const free=nextFreeNearbyPoint(n,p);
-   if(free){n.x=free.x;n.y=free.y}
-   else{n.x=p.x;n.y=p.y}
-   n.routeIndex++;n.stuckFor=0;n.blockedFor=0;
-   if(n.routeIndex>=n.route.length){n.currentRoom=roomAt(n.x,n.y)?.name||navAreaAt(n.x,n.y);return true}
-   return false;
+ const p=n.route[n.routeIndex]; if(!v118ValidPoint(p)){n.routeIndex++;return n.routeIndex>=n.route.length;}
+ if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)){
+   n.routeIndex++;
+   return n.routeIndex>=n.route.length;
  }
 
- const step=(n.speed||56)*dt;
+ const dx=p.x-n.x,dy=p.y-n.y;
+ const d=Math.hypot(dx,dy);
+
+ if(!Number.isFinite(d)){
+   n.routeIndex++;
+   return n.routeIndex>=n.route.length;
+ }
+
+ if(d<5){
+   n.x=p.x;n.y=p.y;n.routeIndex++;
+   n.stuckFor=0;n.blockedFor=0;
+   return n.routeIndex>=n.route.length;
+ }
+
+ const step=(n.speed||56)*Math.min(Math.max(dt||0,0),0.035);
  let nx=n.x,ny=n.y;
- // Axis movement first to avoid diagonal clipping.
+
  if(Math.abs(dx)>=Math.abs(dy))nx+=Math.sign(dx)*Math.min(Math.abs(dx),step);
  else ny+=Math.sign(dy)*Math.min(Math.abs(dy),step);
 
- const collisionFree=walkable(nx,ny);
- const peopleFree=!npcOthers(n).some(o=>Math.hypot(o.x-nx,o.y-ny)<15);
+ let blocked=false;
+ if(!walkable(nx,ny))blocked=true;
+ else{
+   const others=npcOthers(n);
+   for(const o of others){
+     if(o&&Math.hypot(o.x-nx,o.y-ny)<14){blocked=true;break}
+   }
+ }
 
- if(collisionFree&&peopleFree){
+ if(!blocked){
    n.x=nx;n.y=ny;n.stuckFor=0;n.blockedFor=0;
  }else{
    n.stuckFor=(n.stuckFor||0)+dt;
-   if(!peopleFree)n.blockedFor=(n.blockedFor||0)+dt;
- }
-
- // First recovery: find a side-step around another NPC.
- if((n.blockedFor||0)>.35){
-   const sidesteps=[
-     {x:n.x+18,y:n.y},{x:n.x-18,y:n.y},
-     {x:n.x,y:n.y+18},{x:n.x,y:n.y-18}
-   ];
-   const free=sidesteps.find(q=>npcCanStand(n,q.x,q.y));
-   if(free){n.x=free.x;n.y=free.y;n.blockedFor=0}
- }
-
- // Second recovery: rebuild route using explicit traffic lane.
- if((n.stuckFor||0)>.9){
-   const goal=n.routeGoal||n.route[n.route.length-1]||{x:n.homeX,y:n.homeY,room:n.homeRoom};
-   const rebuilt=laneFromArea(n,goal);
-   n.route=rebuilt.length?rebuilt:findNpcPath({x:n.x,y:n.y},goal);
-   n.routeIndex=0;n.stuckFor=0;n.blockedFor=0;
- }
-
- // Final recovery after repeated failures: advance to nearest VALID free node,
- // never through a wall and never teleport to destination.
- n.recoveryCount=n.recoveryCount||0;
- if(!n.route||!n.route.length){
-   n.recoveryCount++;
-   if(n.recoveryCount>=2){
-     const candidates=[
-       {x:n.x+24,y:n.y,room:navAreaAt(n.x+24,n.y)},
-       {x:n.x-24,y:n.y,room:navAreaAt(n.x-24,n.y)},
-       {x:n.x,y:n.y+24,room:navAreaAt(n.x,n.y+24)},
-       {x:n.x,y:n.y-24,room:navAreaAt(n.x,n.y-24)}
-     ];
-     const q=candidates.find(c=>npcCanStand(n,c.x,c.y));
-     if(q){n.x=q.x;n.y=q.y}
-     n.recoveryCount=0;
+   if(n.stuckFor>0.9){
+     // Skip impossible waypoint instead of recomputing a path.
+     n.routeIndex++;
+     n.stuckFor=0;n.blockedFor=0;
+     if(n.routeIndex>=n.route.length)return true;
    }
- }else n.recoveryCount=0;
-
- return n.routeIndex>=n.route.length;
+ }
+ return false;
 }
 function generateNpcActivityTicket(n){
+ if(!v12c43WorkerCanGenerateTicket(n))return false;
+ if(n?.id==="don"&&v12cDonLocked())return;
  if(n.activityTicket||tickets.length>=difficultyConfig[difficulty].maxTickets||isLunch())return;
  let p,type,level="LOW";
  if(n.activity==="meeting"){
@@ -560,6 +670,9 @@ const encounterOpeners={
  ]
 };
 function ambientCorridorEncounter(n){
+ if(n?.id==="don"&&v12cDonLocked())return;
+ if(v12cIntroProtected()&&!v12cNpcAllowedDuringIntro(n))return;
+
  if(encounterLock||storyOpen||isLunch()||introStage!=="done"||n.activity==="bathroom"||n.activity==="coffee")return;
  if((n.lastEncounter??-999)+75>state.min)return;
  if(Math.hypot(player.x-n.x,player.y-n.y)>58)return;
@@ -575,30 +688,21 @@ function ambientCorridorEncounter(n){
  })},850);
 }
 function updateAmbient(dt){
- if(isLunch())return; // lunch positions are controlled absolutely by updateLunchState()
+ if(isLunch())return;
  for(const n of ambientNPCs){
-   if(n.id==="hr"){n.state="work";n.x=n.homeX;n.y=n.homeY;continue}
-   n.timer-=dt;
-   if(n.state==="work"&&n.timer<=0){
-     const r=Math.random();
-     n.activity=r<.24?"coffee":r<.44?"meeting":r<.61?"printer":r<.72?"gallery":r<.82?"bathroom":"wander";
-     if(n.activity==="wander"){n.timer=8+Math.random()*16;continue}
-     n.target=npcDestinationForActivity(n,n.activity);
-     n.routeGoal={...n.target};n.route=routeViaHub(n,n.target);n.routeIndex=0;n.state="activityTravel";n.activityTicket=false;
-   }else if(n.state==="activityTravel"){
+   if(n.id==="pao"||n.id==="don")continue;
+   if(n.id==="pao"||n.id==="don")continue;
+   if(n.state==="specialRoam"||n.state==="specialPause")continue;
+   if(!v12c44ManagedWorker(n))continue;
+   if(n.state==="activityTravel"){
      ambientCorridorEncounter(n);
      if(moveNpcRoute(n,dt)){n.state="activity";n.timer=10+Math.random()*14}
    }else if(n.state==="activity"){
-     if(n.activity==="meeting"&&n.timer<8&&!n.activityTicket&&Math.random()<.27)generateNpcActivityTicket(n); else if(n.activity!=="meeting"&&n.activity!=="bathroom"&&n.activity!=="coffee"&&n.timer<7&&!n.activityTicket&&Math.random()<.05)generateNpcActivityTicket(n);
-     if(n.timer<=0){
-       releaseMeetingSeat(n);n.state="return";n.routeGoal={x:n.homeX,y:n.homeY,room:n.homeRoom};n.route=buildRoute(n,false);n.routeIndex=0;
-     }
-   }else if(n.state==="return"){
-     if(moveNpcRoute(n,dt)){
-  const home=nextFreeNearbyPoint(n,{x:n.homeX,y:n.homeY,room:n.homeRoom});
-  if(home){n.x=home.x;n.y=home.y}
-  n.state="work";n.activity=null;n.timer=20+Math.random()*45;
-}
+     n.timer=(n.timer??10)-dt;
+     if(n.activity==="meeting"&&n.timer<8&&!n.activityTicket&&Math.random()<.08)generateNpcActivityTicket(n);
+     if(n.timer<=0){releaseMeetingSeat(n);v12c43RouteToDesk(n)}
+   }else if(["return","idle","wander"].includes(n.state)){
+     v12c43RouteToDesk(n);
    }
  }
 }
@@ -608,6 +712,8 @@ let pendingOffers={};
 let firstCarryTriggered=false;
 
 function pokemonEncounter(n){
+ if(!n||n.id==="mokasa"||n.name==="CAPO")return;
+ if(!n||n.id==="mokasa")return;
  if(encounterLock)return;
  encounterLock=true;
  n.seeking=false;
@@ -657,22 +763,22 @@ function makeCarryMission(){
    m={label:"CONSEGNA",item:"TONER",pickup:{x:1210,y:805,room:"STAMPANTI"},to:{x:1260,y:805,room:"STAMPANTI"},targetType:"printer"};
  }else if(r<.28){
    const rec=availableRecipient("CENTRALE");
-   m={label:"CONSEGNA",item:"CHIAVETTA USB",pickup:{x:160,y:640,room:"IT"},to:{x:rec.x,y:rec.y,room:"CENTRALE"},recipient:rec,targetType:"npc"};
+   m={label:"CONSEGNA",item:"CHIAVETTA USB",pickup:{x:160,y:840,room:"IT"},to:{x:rec.x,y:rec.y,room:"CENTRALE"},recipient:rec,targetType:"npc"};
  }else if(r<.43){
    const rec=availableRecipient();
-   m={label:"ASSEGNAZIONE",item:"CUFFIE",pickup:{x:115,y:640,room:"IT"},to:{x:rec.x,y:rec.y,room:"POSTAZIONE"},recipient:rec,targetType:"npc"};
+   m={label:"ASSEGNAZIONE",item:"CUFFIE",pickup:{x:115,y:840,room:"IT"},to:{x:rec.x,y:rec.y,room:"POSTAZIONE"},recipient:rec,targetType:"npc"};
  }else if(r<.58){
-   m={label:"CONSEGNA",item:"ADATTATORE USB-C / HDMI",pickup:{x:200,y:640,room:"IT"},to:{x:925,y:205,room:"SALA MEET"},targetType:"meeting"};
+   m={label:"CONSEGNA",item:"ADATTATORE USB-C / HDMI",pickup:{x:650,y:220,room:"SERVER"},to:{x:925,y:205,room:"SALA MEET"},targetType:"meeting"};
  }else if(r<.72){
    const rec=availableRecipient("CENTRALE");
-   m={label:"CONSEGNA",item:"MOUSE USB",pickup:{x:185,y:640,room:"IT"},to:{x:rec.homeX,y:rec.homeY,room:"CENTRALE"},recipient:rec,targetType:"npc"};
+   m={label:"CONSEGNA",item:"MOUSE USB",pickup:{x:150,y:825,room:"IT"},to:{x:rec.homeX,y:rec.homeY,room:"CENTRALE"},recipient:rec,targetType:"npc"};
  }else if(r<.84){
    const rec=availableRecipient();
-   m={label:"CONSEGNA",item:"TASTIERA USB",pickup:{x:150,y:640,room:"IT"},to:{x:rec.homeX,y:rec.homeY,room:"POSTAZIONE"},recipient:rec,targetType:"npc"};
+   m={label:"CONSEGNA",item:"TASTIERA USB",pickup:{x:150,y:840,room:"IT"},to:{x:rec.homeX,y:rec.homeY,room:"POSTAZIONE"},recipient:rec,targetType:"npc"};
  }else if(r<.93){
-   m={label:"CONSEGNA",item:"CAVO ETHERNET",pickup:{x:205,y:640,room:"IT"},to:{x:640,y:190,room:"SERVER"},targetType:"server"};
+   m={label:"CONSEGNA",item:"CAVO ETHERNET",pickup:{x:150,y:825,room:"IT"},to:{x:640,y:190,room:"SERVER"},targetType:"server"};
  }else{
-   m={label:"CONSEGNA",item:"ALIMENTATORE",pickup:{x:180,y:640,room:"IT"},to:{x:1030,y:480,room:"SPAZIO A"},targetType:"meeting"};
+   m={label:"CONSEGNA",item:"ALIMENTATORE",pickup:{x:150,y:825,room:"IT"},to:{x:1030,y:480,room:"SPAZIO A"},targetType:"meeting"};
  }
  m.stage="pickup";
  return m;
@@ -683,7 +789,7 @@ function startTutorialCarryMission(){
  carryMission={
    label:"ASSEGNAZIONE",
    item:"CUFFIE",
-   pickup:{x:115,y:640,room:"IT"},
+   pickup:{x:115,y:840,room:"IT"},
    to:{x:rec.x,y:rec.y,room:"POSTAZIONE"},
    recipient:rec,
    targetType:"npc",
@@ -710,37 +816,14 @@ function carryTarget(){
  }
  return carryMission.to;
 }
-function interactCarry(){
- if(!carryMission)return false;
- const target=carryTarget();
- if(!target||Math.hypot(player.x-target.x,player.y-target.y)>72)return false;
+/* AUDIT removed obsolete interactCarry */
 
- if(carryMission.stage==="pickup"){
-   if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
-   inventory.push(carryMission.item);
-   carryMission.stage="deliver";
-   updateInventoryUI();
-   const dest=carryMission.recipient?`${carryMission.recipient.name}`:safeRoom(carryMission.to,"POSTAZIONE");
-   phoneMessage("IT TASK",`${carryMission.item} raccolto. Consegnalo a ${dest}.`);
-   return true;
- }
-
- const idx=inventory.indexOf(carryMission.item);
- if(idx<0){toast("NON HAI L'OGGETTO RICHIESTO");return true}
- inventory.splice(idx,1);
- state.xp+=180;state.solved++;state.stress=Math.max(0,state.stress-3);
- const recipient=carryMission.recipient?` A ${carryMission.recipient.name}`:"";
- toast(`CONSEGNA COMPLETATA${recipient} // +180 XP`);
- carryMission=null;
- updateInventoryUI();
- return true;
-}
 function carryPrompt(){
  if(!carryMission)return null;
  const target=carryTarget();
  if(!target||Math.hypot(player.x-target.x,player.y-target.y)>95)return null;
- if(carryMission.stage==="pickup")return `E — RACCOGLI ${carryMission.item}`;
- return carryMission.recipient?`E — CONSEGNA ${carryMission.item} A ${carryMission.recipient.name}`:`E — CONSEGNA ${carryMission.item}`;
+ if(carryMission.stage==="pickup")return `F — PRENDI ${carryMission.item}`;
+ return carryMission.recipient?`G — CONSEGNA ${carryMission.item} A ${carryMission.recipient.name}`:`G — CONSEGNA ${carryMission.item}`;
 }
 
 
@@ -753,17 +836,28 @@ function eventNPC(name){return [...npcs,...ambientNPCs].find(n=>n.name===name||n
 function eventFreeNPCs(count=2){
  return ambientNPCs.filter(n=>n.state==="work"&&!n.eventCarry).sort(()=>Math.random()-.5).slice(0,count);
 }
+
+let v114AmazonIntroShown=false;
+function v114AmazonIntroOnce(){
+ if(!studioEvent||studioEvent.type!=="AMAZON")return false;
+ if(v114AmazonIntroShown)return false;
+ v114AmazonIntroShown=true;
+ return true;
+}
 function startAmazonEvent(){
+ v114AmazonIntroShown=false;
  if(studioEvent||introStage!=="done"||isLunch())return false;
  const helpers=eventFreeNPCs(3);
  const packages=[
-  {id:"AMZ-IT-1",label:"PACCO IT // CAVI",owner:"PLAYER",x:705,y:800,to:{x:150,y:610,room:"IT"},taken:false,done:false},
-  {id:"AMZ-IT-2",label:"PACCO IT // PERIFERICHE",owner:"PLAYER",x:730,y:800,to:{x:190,y:610,room:"IT"},taken:false,done:false},
+  {id:"AMZ-IT-1",label:"PACCO IT // CAVI",owner:"PLAYER",x:705,y:800,to:{x:700,y:220,room:"SERVER"},taken:false,done:false},
+  {id:"AMZ-IT-2",label:"PACCO IT // PERIFERICHE",owner:"PLAYER",x:730,y:800,to:{x:700,y:220,room:"SERVER"},taken:false,done:false},
   ...helpers.map((n,i)=>({id:"AMZ-NPC-"+i,label:"PACCO "+n.name,owner:n.id,x:755+i*22,y:800,to:{x:n.homeX,y:n.homeY,room:n.homeRoom},taken:false,done:false}))
  ];
  studioEvent={id:"amazon-"+(++eventSerial),type:"AMAZON",title:"CONSEGNA AMAZON",stage:"pickup",packages,helpers,started:state.min};
- showMissionBanner("PACCHI IN INGRESSO","Zia Ale ha ricevuto una consegna. Ritira i 2 pacchi destinati al REPARTO IT.","2 PACCHI IT // +240 XP","EVENTO STUDIO");
- storyDialog("ZIA ALE","Sono arrivati i pacchi Amazon. Gli altri prendono i loro: questi due sono per il Reparto IT.",()=>{});
+ showMissionBanner("PACCHI IN INGRESSO","Zia Ale ha ricevuto una consegna. Ritira i 2 pacchi IT e depositali nel SERVER / MAGAZZINO IT.","2 PACCHI IT // +240 XP","EVENTO STUDIO");
+ const amazonMsg="Sono arrivati i pacchi Amazon. Gli altri prendono i loro: questi due sono per il Magazzino IT.";
+ // 1.0.16: Amazon is a non-blocking notification. Never set storyOpen.
+ phoneMessage("ZIA ALE",amazonMsg);
  helpers.forEach((n,i)=>{
    const p=packages.find(p=>p.owner===n.id);if(!p)return;
    n.eventCarry=p.id;n.state="eventPickup";n.routeGoal={x:p.x,y:p.y,room:"INGRESSO / SEGRETERIA"};
@@ -772,31 +866,129 @@ function startAmazonEvent(){
  showStudioEventHud("CONSEGNA AMAZON","0/2 pacchi IT consegnati");
  return true;
 }
+
+/* ============================================================
+   V12 CLEAN.4.2 — MEETING EVENT STATE MACHINE
+   IDLE -> ANNOUNCED -> PICKUP -> DELIVER -> COMPLETED/FAILED
+   ============================================================ */
+let v12c42MeetingState="IDLE";
+let v12c42MeetingLateWarned=false;
+let v12c42MeetingQueued=false;
+let v12c42MeetingDeferredStart=false;
+
+function v12c42MeetingActive(){
+  return ["ANNOUNCED","PICKUP","DELIVER"].includes(v12c42MeetingState);
+}
+function v12c42MeetingClosed(){
+  return ["COMPLETED","FAILED"].includes(v12c42MeetingState);
+}
+function v12c42MeetingBusyUi(){
+  return !!(activeMiniGame || !$("#modal")?.classList.contains("hidden"));
+}
+function v12c42MeetingNotify(title,text){
+  if(typeof showStudioEventHud==="function")showStudioEventHud(title,text);
+  else if(typeof sideMessage==="function")sideMessage(title,text);
+  else toast(`${title} // ${text}`);
+}
+function v12c42MeetingStart(){
+  if(!v12c42CanGenerateWork())return false;
+  if(v12c42MeetingActive() || v12c42MeetingClosed())return false;
+  if(studioEvent && studioEvent.type==="MEETING_RUSH")return false;
+
+  // If player is inside a task/minigame, defer until it closes.
+  if(v12c42MeetingBusyUi()){
+    v12c42MeetingQueued=true;
+    v12c42MeetingDeferredStart=true;
+    v12c42MeetingNotify("MEETING TRA 2 MINUTI","Evento accodato: termina prima l'intervento corrente.");
+    return false;
+  }
+
+  v12c42MeetingState="ANNOUNCED";
+  v12c42MeetingLateWarned=false;
+  studioEvent={
+    id:"meet-"+(++eventSerial),
+    type:"MEETING_RUSH",
+    title:"MEETING TRA 2 MINUTI",
+    stage:"pickup",
+    started:state.min,
+    pickup:{x:650,y:220,room:"SERVER"},
+    to:{x:925,y:205,room:"SALA MEET"},
+    item:"EXTENDER HDMI",
+    carried:false,
+    completed:false,
+    failed:false,
+    lateWarned:false
+  };
+  v12c42MeetingNotify("MEETING TRA 2 MINUTI","Recupera l'EXTENDER HDMI nel SERVER / MAGAZZINO IT e portalo in SALA MEET.");
+  v12c42MeetingState="PICKUP";
+  return true;
+}
+
+function v12c42MeetingUpdate(){
+  if(!v12c42CanGenerateWork())return;
+
+  if(v12c42MeetingQueued && !v12c42MeetingBusyUi() && !v12c42MeetingActive()){
+    v12c42MeetingQueued=false;
+    v12c42MeetingStart();
+  }
+
+  const ev=studioEvent;
+  if(!ev || ev.type!=="MEETING_RUSH")return;
+
+  if(ev.completed){
+    v12c42MeetingState="COMPLETED";
+    return;
+  }
+  if(ev.failed){
+    v12c42MeetingState="FAILED";
+    return;
+  }
+
+  const elapsed=state.min-ev.started;
+
+  // One late warning only; warning never blocks and never changes the state loop.
+  if(elapsed>=8 && !ev.carried && !v12c42MeetingLateWarned){
+    v12c42MeetingLateWarned=true;
+    ev.lateWarned=true;
+    v12c42MeetingNotify("MEETING URGENTE","Sei in ritardo: EXTENDER HDMI ancora nel SERVER / MAGAZZINO IT.");
+  }
+
+  // Hard fail only after real timeout.
+  if(elapsed>=18 && !ev.completed){
+    ev.failed=true;
+    v12c42MeetingState="FAILED";
+    state.stress=Math.min(100,state.stress+6);
+    v12c42MeetingNotify("MEETING PERSO","La sala è partita senza l'EXTENDER HDMI.");
+    studioEvent=null;
+    return;
+  }
+
+  v12c42MeetingState=ev.carried?"DELIVER":"PICKUP";
+}
+
 function startMeetingRushEvent(){
- if(studioEvent||introStage!=="done"||isLunch())return false;
- studioEvent={id:"meet-"+(++eventSerial),type:"MEETING_RUSH",title:"MEETING TRA 2 MINUTI",stage:"pickup",
-   item:"EXTENDER HDMI",pickup:{x:200,y:610,room:"IT"},to:{x:925,y:220,room:"SALA MEET"},started:state.min,carried:false};
- showMissionBanner("MEETING TRA 2 MINUTI","Recupera l'EXTENDER HDMI in IT e portalo in SALA MEET.","TEMPO LIMITATO // +220 XP","EVENTO STUDIO");
- phoneMessage("ZIA ALE","Sala Meet: stanno iniziando e manca l'extender HDMI.");
- showStudioEventHud("MEETING URGENTE","Prendi EXTENDER HDMI in IT");
- return true;
+  return v12c42MeetingStart();
 }
 function startDeskSetupEvent(){
  if(studioEvent||introStage!=="done"||isLunch())return false;
  const rec=availableRecipient();
  if(!rec)return false;
+ const from={x:175,y:810,room:"REPARTO IT",label:"POSTAZIONE IT // PC DA SPOSTARE"};
+ const to={x:rec.homeX,y:rec.homeY,room:rec.homeRoom,label:`POSTAZIONE ${rec.name}`};
  studioEvent={id:"desk-"+(++eventSerial),type:"DESK_SETUP",title:"CAMBIO POSTAZIONE",stage:"pickup",
-   item:"MONITOR",pickup:{x:175,y:610,room:"IT"},to:{x:rec.homeX,y:rec.homeY,room:rec.homeRoom},recipient:rec,started:state.min,carried:false};
- showMissionBanner("CAMBIO POSTAZIONE",`${rec.name} ha bisogno di un monitor. Prendilo in IT e portalo alla sua postazione.`,"+200 XP · RAPPORTO +5","EVENTO STUDIO");
- phoneMessage(rec.name,"Mi spostano di postazione. Quando puoi mi porti un monitor?");
- showStudioEventHud("CAMBIO POSTAZIONE",`MONITOR → ${rec.name}`);
+   item:"PC",pickup:from,from,to,recipient:rec,started:state.min,carried:false};
+ showMissionBanner("CAMBIO POSTAZIONE",`${rec.name} cambia postazione. Vai al REPARTO IT, prendi il PC dalla postazione indicata con F e portalo alla postazione di ${rec.name} (${rec.homeRoom}); installalo con G.`,"+200 XP · RAPPORTO +5","EVENTO STUDIO");
+ phoneMessage(rec.name,`Cambio postazione: prendi il PC in REPARTO IT e portalo da me in ${rec.homeRoom}.`);
+ showStudioEventHud("CAMBIO POSTAZIONE",`F: PRENDI PC // REPARTO IT → ${rec.name} // ${rec.homeRoom}`);
  return true;
 }
 function maybeStartStudioEvent(){
+ if(activeMiniGame||!$("#modal")?.classList.contains("hidden"))return;
+ if(!v12c42CanGenerateWork())return;
  if(studioEvent||introStage!=="done"||state.min<studioEventNext||isLunch())return;
  const r=Math.random();
  if(state.min<690)startAmazonEvent();
- else if(r<.48)startMeetingRushEvent();
+ else if(r<.48&&!v12c42MeetingActive()&&!v12c42MeetingClosed())startMeetingRushEvent();
  else if(r<.82)startDeskSetupEvent();
  else startAmazonEvent();
  studioEventNext=state.min+85+Math.random()*75;
@@ -810,42 +1002,18 @@ function studioEventTarget(){
  }
  return studioEvent.stage==="pickup"?studioEvent.pickup:studioEvent.to;
 }
-function interactStudioEvent(){
- if(!studioEvent)return false;
- const t=studioEventTarget();if(!t||Math.hypot(player.x-t.x,player.y-t.y)>72)return false;
- if(studioEvent.type==="AMAZON"){
-   const p=studioEvent.packages.find(p=>p.owner==="PLAYER"&&!p.done&&(p.taken||Math.hypot(player.x-p.x,player.y-p.y)<=72));
-   if(!p)return false;
-   if(!p.taken){
-     if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
-     p.taken=true;inventory.push(p.label);updateInventoryUI();showStudioEventHud("CONSEGNA AMAZON",`Porta ${p.label} nel REPARTO IT`);return true;
-   }
-   const ix=inventory.indexOf(p.label);if(ix>=0)inventory.splice(ix,1);p.done=true;updateInventoryUI();
-   const done=studioEvent.packages.filter(x=>x.owner==="PLAYER"&&x.done).length;
-   showStudioEventHud("CONSEGNA AMAZON",`${done}/2 pacchi IT consegnati`);
-   if(done>=2){state.xp+=240;state.solved++;dayFlags.carryCompleted=(dayFlags.carryCompleted||0)+1;showRewardResult("EVENTO COMPLETATO",["PACCHI IT CONSEGNATI","XP +240","ZIA ALE RAPPORTO +4"],"success");const z=eventNPC("zia");if(z)changeRelation(z,4);studioEvent=null;hideStudioEventHud();updateTaskProgress()}
-   return true;
- }
- if(studioEvent.stage==="pickup"){
-   if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
-   inventory.push(studioEvent.item);studioEvent.carried=true;studioEvent.stage="deliver";updateInventoryUI();
-   showStudioEventHud(studioEvent.title,`Consegna ${studioEvent.item} → ${studioEvent.recipient?.name||safeRoom(studioEvent.to,"DESTINAZIONE")}`);return true;
- }
- const ix=inventory.indexOf(studioEvent.item);if(ix>=0)inventory.splice(ix,1);
- const ev=studioEvent;studioEvent=null;updateInventoryUI();hideStudioEventHud();
- const xp=ev.type==="MEETING_RUSH"?220:200;state.xp+=xp;state.solved++;
- if(ev.recipient)changeRelation(ev.recipient,5);
- showRewardResult("EVENTO COMPLETATO",[ev.title,`XP +${xp}`,ev.recipient?`${ev.recipient.name} RAPPORTO +5`:"MEETING PRONTO"],"success");updateTaskProgress();return true;
-}
+/* AUDIT removed obsolete interactStudioEvent */
+
 function studioEventPrompt(){
  const t=studioEventTarget();if(!t||Math.hypot(player.x-t.x,player.y-t.y)>92)return null;
  if(studioEvent.type==="AMAZON"){
   const p=studioEvent.packages.find(p=>p.owner==="PLAYER"&&!p.done&&(p.taken||Math.hypot(player.x-p.x,player.y-p.y)<=92));
-  return p?(p.taken?`E — CONSEGNA ${p.label}`:`E — PRENDI ${p.label}`):null;
+  return p?(p.taken?`G — CONSEGNA ${p.label}`:`F — PRENDI ${p.label}`):null;
  }
- return studioEvent.stage==="pickup"?`E — PRENDI ${studioEvent.item}`:`E — CONSEGNA ${studioEvent.item}`;
+ return studioEvent.stage==="pickup"?`F — PRENDI ${studioEvent.item}`:`G — CONSEGNA ${studioEvent.item}`;
 }
 function updateStudioEvent(dt){
+ v12c42MeetingUpdate();
  if(!studioEvent)return;
  if(studioEvent.type==="AMAZON"){
   for(const n of studioEvent.helpers){
@@ -857,9 +1025,7 @@ function updateStudioEvent(dt){
    }
   }
  }
- if(studioEvent.type==="MEETING_RUSH"&&state.min-studioEvent.started>8&&!studioEvent.carried){
-   state.stress+=5;showStudioEventHud("MEETING URGENTE","Sei in ritardo: EXTENDER HDMI ancora in IT");
- }
+ if(false){/* V12 CLEAN.4.2 old repeating meeting warning disabled */}
 }
 function drawStudioEventObjects(){
  if(!studioEvent)return;
@@ -871,9 +1037,33 @@ function drawStudioEventObjects(){
   }
   for(const n of studioEvent.helpers){if(n.eventCarry){g.fillStyle="#b9874d";g.fillRect(n.x-9,n.y-2,18,13)}}
  }
+ if(studioEvent.type==="DESK_SETUP"){
+   const t=studioEvent.carried?studioEvent.to:studioEvent.pickup;
+   if(t){
+     const pulse=7+Math.sin(performance.now()/180)*2;
+     g.save();g.strokeStyle="#ffd65a";g.lineWidth=3;g.strokeRect(t.x-18-pulse/2,t.y-14-pulse/2,36+pulse,28+pulse);
+     g.fillStyle="#ffd65a";g.font="bold 9px monospace";g.textAlign="center";
+     g.fillText(studioEvent.carried?`G // INSTALLA PC DA ${studioEvent.recipient?.name||"DESTINAZIONE"}`:"F // PRENDI PC",t.x,t.y-24);
+     g.restore();
+   }
+ }
+}
+
+function v12c4ClampRelation(v){return Math.max(-5,Math.min(5,Math.round(v)))}
+function v12c4InitialRelation(n){
+ if(!n)return 0;
+ if(n.id==="zia")return 2+Math.floor(Math.random()*4);
+ if(n.id==="manager")return -2+Math.floor(Math.random()*4);
+ if(n.id==="hr"||n.name==="BETTY")return 2+Math.floor(Math.random()*4);
+ if(n.id==="don"||n.name==="DON")return 3+Math.floor(Math.random()*3);
+ if(n.id==="pao"||n.name==="PAO")return -5+Math.floor(Math.random()*11);
+ return -5+Math.floor(Math.random()*11);
+}
+function v12c4InitRelations(){
+ for(const n of [...ambientNPCs,...npcs,...(mokasa?[mokasa]:[])]){if(!n)continue;n.rapporto=v12c4InitialRelation(n);n.relation=n.rapporto}
 }
 function spawnNPCs(){
- npcs=npcDefs.map(n=>({...n}));spawnAmbient();mokasa={id:"mokasa",name:"CAPO",role:"DIREZIONE",x:1435,y:555,homeRoom:"SALA MEET CAPO",homeX:1435,homeY:555,tone:"bad",shirt:"#75483d",life:Infinity,court:false};npcCooldown={};mokasaTimer=0;lastZiaHour=-1;
+ npcs=npcDefs.map(n=>({...n}));spawnAmbient();v12c43InitWorkday();mokasa={id:"mokasa",name:"CAPO",role:"DIREZIONE",x:1435,y:555,homeRoom:"SALA MEET CAPO",homeX:1435,homeY:555,tone:"bad",shirt:"#75483d",life:Infinity,court:true,hunter:false,seeking:false,state:"bossIdle",route:null,routeIndex:0,stuckFor:0,blockedFor:0};npcCooldown={};mokasaTimer=0;lastZiaHour=-1;
  lastPlayerPos={x:player.x,y:player.y};idleMinutes=0;
 }
 
@@ -895,10 +1085,46 @@ function v12cNpcCanSeePlayer(n,maxDist=100){
  return !v12cSegmentBlocked(n.x,n.y,player.x,player.y);
 }
 
+
+/* V12 CLEAN.1 — Intro protection zone
+   During entrance/manager intro only Zia Ale and IT Manager may react. */
+
+/* V12 CLEAN.2 — HARD DON INTRO LOCK */
+function v12cDonLocked(){
+ return introStage!=="done" || !managerRaceDone;
+}
+function v12cApplyDonLock(){
+ const don=npcs.find(n=>n.id==="don");
+ if(!don)return;
+ if(v12cDonLocked()){
+   don.hunter=false;
+   don.state="idle";
+   don.route=null;
+   don.routeIndex=0;
+   don.activity=null;
+   don.activityTicket=false;
+   don.exclaimUntil=0;
+ }else{
+   don.hunter=true;
+ }
+}
+
+function v12cIntroProtected(){
+ return introStage!=="done" || !enteredStudio;
+}
+function v12cNpcAllowedDuringIntro(n){
+ if(!n)return false;
+ if(!v12cIntroProtected())return true;
+ return n.id==="zia" || n.id==="manager";
+}
+
 function nearestNPC(){
  let best=null,bd=999;
- for(const n of [...ambientNPCs,...npcs,...(mokasa?[mokasa]:[])]){
-   if(!n||!v12cNpcCanSeePlayer(n,110))continue;
+ const pool=[...ambientNPCs,...npcs];
+ if(mokasa&&Math.hypot(player.x-mokasa.x,player.y-mokasa.y)<65)pool.push(mokasa);
+ for(const n of pool){
+   if(!n||!v12cNpcAllowedDuringIntro(n))continue;
+   if(typeof v12cNpcCanSeePlayer==="function"&&!v12cNpcCanSeePlayer(n,110))continue;
    const d=Math.hypot(n.x-player.x,n.y-player.y);
    if(d<bd){best=n;bd=d}
  }
@@ -906,21 +1132,12 @@ function nearestNPC(){
 }
 
 function updateCapoRoutine(dt){
- if(!mokasa||introStage!=="done")return;
- mokasa.life=Infinity;
- if(isLunch()){
-   if(mokasa.state!=="capoHome"){mokasa.state="capoHome";mokasa.route=findNpcPath({x:mokasa.x,y:mokasa.y},{x:mokasa.homeX,y:mokasa.homeY,room:"SALA MEET CAPO"});mokasa.routeIndex=0}
- }else{
-   mokasa.capoTimer=(mokasa.capoTimer??45)-dt;
-   if((!mokasa.route||mokasa.routeIndex>=mokasa.route.length)&&mokasa.capoTimer<=0){
-     const opts=Math.random()<.62?
-       [{x:1435,y:555,room:"SALA MEET CAPO"},{x:925,y:220,room:"SALA MEET"}]:
-       [{x:1435,y:555,room:"SALA MEET CAPO"},{x:1030,y:480,room:"SPAZIO A"}];
-     const target=opts[Math.floor(Math.random()*opts.length)];
-     mokasa.routeGoal={...target};mokasa.route=findNpcPath({x:mokasa.x,y:mokasa.y},target);mokasa.routeIndex=0;mokasa.state="capoTravel";mokasa.capoTimer=38+Math.random()*55;
-   }
- }
- if(mokasa.route&&mokasa.routeIndex<mokasa.route.length)moveNpcRoute(mokasa,dt);
+ if(!mokasa)return;
+ mokasa.x=1435;mokasa.y=555;
+ mokasa.homeX=1435;mokasa.homeY=555;
+ mokasa.route=null;mokasa.routeIndex=0;
+ mokasa.state="bossIdle";mokasa.seeking=false;mokasa.court=true;
+ return;
 }
 function spawnMokasa(){
  if(Math.random()<.28){
@@ -940,38 +1157,104 @@ function autoCloseModal(ms=2200){
  },ms);
 }
 function createPendingOffer(n){
- if(pendingOffers[n.id])return;
- let offer;
+ if(!n||pendingOffers[n.id])return;
+ let offer=null;
  if(n.id==="pao"){
    const opts=[
-    {title:"CAFFÈ",stress:-8,xp:4,text:"Ho un caffè e due minuti di tregua."},
-    {title:"CALCIO",stress:-6,xp:6,text:"Due chiacchiere sul calcio."},
-    {title:"RASSINA",stress:-7,xp:5,text:"Ti devo raccontare una cosa."}
+    {title:"CAFFÈ CON PAO",stress:-8,xp:20,text:"Quando puoi vieni a cercarmi. Ti offro un caffè."},
+    {title:"DRITTA DI PAO",stress:-6,xp:35,text:"Quando puoi passa da me. Ho una dritta per te."},
+    {title:"FIORENTINA",stress:-7,xp:15,text:"Quando mi trovi facciamo due chiacchiere sulla Fiorentina."}
    ];
    offer=opts[Math.floor(Math.random()*opts.length)];
  }else if(n.id==="don"){
+   if(typeof v12cDonLocked==="function"&&v12cDonLocked())return;
    const opts=[
-    {title:"SIGARETTA",stress:-11,xp:3,text:"Ti porto fuori due minuti."},
-    {title:"CAFFÈ",stress:-8,xp:4,text:"Passa da me quando mi vedi."},
-    {title:"CHIACCHIERE",stress:-6,xp:5,text:"Ho una cosa da dirti."}
+    {title:"DON TI COPRE",stress:-12,xp:30,text:"Quando mi trovi passa da me. Ti copro io un attimo."},
+    {title:"PAUSA CON DON",stress:-9,xp:25,text:"Quando puoi vieni a cercarmi."},
+    {title:"DRITTA DI DON",stress:-7,xp:40,text:"Ho una cosa utile da dirti. Passa da me."}
    ];
    offer=opts[Math.floor(Math.random()*opts.length)];
  }else if(n.id==="zia"){
    const opts=[
-    {title:"CAFFÈ",stress:-10,xp:2,text:"Quando puoi passa da me in Segreteria."},
-    {title:"PILLOLA DI SAGGEZZA",rep:1,text:"Quando puoi passa da me in Segreteria."},
-    {title:"TI COPRO IO",time:12,text:"Quando puoi passa da me in Segreteria."}
+    {title:"CAFFÈ",stress:-10,xp:10,text:"Quando puoi passa da me in Segreteria."},
+    {title:"PILLOLA DI SAGGEZZA",rep:1,xp:10,text:"Quando puoi passa da me in Segreteria."},
+    {title:"TI COPRO IO",time:12,xp:10,text:"Quando puoi passa da me in Segreteria."}
    ];
    offer=opts[Math.floor(Math.random()*opts.length)];
+ }else if(n.id==="hr"){
+   const band=typeof bettyStressBand==="function"?bettyStressBand():0;
+   offer=band>=3
+     ? {title:"SUPPORTO HR",stress:-24,rep:1,xp:80,text:"Passa da me in HR. Ti copro io cinque minuti."}
+     : band>=2
+     ? {title:"SUPPORTO HR",stress:-16,xp:45,text:"Quando hai un minuto passa in HR."}
+     : {title:"CHECK HR",stress:-9,xp:15,text:"Quando puoi passa da me in HR."};
  }else return;
+
  pendingOffers[n.id]=offer;
  phoneMessage(n.name,offer.text);
- if(n.id==="don"){
-   n.seeking=true;n.seekFor=16;n.lastHunt=state.min;
+}
+
+/* VERSIONE1ITSHIFT 1.0.18 — runtime fixes from console evidence */
+
+function sideMessage(name,text){
+ try{
+   const box=document.getElementById("phoneNotification");
+   const sender=document.getElementById("phoneSender");
+   const body=document.getElementById("phoneText");
+   if(sender)sender.textContent=String(name||"MESSAGGIO");
+   if(body)body.textContent=String(text||"");
+   if(box){
+     box.classList.remove("hidden");
+     clearTimeout(box.__v118Hide);
+     box.__v118Hide=setTimeout(()=>box.classList.add("hidden"),5000);
+     return true;
+   }
+   if(typeof toast==="function"){
+     toast(`${name||"MESSAGGIO"} // ${text||""}`);
+     return true;
+   }
+ }catch(e){
+   console.warn("sideMessage:",e);
+ }
+ return false;
+}
+
+function activityDestination(n,kind){
+ if(!n)return null;
+ const home={
+   x:Number.isFinite(n.homeX)?n.homeX:(Number.isFinite(n.x)?n.x:400),
+   y:Number.isFinite(n.homeY)?n.homeY:(Number.isFinite(n.y)?n.y:400),
+   room:String(n.homeRoom||"CENTRALE")
+ };
+ const targets={
+   coffee:{x:1015,y:805,room:"CUCINA"},
+   printer:{x:1210,y:780,room:"STAMPANTI"},
+   bathroom:{x:995,y:575,room:"BAGNI"},
+   meeting:{x:900,y:225,room:"SALA MEET"},
+   wander:home
+ };
+ const key=String(kind||"").toLowerCase();
+ const t=targets[key]||home;
+ return {x:t.x,y:t.y,room:t.room};
+}
+
+function v118ValidPoint(p){
+ return !!(p&&Number.isFinite(p.x)&&Number.isFinite(p.y));
+}
+
+let v118RuntimeErrors=0;
+function v118SafeCall(label,fn){
+ try{return fn()}
+ catch(e){
+   v118RuntimeErrors++;
+   console.error(`ITSHIFT SAFE FRAME // ${label}`,e);
+   if(typeof v117Trace==="function")v117Trace("ERROR",`${label}:${e?.message||e}`);
+   return undefined;
  }
 }
+
 function consumePendingOffer(n){
- const o=pendingOffers[n.id];if(!o)return false;
+ const o=n&&pendingOffers[n.id];if(!o)return false;
  delete pendingOffers[n.id];
  if(o.stress)state.stress=Math.max(0,state.stress+o.stress);
  if(o.xp)state.xp+=o.xp;
@@ -980,58 +1263,122 @@ function consumePendingOffer(n){
    const t=[...tickets].sort((a,b)=>a.due-b.due)[0];
    if(t)t.due+=o.time;
  }
- clamp();hud();renderTickets();
- $("#modalBody").innerHTML=`<h2 class="low">${n.name} // ${o.title}</h2><p>${o.text}</p><p>BONUS RICEVUTO.</p>`;
- $("#modal").classList.remove("hidden");
- autoCloseModal(2100);
+ if(n.id==="hr"){bettySupportCooldown=90;bettyPinged=false}
  npcCooldown[n.id]=state.min;
+ clamp();hud();renderTickets();
+ sideMessage(n.name,`${o.title} // BONUS RICEVUTO`);
+ toast(`${n.name} // ${o.title}`);
  return true;
 }
-function npcTalk(n){
- const now=state.min;
- if(consumePendingOffer(n))return;
- if((npcCooldown[n.id]??-999)+35>now){toast(`${n.name}: ci siamo già parlati.`);return}
- npcCooldown[n.id]=now;
- let title="",desc="",good=true;
 
- if(n.id==="pao"){
-  if(Math.random()<.70){
-   const topics=["FIORENTINA","RASSINA","CALCIO","CAFFÈ"];title=topics[Math.floor(Math.random()*topics.length)];
-   state.stress=Math.max(0,state.stress-7);state.xp+=4;desc="STRESS -7 · XP +4";
-  }else{
-   title=Math.random()<.5?"REVIT":"DESKTOP CONNECTOR";good=false;newTicket(Math.random()<.6?"MEDIUM":"HIGH");
-   desc="«Già che sei qui...» Nuova rogna BIM.";
-  }
- }else if(n.id==="zia"){
-  if(Math.random()<.80){
-   const r=Math.random();
-   if(r<.4){title="CAFFÈ";state.stress=Math.max(0,state.stress-10);desc="STRESS -10";}
-   else if(r<.7){title="PILLOLA DI SAGGEZZA";state.rep=Math.min(5,state.rep+1);desc="REPUTAZIONE +1";}
-   else{title="TI COPRO IO";let t=[...tickets].sort((a,b)=>a.due-b.due)[0];if(t)t.due+=12;desc="+12 MINUTI AL TICKET PIÙ URGENTE";}
-  }else{title="PROBLEMA DA BOOMER";good=false;newTicket("LOW");desc="Nuova task LOW."}
- }else if(n.id==="don"){
-  title=["CAFFÈ","DRITTA","PAUSA TATTICA"][Math.floor(Math.random()*3)];
-  state.stress=Math.max(0,state.stress-8);state.xp+=6;desc="STRESS -8 · XP +6";
- }else if(n.id==="hr"){
-  title=["CONSIGLIO","DRITTA","RESPIRA UN ATTIMO"][Math.floor(Math.random()*3)];
-  const r=Math.random(); if(r<.45){state.stress=Math.max(0,state.stress-6);desc="Un buon consiglio al momento giusto. STRESS -6";} else if(r<.8){state.xp+=12;desc="Ti suggerisce come organizzare le priorità. XP +12";} else {state.rep=Math.min(5,state.rep+1);desc="Una parola buona gira per lo studio. REPUTAZIONE +1";}
- }else if(n.id==="manager"){
-  title="DISPATCH";good=false;
-  const levels=state.min>990?["HIGH","CRITICAL"]:["LOW","MEDIUM","HIGH"];const wanted=levels[Math.floor(Math.random()*levels.length)];const lv=managerDispatchTicket(wanted);desc=lv?`«Mi hanno chiamato. Ti ho girato un ${lv}: controlla il TABLET IT.»`:"«Mi hanno chiamato, ma hai già troppi ticket aperti. Chiudine uno.»";
-   }else if(n.id==="mokasa"&&n.court){
-  title="RICHIESTA DIREZIONE // EXTREME";good=false;
-  const ok=Math.random()<.38;
-  if(ok){state.xp+=900;state.rep=Math.min(5,state.rep+1);desc="Hai gestito una richiesta impossibile. XP +900 · REPUTAZIONE +1";}
-  else{state.stress+=18*difficultyConfig[difficulty].stressMult;state.incident+=12*difficultyConfig[difficulty].incidentMult;desc="La richiesta si complica. STRESS +18 · INCIDENT +12%";}
- }else if(n.id==="mokasa"){
-  title="TI HA VISTO";good=false;
-  if(Math.random()<.90){state.stress+=12*difficultyConfig[difficulty].stressMult;state.rep-=difficulty==='easy'?0:1;if(Math.random()<.4)newTicket("CRITICAL");desc="«Qui bisogna lavorare.» STRESS +12 · REPUTAZIONE -1";}
-  else{state.rep=Math.min(5,state.rep+1);desc="Per una volta approva. REPUTAZIONE +1";}
+let v12c45CapoTalkAt=0;
+function v12c45CapoCanTalk(){
+ return performance.now()-v12c45CapoTalkAt>12000;
+}
+
+
+function v12c451ManagerTalkAllowed(n){
+ if(!n || n.id!=="manager")return true;
+ // Intro/race owns Manager behavior. After it, no random repetitive chatter.
+ if(!managerRaceDone)return false;
+ // Only allow one optional exchange every 45 sec.
+ const now=performance.now();
+ if(!n._lastOptionalTalk)n._lastOptionalTalk=0;
+ if(now-n._lastOptionalTalk<45000)return false;
+ n._lastOptionalTalk=now;
+ return true;
+}
+
+
+/* VERSIONE1ITSHIFT — SPECIAL NPCS */
+let v1BettyBonusAt=0,v1PaoSpecialAt=0,v1DonSpecialAt=0;
+
+function v1Rel(n){return typeof ensureRelation==="function"?ensureRelation(n):(n?.rapporto??0)}
+
+function v1BettyHRBonus(n){
+ if(!n||!(n.id==="hr"||n.name==="BETTY"))return false;
+ const now=performance.now();
+ if(now-v1BettyBonusAt<70000)return false;
+ const r=v1Rel(n);
+ if(r<0)return false;
+ v1BettyBonusAt=now;
+ const relief=r>=4?18:r>=2?13:9;
+ state.stress=Math.max(0,state.stress-relief);
+ if(r>=4&&state.strikes>0&&Math.random()<.12){
+   state.strikes=Math.max(0,state.strikes-1);
+   sideMessage("BETTY // HR",`STRESS -${relief} // ERRORE -1`);
+ }else sideMessage("BETTY // HR",`Una cosa alla volta. STRESS -${relief}`);
+ hud();return true;
+}
+
+function v1PaoSpecial(n){
+ if(!n||!(n.id==="pao"||n.name==="PAO"))return false;
+ const now=performance.now();
+ if(now-v1PaoSpecialAt<50000)return false;
+ v1PaoSpecialAt=now;
+ const r=v1Rel(n);
+ const lines=[
+  "Quest'anno la Fiorentina ci fa soffrire anche senza aprire un ticket.",
+  "Se risolvi questa al primo colpo ti porto allo stadio.",
+  "Il viola sul monitor è giusto. Non calibrarlo."
+ ];
+ sideMessage("PAO",lines[Math.floor(Math.random()*lines.length)]);
+ if(r>=2&&Math.random()<.38){state.stress=Math.max(0,state.stress-7);state.xp+=35;toast("PAO // DRITTA BUONA // STRESS -7 // XP +35");hud()}
+ if(r<=-2&&Math.random()<.35)newTicket(Math.random()<.3?"HIGH":"MEDIUM");
+ return true;
+}
+
+function v1DonSpecial(n){
+ if(!n||!(n.id==="don"||n.name==="DON"))return false;
+ const now=performance.now();
+ if(now-v1DonSpecialAt<60000)return false;
+ v1DonSpecialAt=now;
+ const r=v1Rel(n);
+ sideMessage("DON",r>=2?"Tranquillo, se serve ti do una mano.":"Tutto sotto controllo?");
+ if(r>=2){
+   state.stress=Math.max(0,state.stress-8);
+   if(state.strikes>0&&r>=4&&Math.random()<.10)state.strikes=Math.max(0,state.strikes-1);
+   state.xp+=25;hud();
  }
- clamp();hud();renderTickets();
- $("#modalBody").innerHTML=`<h2 class="${good?"low":"critical"}">${n.name} // ${title}</h2><p>${desc}</p>`;
- $("#modal").classList.remove("hidden");
- autoCloseModal(n.id==="mokasa"?2600:2100);
+ return true;
+}
+
+function npcTalk(n){
+ if(!n)return false;
+
+ // 1.0.9: a promised special interaction ALWAYS wins over generic chatter.
+ if(consumePendingOffer(n))return true;
+
+ if(n?.id==="manager"&&managerRaceDone){
+   if(!v12c451ManagerTalkAllowed(n))return false;
+   sideMessage("IT MANAGER","Controlla i ticket e tieni d'occhio il server.");
+   return true;
+ }
+ if(!v12c451ManagerTalkAllowed(n))return false;
+
+ if(n.id==="hr"||n.name==="BETTY"){
+   if(v1BettyHRBonus(n))return true;
+ }
+ if(n.id==="pao"||n.name==="PAO"){
+   if(v1PaoSpecial(n))return true;
+ }
+ if(n.id==="don"||n.name==="DON"){
+   if(v1DonSpecial(n))return true;
+ }
+
+ if((n.id==="mokasa"||n.name==="CAPO")){
+   if(!v12c45CapoCanTalk())return false;
+   v12c45CapoTalkAt=performance.now();
+ }
+ if(typeof v12cIntroProtected==="function"&&v12cIntroProtected()&&typeof v12cNpcAllowedDuringIntro==="function"&&!v12cNpcAllowedDuringIntro(n))return false;
+
+ const rel=typeof ensureRelation==="function"?ensureRelation(n):(n.rapporto??0);
+ const pos=["Tutto tranquillo, per ora.","Grazie, almeno tu rispondi.","Oggi ti risparmio una richiesta assurda."];
+ const neu=["Hai un secondo?","Quando puoi, avrei una cosa da chiederti.","Ti segnalo una cosa, senza panico."];
+ const neg=["Finalmente ti trovo.","È da un po' che aspetto.","Non dirmi di riavviare."];
+ const pool=rel>=2?pos:rel<=-2?neg:neu;
+ sideMessage(n.name||"NPC",pool[Math.floor(Math.random()*pool.length)]);
+ return true;
 }
 function showStrike(level){
  const o=$("#strikeOverlay");
@@ -1076,9 +1423,9 @@ const stations=[
  ...[[105,385],[165,385],[205,440]].map((p,i)=>({id:"B"+String(i+1).padStart(2,"0"),room:"BIM",type:"HP Z",x:p[0],y:p[1]})),
  ...[[1300,165],[1360,165],[1420,215]].map((p,i)=>({id:"R"+String(i+1).padStart(2,"0"),room:"RENDERISTI",type:"HP Z",x:p[0],y:p[1]})),
  // Stanze private: una sola postazione HR; IT ha solo PG + Manager e non genera ambient NPC.
- {id:"HR01",room:"HR",type:"PRIVATE",x:405,y:180},
- {id:"IT-PG",room:"IT",type:"PRIVATE",x:125,y:650},
- {id:"IT-MGR",room:"IT",type:"PRIVATE",x:190,y:640},
+ {id:"HR01",room:"EDITORIA",type:"PRIVATE",x:135,y:180},
+ {id:"IT-PG",room:"IT",type:"PRIVATE",x:125,y:850},
+ {id:"IT-MGR",room:"IT",type:"PRIVATE",x:190,y:840},
  // Sale e infrastruttura.
  {id:"MEET-TV",room:"SALA MEET",type:"AV",x:925,y:205},
  {id:"SPAZIO-TV",room:"SPAZIO A",type:"AV",x:1030,y:480},
@@ -1123,10 +1470,11 @@ function showStudioEventHud(title,text){
 }
 function hideStudioEventHud(){ $("#studioEventHud")?.classList.add("hidden"); }
 let v12cDoorbellRung=false,v12cDoorOpened=false;
-let introStage="outside",shiftStarted=false,managerRaceDone=false,managerPenaltyDone=false; // V10 state kept only for compatibility
+let introStage="outside",shiftStarted=false,managerRaceDone=false,managerPenaltyDone=false; // compatibility
+let raceState="idle",workstationOnline=false,firstMissionResolved=false; // V12 CLEAN.4.6
 let introMissionArmed=false,introManagerAlerted=false;
 let storyOpen=false,storyCallback=null;
-const IT_PC={x:140,y:660,room:"IT"};
+const IT_PC={x:150,y:842,room:"IT"};
 const OUTSIDE_ZONE={x:500,y:930,w:300,h:90};
 walkZones.push(OUTSIDE_ZONE,{x:620,y:900,w:160,h:120},V101_EXTERIOR.SIDEWALK);
 let deferredDialogs=[];
@@ -1143,9 +1491,11 @@ function storyDialog(who,text,cb=null){
  b.classList.toggle("bettySupport",who==="BETTY");
  b.classList.remove("hidden");
 }
-function closeStory(){if(!storyOpen)return;storyOpen=false;$("#storyDialog")?.classList.add("hidden");const cb=storyCallback;storyCallback=null;if(cb)cb();setTimeout(flushDeferredDialog,80)}
+function closeStory(){if(!storyOpen)return;storyOpen=false;$("#storyDialog")?.classList.add("hidden");const cb=storyCallback;storyCallback=null;if(cb)cb();setTimeout(flushDeferredDialog,80)
+ uiMessageBusy=false;
+}
 function managerRaceRoute(m){
- const goal={x:190,y:640,room:"IT"};
+ const goal={x:185,y:842,room:"IT"};
  // V10.2: percorso più naturale, meno zig-zag.
  // I nodi sono solo sui corridoi principali; ogni tratto viene validato dal pathfinder.
  const anchors=[
@@ -1167,68 +1517,196 @@ function managerRaceRoute(m){
  return out;
 }
 
+
+/* V12 CLEAN.3 — MANAGER RACE SAFE ROUTE
+   Never targets the IT wall directly.
+   Route: Segreteria -> main corridor -> IT corridor -> IT door -> desk.
+*/
+function v12c3ManagerRaceRoute(m){
+ const anchors=[
+   {x:m.x,y:m.y,room:navAreaAt(m.x,m.y)},
+   {x:650,y:735,room:"CORRIDOIO"},
+   {x:520,y:705,room:"CORRIDOIO"},
+   {x:365,y:705,room:"CORRIDOIO"},
+   {x:300,y:675,room:"CORRIDOIO"}, // IT door / threshold
+   {x:225,y:820,room:"IT"},        // soglia interna IT
+   {x:185,y:842,room:"IT"}         // workstation
+ ];
+ const route=[];
+ for(let i=1;i<anchors.length;i++){
+   const from=route.length?route[route.length-1]:anchors[0];
+   const seg=findNpcPath(from,anchors[i]);
+   if(!seg||!seg.length)return [];
+   // refuse any segment that contains a non-walkable node
+   if(seg.some(p=>!walkable(p.x,p.y)))return [];
+   if(route.length && seg.length &&
+      Math.hypot(route[route.length-1].x-seg[0].x,route[route.length-1].y-seg[0].y)<3){
+      seg.shift();
+   }
+   route.push(...seg);
+ }
+ return route;
+}
+
 function startShiftFromEntrance(){
+ v111StartRaceClock();
+ const _m=npcs.find(n=>n.id==="manager");
+ if(_m){
+   _m.x=585;_m.y=760;_m.route=v107ManagerRaceRoute();_m.routeIndex=0;
+   _m.routeGoal={x:185,y:842,room:"IT"};_m.state="managerRace";
+   _m.stuckFor=0;_m.blockedFor=0;
+ }
+
  if(shiftStarted)return;
- shiftStarted=true;state.min=Math.max(state.min,540);introStage="reachPC";introManagerAlerted=true;
+ shiftStarted=true;state.min=Math.max(state.min,540);introStage="reachPC";introManagerAlerted=true;raceState="running";workstationOnline=false;firstMissionResolved=false;
  const m=npcs.find(n=>n.id==="manager");
  if(m){
    m.exclaimUntil=performance.now()+1800;m.state="managerRace";
    m.raceSpeed=Math.max(m.raceSpeed||0,122);m.speed=m.raceSpeed;
-   m.routeGoal={x:190,y:640,room:"IT"};m.route=managerRaceRoute(m);
+   m.routeGoal={x:185,y:842,room:"IT"};m.route=v12c3ManagerRaceRoute(m);
    m.routeIndex=0;m.stuckFor=0;m.blockedFor=0;
    if(!m.route.length){
      m.state="managerWatch";
      phoneMessage("IT MANAGER","Percorso verso IT non disponibile. Gara sospesa.");
    }
  }
- showMissionBanner("PRIMA MISSIONE // ACCENDI LA TUA POSTAZIONE PRIMA DEL MANAGER","Raggiungi fisicamente il REPARTO IT. Nessun teleport.","VITTORIA // +100 XP · +REPUTAZIONE","09:00 // APERTURA TURNO");
+ if(typeof sideMessage==="function")sideMessage("IT TASK","Raggiungi IT e avvia la tua workstation prima del manager."); else toast("IT TASK // Raggiungi IT prima del Manager");
 }
+
+function v12c462PhysicalPickupNearby(){
+ const ct=carryMission?.stage==="pickup"?carryTarget():null;
+ if(ct&&Math.hypot(player.x-ct.x,player.y-ct.y)<85)return true;
+ if(studioEvent?.type==="AMAZON"&&studioEvent.packages.some(p=>p.owner==="PLAYER"&&!p.taken&&!p.done&&Math.hypot(player.x-p.x,player.y-p.y)<85))return true;
+ if(studioEvent&&!studioEvent.carried&&studioEvent.pickup&&Math.hypot(player.x-studioEvent.pickup.x,player.y-studioEvent.pickup.y)<85)return true;
+ return false;
+}
+
+
+let v110FirstMissionResolved=false;
+function v110CompleteFirstMission(){
+ if(v110FirstMissionResolved)return false;
+ v110FirstMissionResolved=true;workstationOnline=true;firstMissionResolved=true;
+ managerRaceDone=true;introStage="done";
+ storyOpen=false;uiMessageBusy=false;activeMiniGame=null;
+ if(typeof v11MissionBriefOpen!=="undefined")v11MissionBriefOpen=false;
+ const modal=document.getElementById("modal");if(modal)modal.classList.add("hidden");
+ if(raceState==="running"){raceState="won";state.xp+=100;state.rep=Math.min(5,state.rep+1)}
+ else if(raceState!=="lost")raceState="lost";
+ const m=npcs.find(n=>n.id==="manager");
+ if(m){m.route=null;m.routeIndex=0;m.state="desk";m.x=185;m.y=842}
+ if(!tickets.length)newTicket("LOW");
+ toast("WORKSTATION ONLINE // PRIMA MISSIONE COMPLETATA");hud();updateTaskProgress();return true;
+}
+
+
+/* VERSIONE1ITSHIFT 1.0.11 — TRUE STARTUP RACE */
+let v111RaceStartClock=null;
+let v111PlayerFinishClock=null;
+let v111ManagerFinishClock=null;
+let v111RaceResolved=false;
+
+function v111StartRaceClock(){
+ v111RaceStartClock=performance.now();
+ v111PlayerFinishClock=null;
+ v111ManagerFinishClock=null;
+ v111RaceResolved=false;
+}
+
+function v111RegisterManagerFinish(){
+ if(v111ManagerFinishClock!==null||v111RaceStartClock===null)return;
+ v111ManagerFinishClock=performance.now();
+ if(raceState==="running")raceState="lost";
+}
+
+function v111RegisterPlayerFinish(){
+ if(v111PlayerFinishClock!==null||v111RaceStartClock===null)return;
+ v111PlayerFinishClock=performance.now();
+}
+
+function v111RaceWatch(){
+ if(v111RaceStartClock===null||v111ManagerFinishClock!==null||v111RaceResolved)return;
+ const m=npcs.find(n=>n.id==="manager");
+ if(!m)return;
+ if(Math.hypot(m.x-IT_PC.x,m.y-IT_PC.y)<55)v111RegisterManagerFinish();
+}
+
+function v111RaceResult(){
+ if(v111RaceResolved||v111PlayerFinishClock===null)return;
+ v111RaceResolved=true;
+ const p=(v111PlayerFinishClock-v111RaceStartClock)/1000;
+ const m=v111ManagerFinishClock===null?Infinity:(v111ManagerFinishClock-v111RaceStartClock)/1000;
+ const win=p<m;
+ const rows=[
+   "WORKSTATION ONLINE",
+   `TU: ${p.toFixed(1)}s`,
+   Number.isFinite(m)?`IT MANAGER: ${m.toFixed(1)}s`:"IT MANAGER: NON ARRIVATO"
+ ];
+ if(win){
+   state.xp+=100;state.rep=Math.min(5,state.rep+1);
+   rows.push("VITTORIA // XP +100 // REPUTAZIONE +1");
+   raceState="won";
+   showRewardResult("MISSIONE COMPLETATA",rows,"success");
+ }else{
+   state.stress=Math.min(100,state.stress+4);
+   rows.push(`SCONFITTA // RITARDO ${(p-m).toFixed(1)}s // STRESS +4`);
+   raceState="lost";
+   showRewardResult("MISSIONE COMPLETATA",rows,"failure");
+ }
+ hud();
+}
+
 function bootWorkstation(){
- if(introStage!=="reachPC")return false;
- if(Math.hypot(player.x-IT_PC.x,player.y-IT_PC.y)>78)return false;
- const won=!managerPenaltyDone;
- $("#modal").classList.remove("hidden");
- $("#modalBody").innerHTML=`<div class="pixelTaskHead"><span>09:00 // IT</span><h2>AVVIO POSTAZIONE</h2><p>Accendi il PC e completa il boot della tua postazione.</p></div>
+ if(state?.phase!=="shift"||!shiftStarted)return false;
+ if(v110FirstMissionResolved||firstMissionResolved)return false;
+ if(typeof IT_PC==="undefined"||!v118ValidPoint(IT_PC)||Math.hypot(player.x-IT_PC.x,player.y-IT_PC.y)>78)return false;
+
+ clearTimeout(window.__npcModalTimer);window.__npcModalTimer=null;
+ const modal=document.getElementById("modal");
+ const body=document.getElementById("modalBody");
+ if(!modal||!body)return false;
+ modal.classList.remove("hidden");
+
+ body.innerHTML=`<div class="pixelTaskHead"><span>09:00 // IT</span><h2>AVVIO POSTAZIONE</h2><p>POWER, attendi il boot, poi LOGIN.</p></div>
  <div class="miniGame bootGame">
   <button id="powerPC" class="pixelAction">POWER</button>
   <div class="bootScreen" id="bootPC">PC SPENTO<span></span></div>
   <button id="loginPC" class="pixelAction" disabled>LOGIN</button>
- </div><div id="miniError"></div>`;
+ </div>`;
+
  let powered=false;
- $("#powerPC").onclick=()=>{
-   powered=true;$("#powerPC").disabled=true;$("#bootPC").innerHTML="BIOS...<br>NETWORK...<br>WINDOWS READY";
-   setTimeout(()=>{$("#loginPC").disabled=false},650);
+ const power=document.getElementById("powerPC"), login=document.getElementById("loginPC"), screen=document.getElementById("bootPC");
+ power.onclick=()=>{
+   if(powered)return;
+   powered=true;power.disabled=true;screen.innerHTML="BIOS...<br>NETWORK...<br>WINDOWS READY";
+   setTimeout(()=>{if(login)login.disabled=false},550);
  };
- $("#loginPC").onclick=()=>{
+ login.onclick=()=>{
    if(!powered)return;
-   $("#modal").classList.add("hidden");
-   introStage="done";managerRaceDone=true;
-   if(won){
-     state.xp+=100;state.rep=Math.min(5,state.rep+1);
-     showRewardResult("MISSIONE COMPLETATA",["ARRIVATO PRIMA DELL'IT MANAGER","XP +100","REPUTAZIONE +1"],"success");
-   }else{
-     showRewardResult("MISSIONE COMPLETATA",["POSTAZIONE OPERATIVA","IT MANAGER ARRIVATO PRIMA","STRESS +4"],"failure");
-   }
-   newTicket("LOW");
+   modal.classList.add("hidden");
+   v111RegisterPlayerFinish();
+   v110FirstMissionResolved=true;firstMissionResolved=true;workstationOnline=true;managerRaceDone=true;introStage="done";
+   storyOpen=false;uiMessageBusy=false;activeMiniGame=null;
+   if(!tickets.length)newTicket("LOW");
+   v111RaceResult();updateTaskProgress();hud();
  };
  return true;
 }
 
 /* V5.3.2 — IT MANAGER DEDICATED PATH */
 
-function managerStartRoute(){const m=npcs.find(n=>n.id==="manager");const from=m?{x:m.x,y:m.y}:{x:650,y:800};return findNpcPath(from,{x:190,y:670,room:"IT"});}
+function managerStartRoute(){const m=npcs.find(n=>n.id==="manager");const from=m?{x:m.x,y:m.y}:{x:650,y:800};return findNpcPath(from,{x:190,y:870,room:"IT"});}
 function managerITtoServerRoute(){
  return findNpcPath({x:190,y:640},{x:650,y:190,room:"SERVER"});
 }
 function managerServerToITRoute(){
- return findNpcPath({x:650,y:190},{x:190,y:640,room:"IT"});
+ return findNpcPath({x:650,y:190},{x:190,y:840,room:"IT"});
 }
 function moveManagerRoute(n,dt){if(!n.route||!n.route.length||n.routeIndex>=n.route.length)return true;const old=n.speed;n.speed=n.raceSpeed||96;const done=moveNpcRoute(n,dt);n.speed=old;return done;}
 
 function safeRoom(obj,fallback="CORRIDOIO"){return obj&&typeof obj.room==="string"&&obj.room?obj.room:fallback;}
 function safePoint(obj,fallback={x:820,y:705,room:"CORRIDOIO"}){if(!obj||!Number.isFinite(obj.x)||!Number.isFinite(obj.y))return {x:fallback.x,y:fallback.y,room:safeRoom(fallback)};return {x:obj.x,y:obj.y,room:safeRoom(obj,safeRoom(fallback))};}
 function managerRouteTo(target){
- target=safePoint(target,{x:190,y:640,room:"IT"});
+ target=safePoint(target,{x:190,y:840,room:"IT"});
  const route=[];
  if(safeRoom(target)==="SERVER"){
    route.push(
@@ -1253,23 +1731,55 @@ function managerDispatchTicket(level=null){
  if(created){renderTickets();refreshPDA();updateTaskProgress()}
  return created?lv:false;
 }
+
+function v12c45ManagerAllowedRoom(room){return ["IT","SERVER","SERVER"].includes(room)}
+function v12c45ManagerRoutineTarget(m){
+ const goServer=Math.random()<0.5;
+ return goServer?{x:755,y:210,room:"SERVER"}:{x:245,y:850,room:"IT"};
+}
+
+
+function v107ManagerRaceRoute(){
+ return [
+   {x:585,y:760,room:"INGRESSO / SEGRETERIA"},
+   {x:500,y:730,room:"CORRIDOIO"},
+   {x:395,y:730,room:"CORRIDOIO"},
+   {x:300,y:760,room:"CORRIDOIO"},
+   {x:255,y:800,room:"CORRIDOIO"},
+   {x:225,y:820,room:"IT"},
+   {x:185,y:842,room:"IT"}
+ ];
+}
+
 function updateManager(dt){
+ if(isLunch())return;
  const m=npcs.find(n=>n.id==="manager");if(!m)return;
  if(m.state==="managerRace"){
-   const old=m.speed;m.speed=m.raceSpeed||118;const arrived=moveNpcRoute(m,dt);m.speed=old;
+   if(!m.route||!m.route.length){
+     m.route=v107ManagerRaceRoute();m.routeIndex=0;m.routeGoal={x:185,y:842,room:"IT"};
+   }
+   const old=m.speed;m.speed=m.raceSpeed||118;
+   const arrived=moveNpcRoute(m,dt);
+   m.speed=old;
    if(arrived){
-     m.state="desk";m.currentRoom="IT";
-     if(introStage==="reachPC"&&!managerRaceDone&&!managerPenaltyDone){
-       managerPenaltyDone=true;state.stress=Math.min(100,state.stress+4);
+     m.state="desk";m.currentRoom="IT";m.x=185;m.y=842;
+     if(raceState==="running"&&!managerPenaltyDone){
+       raceState="lost";managerRaceDone=true;managerPenaltyDone=true;
+       state.stress=Math.min(100,state.stress+4);
        phoneMessage("IT MANAGER","Io sono già arrivato. Accendi quella workstation.");hud();
      }
    }
    return;
  }
- if(introStage!=="done")return;
+ // The manager's normal routine starts only after the workstation mission is resolved.
+ if(!firstMissionResolved)return;
+ const room=roomAt(m.x,m.y)?.name;
+ if(room && !v12c45ManagerAllowedRoom(room)){
+   m.routeGoal=v12c45ManagerRoutineTarget(m);m.route=findNpcPath({x:m.x,y:m.y},m.routeGoal);m.routeIndex=0;m.state="managerRoutine";
+ }
  m.managerTimer=(m.managerTimer??80)-dt;
- if((m.state==="desk"||m.state==="idle")&&m.managerTimer<=0){
-   const target=Math.random()<.48?{x:650,y:190,room:"SERVER"}:{x:190,y:640,room:"IT"};
+ if((m.state==="desk"||m.state==="idle"||m.state==="managerRoutine")&&m.managerTimer<=0){
+   const target=Math.random()<.48?{x:650,y:190,room:"SERVER"}:{x:185,y:842,room:"IT"};
    m.routeGoal={...target};m.route=findNpcPath({x:m.x,y:m.y},target);m.routeIndex=0;m.state="managerTravel";m.managerTimer=65+Math.random()*90;
  }
  if(m.state==="managerTravel"&&moveNpcRoute(m,dt)){
@@ -1277,86 +1787,105 @@ function updateManager(dt){
    if(Math.random()<.55){const lv=managerDispatchTicket();if(lv)phoneMessage("IT MANAGER",`Mi hanno chiamato: ti ho girato un ticket ${lv}. Controlla il TABLET IT.`)}
  }
 }
-function lunchRouteFor(n,i){
- const target=lunchSpotFor(n,i);
- if(n.id==="manager"||n.id==="hr")return [target];
- n.routeGoal={...target};
- return findNpcPath({x:n.x,y:n.y},target);
+
+/* AUDIT removed obsolete lunchRouteFor */
+
+
+/* V12 CLEAN.4.6.2 — canonical lunch state */
+let v12c462LunchActive=false;
+function v12c462LunchParticipants(){return [...ambientNPCs,...npcs].filter(n=>n&&n.id!=="mokasa")}
+function v12c462BuildLunchSeats(){
+ const people=v12c462LunchParticipants();v12c43LunchSeats=[];
+ const xs=[825,860,895,930,965,1000,1035,1070,1105];
+ const ys=[790,875];let i=0;
+ for(const y of ys)for(const x of xs){if(i<people.length)v12c43LunchSeats.push({id:i++,x,y,room:"CUCINA"})}
+ people.forEach((n,j)=>n.lunchSeatId=j%Math.max(1,v12c43LunchSeats.length));
 }
-function beginLunchMigration(){
- if(dayFlags.lunchStarted)return;
- dayFlags.lunchStarted=true;
- ambientNPCs.forEach((n,i)=>{
-   const s=lunchSpotFor(n,i);
-   n.routeGoal={...s};n.route=findNpcPath({x:n.x,y:n.y},s);n.routeIndex=0;n.stuckFor=0;n.blockedFor=0;n.state="lunchTravel";
- });
- npcs.forEach((n,i)=>{
-   if(n.id==="manager"||n.id==="hr"||n.id==="zia")return;
-   const s=lunchSpotFor(n,ambientNPCs.length+i);
-   n.routeGoal={...s};n.route=findNpcPath({x:n.x,y:n.y},s);n.routeIndex=0;n.stuckFor=0;n.blockedFor=0;n.state="specialLunchTravel";
+function v12c462StartLunch(){
+ if(v12c462LunchActive)return;
+ v12c462LunchActive=true;lunchMode=true;v12c462BuildLunchSeats();
+ v12c462LunchParticipants().forEach((n,i)=>{
+   const seat=v12c43LunchSeats[n.lunchSeatId];if(!seat)return;
+   n.activity=null;n.activityTicket=false;n.routeGoal={...seat};
+   n.route=(v12c44IsPao(n)&&n.homeRoom==="BIM")?v12c44PaoExitRoute(n,seat):findNpcPath({x:n.x,y:n.y},seat);
+   n.routeIndex=0;n.state="lunchTravel";n.lunchDelay=(i%5)*.45+Math.random()*.8;
  });
 }
+function v12c462UpdateLunch(dt){
+ if(!isLunch())return;
+ if(!v12c462LunchActive)v12c462StartLunch();
+ for(const n of v12c462LunchParticipants()){
+   const seat=v12c43LunchSeats[n.lunchSeatId];if(!seat)continue;
+   if(n.state==="lunchTravel"){
+     n.lunchDelay=(n.lunchDelay||0)-dt;if(n.lunchDelay>0)continue;
+     if(moveNpcRoute(n,dt)){n.x=seat.x;n.y=seat.y;n.route=null;n.routeIndex=0;n.state="lunchSeated"}
+   }else if(n.state==="lunchSeated"){n.x=seat.x;n.y=seat.y}
+   else{
+     n.routeGoal={...seat};
+     n.route=(v12c44IsPao(n)&&n.homeRoom==="BIM")?v12c44PaoExitRoute(n,seat):findNpcPath({x:n.x,y:n.y},seat);
+     n.routeIndex=0;n.state="lunchTravel";
+   }
+ }
+}
+
+function v114PostLunchReset(){
+ const setHome=(n,x,y,room,stateName)=>{
+   if(!n)return;
+   n.x=x;n.y=y;n.homeX=x;n.homeY=y;n.homeRoom=room;
+   n.route=null;n.routeIndex=0;n.routeGoal=null;
+   n.stuckFor=0;n.blockedFor=0;n.seeking=false;
+   n.state=stateName||"work";
+   n.lunchSeat=null;n.lunchSlot=null;n.inLunch=false;
+ };
+ const pao=v106SpecialNpcById("pao");
+ const don=v106SpecialNpcById("don");
+ const betty=npcs.find(n=>n.id==="hr"||n.name==="BETTY");
+ const zia=npcs.find(n=>n.id==="zia"||n.name==="ZIA ALE");
+ const manager=npcs.find(n=>n.id==="manager");
+
+ setHome(pao,140,675,"BIM","work");
+ setHome(don,1045,880,"CUCINA","work");
+ setHome(betty,155,205,"HR","idle");
+ setHome(zia,650,805,"INGRESSO / SEGRETERIA","idle");
+ setHome(manager,185,842,"IT","desk");
+
+ if(pao)pao._spT=3+Math.random()*4;
+ if(don)don._spT=4+Math.random()*5;
+}
+function v12c462EndLunch(){
+ if(!v12c462LunchActive)return;
+ v12c462LunchActive=false;lunchMode=false;
+ v12c462LunchParticipants().forEach(n=>{
+   n.route=null;n.routeIndex=0;n.stuckFor=0;n.blockedFor=0;
+   if(n.id==="manager"){
+     n.routeGoal={x:190,y:840,room:"IT"};
+     n.route=findNpcPath({x:n.x,y:n.y},n.routeGoal);
+     n.routeIndex=0;n.state="managerTravel";
+   }else if(n.id==="pao"||n.id==="don"){
+     n.state="work";
+     n._specialTimer=4+Math.random()*7;
+   }else{
+     v12c43RouteToDesk(n);
+   }
+ });
+
+ for(const id of ["pao","don"]){
+   const s=v106SpecialNpcById(id);
+   if(s){s.route=null;s.routeIndex=0;s.state="work";s._spT=2+Math.random()*3}
+ }
+
+ v114PostLunchReset();}
+
+function beginLunchMigration(){v12c462StartLunch()}
+
+/* AUDIT removed obsolete v12c43StartLunchAssigned */
+
+/* AUDIT removed obsolete v12c43UpdateLunchAssigned */
+
+
 function updateLunchMigration(dt){
- if(state.min>=770&&state.min<840)beginLunchMigration();
-
- if(state.min>=770&&state.min<840){
-   ambientNPCs.forEach(n=>{
-     if(n.state==="lunchTravel"&&moveNpcRoute(n,dt)){
-       n.state="lunch";n.route=null;n.routeIndex=0;n.currentRoom="CUCINA";
-     }
-   });
-   npcs.forEach(n=>{
-     if(n.state==="specialLunchTravel"&&moveNpcRoute(n,dt)){
-       n.state="lunch";n.route=null;n.routeIndex=0;
-     }
-   });
- }
-
- if(state.min>=840&&!dayFlags.lunchReturn){
-   dayFlags.lunchReturn=true;
-   ambientNPCs.forEach((n,i)=>{
-     n.state="returnQueued";
-     n.returnDelay=(i%6)*0.75+Math.floor(i/6)*0.35;
-     n.routeGoal={x:n.homeX,y:n.homeY,room:n.homeRoom};
-     n.route=null;n.routeIndex=0;n.stuckFor=0;n.blockedFor=0;n.returnStartedAt=state.min;
-   });
-
-   npcs.forEach((n,i)=>{
-     if(n.id==="manager"){n.state="desk";return}
-     if(n.id==="hr"){n.state="idle";return}
-     if(n.id==="don"){n.state="idle";return}
-     const h=n.id==="zia"?{x:685,y:815,room:"INGRESSO / SEGRETERIA"}:{x:n.homeX,y:n.homeY,room:n.homeRoom};
-     if(h){
-       n.routeGoal={...h};n.state="specialReturnQueued";n.returnDelay=.7+(i*.45);
-       n.route=null;n.routeIndex=0;n.stuckFor=0;n.blockedFor=0;
-     }
-   });
- }
-
- ambientNPCs.forEach(n=>{
-   if(n.state==="returnQueued"){
-     n.returnDelay-=dt;
-     if(n.returnDelay<=0){
-       n.state="return";
-       n.route=laneFromArea(n,n.routeGoal);n.routeIndex=0;
-     }
-   }else if(n.state==="return"){
-     if(moveNpcRoute(n,dt)){
-       n.state="work";n.currentRoom=n.homeRoom;n.route=null;n.routeIndex=0;n.timer=20+Math.random()*35;
-     }else if(state.min-(n.returnStartedAt||state.min)>10){
-       n.route=laneFromArea(n,n.routeGoal);n.routeIndex=0;n.stuckFor=0;n.blockedFor=0;n.returnStartedAt=state.min;
-     }
-   }
- });
-
- npcs.forEach(n=>{
-   if(n.state==="specialReturnQueued"){
-     n.returnDelay-=dt;
-     if(n.returnDelay<=0){n.state="specialReturn";n.route=laneFromArea(n,n.routeGoal);n.routeIndex=0}
-   }else if(n.state==="specialReturn"&&moveNpcRoute(n,dt)){
-     n.state="idle";n.route=null;n.routeIndex=0;
-   }
- });
+ if(isLunch())v12c462UpdateLunch(dt);
+ else if(v12c462LunchActive)v12c462EndLunch();
 }
 function randomizeMiniLayout(){
  const box=document.querySelector(".miniGame");if(!box)return;
@@ -1378,8 +1907,8 @@ const LUNCH_SPOTS=[
  {x:1090,y:650,room:"RIFUGIO DIGITALE",seat:false},{x:1140,y:650,room:"RIFUGIO DIGITALE",seat:false}
 ];
 function lunchSpotFor(n,i){
- if(n.id==="manager")return {x:190,y:640,room:"IT"};
- if(n.id==="hr")return {x:405,y:205,room:"HR"};
+ if(n.id==="manager")return {x:190,y:840,room:"IT"};
+ if(n.id==="hr")return {x:135,y:205,room:"EDITORIA"};
  if(n.id==="zia")return {x:685,y:815,room:"INGRESSO / SEGRETERIA"};
  return {...LUNCH_SPOTS[i%LUNCH_SPOTS.length]};
 }
@@ -1405,22 +1934,23 @@ function narrativeOnce(key,sender,text){
 let v12cStoryMission=0;
 function v12cStoryProgression(){
  if(!state||introStage!=="done"||storyOpen||isLunch())return;
- if(v12cStoryMission<1&&state.min>=600){
+ if(v12cStoryMission<1&&state.min>=600&&!studioEvent){
    v12cStoryMission=1;
    showMissionBanner("MISSIONE 2 // SALA MEET","Controlla la sala meeting: qualcosa non torna.","EVENTO STORIA","STORIA");
-   if(!studioEvent)startMeetingRushEvent();
- }else if(v12cStoryMission<2&&state.min>=690){
+   startMeetingRushEvent();
+ }else if(v12cStoryMission<2&&state.min>=690&&!studioEvent){
    v12cStoryMission=2;
    showMissionBanner("MISSIONE 3 // CONSEGNA","Zia Ale ha ricevuto dei pacchi. Quelli IT sono tuoi.","EVENTO STORIA","STORIA");
-   if(!studioEvent)startAmazonEvent();
- }else if(v12cStoryMission<3&&state.min>=900){
+   startAmazonEvent();
+ }else if(v12cStoryMission<3&&state.min>=900&&!studioEvent){
    v12cStoryMission=3;
    showMissionBanner("MISSIONE 4 // POMERIGGIO","Cambio postazione urgente: serve un monitor.","EVENTO STORIA","STORIA");
-   if(!studioEvent)startDeskSetupEvent();
+   startDeskSetupEvent();
  }
 }
 
 function updateNarrative(){
+ if(!v12c42CanGenerateWork())return;
  if(!state||!shiftStarted)return;
  if(state.min>=615)narrativeOnce("1015","ZIA ALE","La Sala Meet tra poco è occupata. Se passa qualcuno di corsa, sai già perché.");
  if(state.min>=705)narrativeOnce("1145","IT MANAGER","Occhio ai ticket della direzione: se arrivano, hanno priorità.");
@@ -1505,18 +2035,14 @@ function forceLunchReturn(){
   n.route=routeNpcHome(n);n.routeIndex=0;n.timer=0;n.activity=null;n.activityTicket=false;
  });
 }
-function updateLunchReturn(dt){
- // V9.1.4: lunch return is fully controlled by updateLunchMigration().
- // No forced x/y snap to home; this avoids NPCs jumping into walls or each other.
- return;
-}
+function updateLunchReturn(dt){return}
 
-function setLunchPositions(){
- // V10.1: no lunch teleport. Movement is route-only.
- return;
-}
-function leaveLunch(){forceLunchReturn();}
-function updateLunchState(){ updateLunchMigration(1/60); }
+/* AUDIT removed obsolete setLunchPositions */
+
+/* AUDIT removed obsolete leaveLunch */
+
+/* AUDIT removed obsolete updateLunchState */
+
 
 function beginEntranceWalk(){
  introFreeWalk=true;
@@ -1589,14 +2115,56 @@ function runV6Audit(){
  const kitchenPC=stations.filter(s=>s.room==="CUCINA"&&["HP Z","MAC"].includes(s.type));if(kitchenPC.length)issues.push("PC presenti in cucina");
  console.log("V9 AUDIT:",issues.length?issues:"OK");return issues;
 }
+function v12c4Phase(){return state?.phase||"boot";}
+
+function v1FinalAudit(){
+ const problems=[];
+ if(typeof v12c45Pickup!=="function")problems.push("F pickup missing");
+ if(typeof v12c45Deliver!=="function")problems.push("G deliver missing");
+ if(typeof v12c462StartLunch!=="function")problems.push("Lunch missing");
+ if(typeof v1BettyHRBonus!=="function")problems.push("Betty HR missing");
+ if(typeof v1PaoSpecial!=="function")problems.push("PAO special missing");
+ if(typeof v1DonSpecial!=="function")problems.push("DON special missing");
+ if(typeof v12c44DrawCollisionDebug!=="function")problems.push("F2 debug missing");
+ if(problems.length)console.warn("VERSIONE1ITSHIFT AUDIT",problems);
+ return problems;
+}
+
+
+function v102FinalAudit(){
+ const issues=[];
+ if(typeof v102NormalizeTicketLifetime!=="function")issues.push("ticket lifetime");
+ if(typeof v102SoftLockGuard!=="function")issues.push("softlock guard");
+ if(typeof v102DrawLab!=="function")issues.push("lab draw");
+ if(typeof v1BettyHRBonus!=="function")issues.push("Betty");
+ if(typeof v1PaoSpecial!=="function")issues.push("PAO");
+ if(typeof v1DonSpecial!=="function")issues.push("DON");
+ if(issues.length)console.warn("VERSIONE1ITSHIFT 1.0.2 AUDIT",issues);
+ return issues;
+}
+
 function reset(){
+ v114AmazonIntroShown=false;v114LastUiProgress=performance.now();v114LastStateMin=null;
+ v111RaceStartClock=null;v111PlayerFinishClock=null;v111ManagerFinishClock=null;v111RaceResolved=false;
+ v110FirstMissionResolved=false;
+ v109EndShiftReady=false;
+ v12c452SoftLockFor=0;
+ setTimeout(()=>v12c45InitPlayerSafe(),0);
+ v12c43LunchSeats=[];v12c462LunchActive=false;
+ v12c42MeetingState="IDLE";v12c42MeetingLateWarned=false;v12c42MeetingQueued=false;v12c42MeetingDeferredStart=false;
+ if(!state)state={phase:"boot",stress:0,strikes:0,maxStrikes:5,xp:0,incident:0,rep:0,solved:0,min:538};
+ managerRaceDone=false;
  v12cDoorbellRung=false;v12cDoorOpened=false;v12cStoryMission=0;
  bettySupportCooldown=0;bettyPinged=false;bettyLastStressBand=0;
 
  Object.keys(npcRelations).forEach(k=>delete npcRelations[k]);
 
  introFreeWalk=false;entranceOpened=false;enteredStudio=false;window.__entranceDialogReady=false;
-const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:705,y:985,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;studioEvent=null;studioEventNext=610;eventSerial=0;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";introFreeWalk=false;entranceOpened=false;enteredStudio=false;shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;spawnNPCs();runV10Audit();runV8Audit();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside";m.route=null;m.routeIndex=0}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio.",()=>beginEntranceWalk()),250));}
+const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0};player={x:705,y:985,s:205};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;studioEvent=null;studioEventNext=610;eventSerial=0;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};lunchMode=false;fullMap=false;introStage="outside";introFreeWalk=false;entranceOpened=false;enteredStudio=false;shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;raceState="idle";workstationOnline=false;firstMissionResolved=false;spawnNPCs();v12c4InitRelations();runV10Audit();runV8Audit();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=800;m.state="outside";m.route=null;m.routeIndex=0}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();storyDialog("08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare...",()=>setTimeout(()=>storyDialog("TELEFONO","A dopo. Entro in studio.",()=>beginEntranceWalk()),250));
+ v1FinalAudit();
+
+ v102FinalAudit();
+}
 function inside(r,x,y,p=0){return x>=r.x+p&&x<=r.x+r.w-p&&y>=r.y+p&&y<=r.y+r.h-p}
 function walkable(x, y) {
   if (!walkZones.some(z => inside(z, x, y))) {
@@ -1669,7 +2237,7 @@ function updateTaskProgress(){
  // Target giornaliero dinamico: 14 interventi equivalgono al 100%.
  const completed=(state.solved||0);
  const carryDone=(dayFlags&&dayFlags.carryCompleted)||0;
- const pct=state.phase==="ended"?100:Math.max(0,Math.min(99,Math.round(((completed+carryDone)/14)*100)));
+ const pct=state?.phase==="ended"?100:Math.max(0,Math.min(99,Math.round(((completed+carryDone)/14)*100)));
  const fill=$("#taskProgressFill"),txt=$("#taskProgressText");
  if(fill)fill.style.width=pct+"%";
  if(txt)txt.textContent=pct+"%";
@@ -1689,6 +2257,20 @@ function showRewardResult(title,rows,kind="success"){
  if(window.__rewardTimer)clearTimeout(window.__rewardTimer);ttl.textContent=title;ttl.className=kind;box.innerHTML=rows.map((x,i)=>`<div><span>${i===0?"✓":"+"}</span><b>${x}</b></div>`).join("");ov.classList.remove("hidden");
  const close=()=>{if(ov.classList.contains("hidden"))return;ov.classList.add("hidden");window.removeEventListener("keydown",key);clearTimeout(window.__rewardTimer);setTimeout(flushDeferredDialog,80)};
  const key=e=>{if(e.key==="Enter"||e.key.toLowerCase()==="e"){e.preventDefault();close()}};window.addEventListener("keydown",key);$("#rewardContinue").onclick=close;window.__rewardTimer=setTimeout(close,5200);
+}
+
+function v12c4GrantBonus(){
+ if(!state||state.phase!=="shift")return null;
+ const roll=Math.random();let bonus=null;
+ if(state.strikes>0&&roll<0.055){state.strikes=Math.max(0,state.strikes-1);bonus=["BACKUP SALVAVITA","-1 ERRORE"]}
+ else if(state.stress>=35&&roll<0.13){state.stress=Math.max(0,state.stress-12);bonus=["CAFFÈ DOPPIO","STRESS -12"]}
+ else if(state.strikes>0&&state.stress<70&&roll<0.17){state.strikes=Math.max(0,state.strikes-1);state.stress=Math.min(100,state.stress+5);bonus=["RIAVVIO MIRACOLOSO","-1 ERRORE // STRESS +5"]}
+ else{
+   const allies=[...ambientNPCs,...npcs].filter(n=>ensureRelation(n)>=4);
+   if(state.strikes>0&&allies.length&&Math.random()<0.06){const a=allies[Math.floor(Math.random()*allies.length)];state.strikes=Math.max(0,state.strikes-1);bonus=[`FAVORE DI ${a.name}`,"-1 ERRORE"]}
+ }
+ if(bonus){if(typeof sideMessage==="function")sideMessage("BONUS",`${bonus[0]} // ${bonus[1]}`);else toast(`BONUS // ${bonus[0]} // ${bonus[1]}`);hud()}
+ return bonus;
 }
 function miniSuccess(i,label,skipContext=false){
  if(i<0||i>=tickets.length)return;
@@ -1711,6 +2293,8 @@ function miniSuccess(i,label,skipContext=false){
    `STRESS -${Math.round(stressBefore-state.stress)}`,
    relRow
  ].filter(Boolean),"success");
+
+ v12c4GrantBonus();
 }
 
 function failMiniGameCurrent(){
@@ -1928,7 +2512,7 @@ function startMiniGame(i){
  setTimeout(randomizeMiniLayout,0);
 }
 function newTicket(force,opts={}){
- if(state.phase!=="shift"||tickets.length>=difficultyConfig[difficulty].maxTickets)return;if(isLunch()&&!opts.anomaly)return;
+ if(state?.phase!=="shift"||tickets.length>=difficultyConfig[difficulty].maxTickets)return;if(isLunch()&&!opts.anomaly)return;
  let level=force||levelForTime(),p;
  let valid=stations.filter(s=>walkable(s.x,s.y)||reachablePoints().some(p=>Math.hypot(p.x-s.x,p.y-s.y)<95));
  if(!valid.length)valid=reachablePoints();
@@ -2004,11 +2588,11 @@ function updateBettySupport(dt){
  if(!state||introStage!=="done")return;
  bettySupportCooldown=Math.max(0,bettySupportCooldown-dt);
  const band=bettyStressBand();
+ const betty=npcs.find(n=>n.id==="hr");
 
- // Betty non spamma: una chiamata quando si supera una nuova soglia.
- if(band>0&&band>bettyLastStressBand&&!bettyPinged&&bettySupportCooldown<=0){
+ if(band>0&&band>bettyLastStressBand&&!bettyPinged&&bettySupportCooldown<=0&&betty){
    bettyPinged=true;bettyLastStressBand=band;
-   phoneMessage("BETTY",band>=3?"Passa da me un attimo. Sei al limite.":"Quando hai un minuto passa in HR.");
+   createPendingOffer(betty);
  }
  if(band===0){bettyLastStressBand=0;bettyPinged=false}
 }
@@ -2062,18 +2646,176 @@ function bettySupport(){
 
 function hrAdvice(){return bettySupport();}
 
+
+/* ============================================================
+   V12 CLEAN.4.5 — INTERACTION SPLIT
+   E = interact
+   F = pick up
+   G = deliver/place
+   ============================================================ */
+function v12c45IsBlockingUI(){
+ const modal=document.getElementById("modal");
+ const end=document.getElementById("endGameOverlay");
+ const modalVisible=!!(modal && !modal.classList.contains("hidden") && modal.offsetParent!==null);
+ const endVisible=!!(end && !end.classList.contains("hidden") && end.offsetParent!==null);
+ return !!(activeMiniGame || modalVisible || endVisible);
+}
+
+function v107PackageDestinationText(){
+ return "SERVER / MAGAZZINO IT — area deposito vicino ai rack";
+}
+
+function v12c45Pickup(){
+ if(state?.phase!=="shift"||v12c45IsBlockingUI())return false;
+
+ if(carryMission?.stage==="pickup"){
+   const t=carryTarget();
+   if(t&&Math.hypot(player.x-t.x,player.y-t.y)<85){
+     if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
+     inventory.push(carryMission.item);carryMission.stage="deliver";updateInventoryUI();
+     const dest=carryMission.recipient?carryMission.recipient.name:safeRoom(carryMission.to,"POSTAZIONE");
+     phoneMessage("IT TASK",`${carryMission.item} preso. Consegnalo a ${dest}.`);
+     return true;
+   }
+ }
+
+ if(studioEvent?.type==="AMAZON"){
+   const p=studioEvent.packages.find(p=>p.owner==="PLAYER"&&!p.done&&!p.taken&&Math.hypot(player.x-p.x,player.y-p.y)<85);
+   if(p){
+     if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
+     p.taken=true;inventory.push(p.label);updateInventoryUI();
+     showStudioEventHud("CONSEGNA AMAZON",`Porta ${p.label} in ${v107PackageDestinationText()}`);
+     return true;
+   }
+ }
+
+ if(studioEvent&&!studioEvent.carried&&!studioEvent.completed&&!studioEvent.failed){
+   const p=studioEvent.pickup||studioEvent.from;
+   if(p&&Math.hypot(player.x-p.x,player.y-p.y)<85){
+     if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
+     studioEvent.carried=true;studioEvent.stage="deliver";
+     const item=studioEvent.item||"OGGETTO";
+     if(!inventory.includes(item))inventory.push(item);
+     if(studioEvent.type==="MEETING_RUSH")v12c42MeetingState="DELIVER";
+     if(studioEvent.type==="DESK_SETUP")showStudioEventHud("CAMBIO POSTAZIONE",`G: INSTALLA PC → ${studioEvent.recipient?.name||"DESTINAZIONE"} // ${studioEvent.to?.room||"POSTAZIONE"}`);
+     updateInventoryUI();toast(`PRESO // ${item}`);return true;
+   }
+ }
+
+ const supplies=[
+   {name:"CUFFIE",x:395,y:215},{name:"HDMI",x:450,y:215},
+   {name:"ALIMENTATORE",x:505,y:215},{name:"RICAMBI",x:715,y:215}
+ ];
+ const s=supplies.find(o=>Math.hypot(player.x-o.x,player.y-o.y)<70);
+ if(s){
+   if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
+   if(!inventory.includes(s.name))inventory.push(s.name);
+   updateInventoryUI();toast(`PRESO // ${s.name}`);return true;
+ }
+ toast("Niente da prendere qui.");return false;
+}
+
+function v12c45Deliver(){
+ if(state?.phase!=="shift"||v12c45IsBlockingUI())return false;
+
+ if(carryMission?.stage==="deliver"){
+   const t=carryTarget();
+   if(t&&Math.hypot(player.x-t.x,player.y-t.y)<90){
+     const ix=inventory.indexOf(carryMission.item);
+     if(ix<0){toast("NON HAI L'OGGETTO RICHIESTO");return true}
+     inventory.splice(ix,1);
+     const recipient=carryMission.recipient?.name||safeRoom(carryMission.to,"POSTAZIONE");
+     state.xp+=180;state.solved++;state.stress=Math.max(0,state.stress-3);
+     toast(`CONSEGNATO // ${carryMission.item} → ${recipient} // +180 XP`);
+     carryMission=null;updateInventoryUI();updateTaskProgress();return true;
+   }
+ }
+
+ if(studioEvent?.type==="AMAZON"&&Math.hypot(player.x-650,player.y-210)<105){
+   const p=studioEvent.packages.find(p=>p.owner==="PLAYER"&&p.taken&&!p.done&&inventory.includes(p.label));
+   if(p){
+     inventory.splice(inventory.indexOf(p.label),1);p.done=true;updateInventoryUI();
+     const done=studioEvent.packages.filter(x=>x.owner==="PLAYER"&&x.done).length;
+     showStudioEventHud("CONSEGNA AMAZON",`${done}/2 pacchi IT depositati`);
+     if(done>=2){
+       state.xp+=240;state.solved++;
+       showRewardResult("EVENTO COMPLETATO",["PACCHI IT DEPOSITATI","XP +240"],"success");
+       studioEvent=null;hideStudioEventHud();updateTaskProgress();
+     }
+     return true;
+   }
+ }
+
+ if(studioEvent?.carried&&!studioEvent.completed){
+   const t=studioEvent.to;
+   if(t&&Math.hypot(player.x-t.x,player.y-t.y)<95){
+     const item=studioEvent.item||"OGGETTO";
+     const ix=inventory.indexOf(item);if(ix>=0)inventory.splice(ix,1);
+     const type=studioEvent.type;studioEvent.completed=true;
+     if(type==="MEETING_RUSH")v12c42MeetingState="COMPLETED";
+     const xp=type==="MEETING_RUSH"?220:200;
+     state.xp+=xp;state.solved++;updateInventoryUI();
+     toast(`CONSEGNATO // ${item} // XP +${xp}`);
+     studioEvent=null;hideStudioEventHud();updateTaskProgress();return true;
+   }
+ }
+ toast("Niente da consegnare qui.");return false;
+}
+
+
+function v12c45RepairPcTask(){
+ if(state?.phase!=="shift")return false;
+ if(Math.hypot(player.x-V102_LAB_BENCH.x,player.y-V102_LAB_BENCH.y)>70)return false;
+ if(!inventory.includes("RICAMBI")){
+   toast("SERVONO RICAMBI // PRENDILI DAL MAGAZZINO");
+   return true;
+ }
+ inventory=inventory.filter(x=>x!=="RICAMBI");
+ state.xp+=160;state.solved++;
+ toast("PC RIPARATO AL BANCO LAB // XP +160");
+ hud();updateTaskProgress();
+ return true;
+}
+
+
+function v113ManualCapoInteract(){
+ if(!mokasa||state?.phase!=="shift")return false;
+ if(Math.hypot(player.x-mokasa.x,player.y-mokasa.y)>65)return false;
+ if(typeof v109EndShiftReady!=="undefined"&&v109EndShiftReady){
+   v109EndShiftReady=false;startBoss();return true;
+ }
+ sideMessage("CAPO","Ci vediamo a fine turno.");
+ return true;
+}
+
 function interact(){
+ if(storyOpen){closeStory();return true;}
+
+ const _modal114=document.getElementById("modal");
+ if(_modal114&&!_modal114.classList.contains("hidden")&&!activeMiniGame){
+   _modal114.classList.add("hidden");
+   storyOpen=false;uiMessageBusy=false;
+   if(typeof v11MissionBriefOpen!=="undefined")v11MissionBriefOpen=false;
+   return true;
+ }
+
+ if(v113ManualCapoInteract())return true;
+ if(!v110FirstMissionResolved&&typeof IT_PC!=="undefined"&&v118ValidPoint(IT_PC)&&Math.hypot(player.x-IT_PC.x,player.y-IT_PC.y)<78){
+   if(bootWorkstation())return true;
+ }
+
+ if(managerRaceDone&&storyOpen&&!v12c452UiActuallyBlocking())storyOpen=false;
+
+ if(v12c45RepairPcTask())return true;
  if(storyOpen){closeStory();return}
- if(state.phase!=="shift")return;
+ if(state?.phase!=="shift")return;
 
  // Porta: disponibile soltanto dopo TELEFONO -> beginEntranceWalk().
  if(tryStudioEntrance())return;
 
- if(hrAdvice())return;
+ /* 1.0.9: Betty is handled through npcTalk / pending offer */
 
  if(bootWorkstation())return;
- if(interactStudioEvent())return;
- if(interactCarry())return;
  let i=tickets.findIndex(t=>Math.hypot(player.x-t.p.x,player.y-t.p.y)<75);
  if(i<0){
  const near=nearestNPC();
@@ -2130,7 +2872,7 @@ window.addEventListener("keydown",e=>{
  if(e.key==="n"||e.key==="N"){e.preventDefault();restartRun(true)}
 });
 
-function checkEarlyEnd(){clamp();if(state.strikes>=state.maxStrikes)return ending("IMPOSTORE","Troppi interventi errati. Le tue credenziali IT vengono revocate.");if(state.rep<=0)return ending("LICENZIATO","La reputazione è crollata. ACCESS REVOKED.");if(state.incident>=100)return ending("MAJOR INCIDENT","L'infrastruttura dello studio è offline.");if(state.stress>=100)return ending("BURNOUT","Non riesci più a gestire il turno.")}
+function checkEarlyEnd(){clamp();if(state.strikes>=state.maxStrikes)return ending("IMPOSTORE","Troppi interventi errati. Le tue credenziali IT vengono revocate.");if(state.rep<=0)return ending("LICENZIATO","La reputazione è crollata. ACCESS REVOKED.");if(state.incident>=100)return ending("MAJOR INCIDENT","L'infrastruttura dello studio è offline.");if(state.stress>=98&&v12c41BurnoutReady(dt))return ending("BURNOUT","Non riesci più a gestire il turno.")}
 function showAnomaly(text,duration=2600){
  const o=$("#anomalyOverlay"),t=$("#anomalyText");
  t.textContent=text;
@@ -2170,6 +2912,20 @@ function anomalyEvent(){
  if(phase==="ESCALATION"&&Math.random()<.12){showAnomaly("UNKNOWN SESSION // USER 00",1500);state.anomalyPenalty++}
  if(a>.55&&Math.random()<.12)state.stress+=2*difficultyConfig[difficulty].stressMult;
 }function maybeCritical(){if(state.min>600&&Math.random()<difficultyConfig[difficulty].criticalChance)newTicket("CRITICAL")}
+
+let v109EndShiftReady=false;
+const V109_BOSS_DOOR={x:1325,y:545};
+
+function v109ArmEndShift(){
+ if(v109EndShiftReady)return;
+ v109EndShiftReady=true;
+ state.min=BOSS;
+ phoneMessage("IT MANAGER","Fine turno. Il Capo ti aspetta in SALA MEET CAPO.");
+ showMissionBanner("FINE TURNO","Vai fisicamente in Sala Meet Capo e premi E sul Capo.","18:43 // DIREZIONE","FINALE");
+ hud();
+}
+function v109TryStartFinale(){return false;}
+
 function startBoss(){
  state.phase="boss";state.min=BOSS;tickets=[];renderTickets();state.bossPhase=1;bossModal();
 }
@@ -2202,7 +2958,7 @@ function ending(type,text,win=false){
  }else{$("#modalBody").innerHTML=`<h2 class="critical">${type}</h2><p>${text}</p><button class="choice" onclick="location.reload()">NUOVA PARTITA</button>`;$("#modal").classList.remove("hidden")}
 }
 function clamp(){state.incident=Math.max(0,Math.min(100,state.incident));state.stress=Math.max(0,Math.min(100,state.stress));state.rep=Math.max(0,Math.min(5,state.rep))}
-$("#x").onclick=()=>{if(state&&state.phase!=="shift"){toast("Questo evento non può essere ignorato.");return}$("#modal").classList.add("hidden")};
+$("#x").onclick=()=>{if(state&&state?.phase!=="shift"){toast("Questo evento non può essere ignorato.");return}$("#modal").classList.add("hidden")};
 function hud(){clamp();$("#clock").textContent=fmt(state.min);$("#stress").textContent=Math.round(state.stress)+"%";$("#rep").textContent="★".repeat(state.rep)+"☆".repeat(5-state.rep);$("#strikes").textContent=state.strikes+"/"+state.maxStrikes;$("#xp").textContent=state.xp;$("#incident").textContent=Math.round(state.incident)+"%"}
 
 
@@ -2220,55 +2976,576 @@ function monitorEntranceIntro(){
 }
 
 function updateWorkloadStress(dt){
- if(!state||introStage!=="done"||state.phase!=="shift")return;
-
+ if(!v12c42CanGenerateWork())return;
+ if(!state||!shiftStarted||state.phase!=="shift")return;
  const open=tickets.length;
  const critical=tickets.filter(t=>t.level==="CRITICAL").length;
  const high=tickets.filter(t=>t.level==="HIGH").length;
- const deadline=tickets.filter(t=>t.due-state.min<20).length;
- const hostile=[...ambientNPCs,...npcs].filter(n=>ensureRelation(n)<=-15).length;
-
- // V10.2 BALANCE:
- // 0-2 ticket => quasi nessuna pressione.
- // 3-4 => pressione leggera.
- // 5+ / HIGH / CRITICAL / deadline => pressione reale.
+ const deadline=tickets.filter(t=>t.due-state.min<18).length;
  let pressure=0;
- if(open>=3)pressure+=(open-2)*0.16;
- if(open>=5)pressure+=(open-4)*0.12;
- pressure+=high*0.18;
- pressure+=critical*0.42;
- pressure+=deadline*0.15;
- pressure+=hostile*0.006;
- pressure+=(state.incident/100)*0.08;
-
- // Difficulty still matters, but much less aggressively.
- const mult={
-   easy:0.55,
-   normal:0.78,
-   hard:1.00,
-   nightmare:1.22
- }[difficulty]||0.78;
-
- if(pressure>0){
-   state.stress+=pressure*dt*mult;
- }else{
-   // Quiet periods slowly recover stress.
-   state.stress=Math.max(0,state.stress-0.035*dt);
- }
-
- // Lunch is an actual recovery window.
- if(isLunch()){
-   state.stress=Math.max(0,state.stress-(open<=2?0.14:0.07)*dt);
- }
-
- // Low stress should remain stable instead of creeping upward.
- if(state.stress<40&&open<=2){
-   state.stress=Math.max(0,state.stress-0.025*dt);
- }
-
+ if(open>=4)pressure+=(open-3)*0.10;
+ if(open>=6)pressure+=(open-5)*0.08;
+ pressure+=high*0.10+critical*0.24+deadline*0.08+(state.incident/100)*0.04;
+ const mult={easy:0.42,normal:0.60,hard:0.82,nightmare:1.05}[difficulty]||0.60;
+ if(pressure>0)state.stress+=pressure*dt*mult; else state.stress=Math.max(0,state.stress-0.05*dt);
+ if(isLunch())state.stress=Math.max(0,state.stress-(open<=3?0.18:0.10)*dt);
+ if(state.stress<45&&open<=3)state.stress=Math.max(0,state.stress-0.035*dt);
  clamp();
 }
+
+/* V12 CLEAN.4.1 — meeting/burnout balance guard */
+let v12c41StressFrameStart=0;
+function v12c41BeginStressFrame(){
+ if(state)v12c41StressFrameStart=Number(state.stress)||0;
+}
+function v12c41CapStressSpike(maxGain=1.35){
+ if(!state)return;
+ const ceiling=v12c41StressFrameStart+maxGain;
+ if(state.stress>ceiling)state.stress=ceiling;
+ state.stress=Math.max(0,Math.min(100,state.stress));
+}
+function v12c41MeetingStress(minutesToMeeting,missed=false){
+ // Advance warning is information, not punishment.
+ if(minutesToMeeting>0)return 0;
+ // Once it has started, pressure ramps gently.
+ if(!missed)return 0.35;
+ // Missing it matters, but never causes instant burnout.
+ return 6;
+}
+
+
+let v12c41BurnoutHighFor=0;
+function v12c41BurnoutReady(dt){
+ if(!state)return false;
+ if(state.stress>=98)v12c41BurnoutHighFor+=dt;
+ else v12c41BurnoutHighFor=Math.max(0,v12c41BurnoutHighFor-dt*2);
+ return v12c41BurnoutHighFor>=8;
+}
+
+
+/* V12 CLEAN.4.2 — shift is dormant until the player is physically inside */
+function v12c42OperationalShift(){
+  return !!(enteredStudio && shiftStarted && state?.phase==="shift");
+}
+function v12c42CanGenerateWork(){
+  return v12c42OperationalShift() && !storyOpen;
+}
+
+
+
+
+/* V12 CLEAN.4.4 — PAO hard exit corridor */
+const V12C44_PAO_EXIT=[
+ {x:165,y:650,room:"BIM"},
+ {x:205,y:650,room:"BIM"},
+ {x:245,y:425,room:"CORRIDOIO"},
+ {x:285,y:425,room:"CORRIDOIO"}
+];
+function v12c44IsPao(n){
+ return !!n && (n.name==="PAO" || n.id==="pao");
+}
+function v12c44PaoExitReserved(x,y,n){
+ if(v12c44IsPao(n))return false;
+ return V12C44_PAO_EXIT.some(p=>Math.hypot(x-p.x,y-p.y)<30);
+}
+function v12c44PaoExitRoute(n,target){
+ const release=[
+  {x:195,y:625,room:"BIM"},
+  {x:235,y:625,room:"BIM"},
+  {x:273,y:625,room:"CORRIDOIO"}
+ ];
+ const route=[];let from={x:n.x,y:n.y,room:"BIM"};
+ for(const p of release){const seg=findNpcPath(from,p);if(seg?.length)route.push(...seg);from=p}
+ if(target){const seg=findNpcPath(from,target);if(seg?.length)route.push(...seg)}
+ return route;
+}
+
+/* AUDIT removed obsolete v12c43PaoExitRoute */
+
+
+
+function v12c44ManagedWorker(n){
+ return !!n && v12c43AllWorkers().includes(n);
+}
+
+function v12c43UpdateWorkers(dt){
+ if(v111PhysicalMissionBusy())return;
+ if(!v12c42CanGenerateWork()||isLunch())return;
+
+ for(const n of v12c43AllWorkers()){
+   if(n.id==="pao"||n.id==="don")continue;
+   if(n.id==="pao"||n.id==="don")continue;
+   v12c43EnsureDesk(n);
+   if(typeof n.workBias!=="number" || n.workBias<0.85)n.workBias=0.78+Math.random()*0.10;
+
+   if(n.state==="returnDesk"){
+     if(moveNpcRoute(n,dt)){
+       n.state="work";
+       n.x=n.deskX;n.y=n.deskY;
+       n.workTimer=55+Math.random()*105;
+       n.activityCooldown=50+Math.random()*100;
+       n.route=null;n.routeIndex=0;
+     }
+     continue;
+   }
+
+   if(n.state==="work"){
+     n.workTimer-=dt;
+     n.activityCooldown-=dt;
+
+     if(n.workTimer<=0){
+       n.workTimer=60+Math.random()*110;
+
+       if(n.activityCooldown<=0 && !n.activityTicket && Math.random()>(n.workBias||0.88)){
+         n.activityCooldown=80+Math.random()*160;
+         const r=Math.random();
+         n.activity=r<.28?"coffee":r<.48?"printer":r<.66?"bathroom":r<.80?"meeting":"wander";
+         const target=activityDestination(n,n.activity);
+
+         if(v118ValidPoint(target)){
+           n.target=target;
+           n.routeGoal=target;
+           if(v12c44IsPao(n)&&n.homeRoom==="BIM"&&target.room!=="BIM"){
+             n.route=v12c44PaoExitRoute(n,target);
+           }else{
+             n.route=findNpcPath({x:n.x,y:n.y},target);
+           }
+           n.routeIndex=0;
+           n.state="activityTravel";
+         }
+       }
+     }
+     continue;
+   }
+
+   // Legacy activity states can run to completion, then always return to desk.
+   if(["idle","wander","coffee","printer","bathroom","meeting"].includes(n.state) && !n.activityTicket){
+     v12c43RouteToDesk(n);
+   }
+ }
+}
+
+
+let v12c45LastSafePlayer={x:0,y:0};
+function v12c45InitPlayerSafe(){
+ v12c45LastSafePlayer={x:player.x,y:player.y};
+}
+function v12c45PlayerAntiStuck(){
+ if(walkable(player.x,player.y)){
+   v12c45LastSafePlayer={x:player.x,y:player.y};
+   return;
+ }
+ player.x=v12c45LastSafePlayer.x;
+ player.y=v12c45LastSafePlayer.y;
+}
+
+
+/* V12 CLEAN.4.6 — canonical gameplay unlock */
+function v12c452UiActuallyBlocking(){
+ const modal=document.getElementById("modal");
+ const end=document.getElementById("endGameOverlay");
+ const mission=document.getElementById("missionBanner");
+ const modalVisible=!!(modal && !modal.classList.contains("hidden") && modal.offsetParent!==null);
+ const endVisible=!!(end && !end.classList.contains("hidden") && end.offsetParent!==null);
+ const missionVisible=!!(mission && !mission.classList.contains("hidden") && mission.offsetParent!==null);
+ return modalVisible||endVisible||missionVisible||activeMiniGame||storyOpen;
+}
+function v12c452ReleaseGameplayLocks(){
+ if(!state||state.phase!=="shift")return;
+ storyOpen=false;
+ uiMessageBusy=false;
+ if(typeof v11MissionBriefOpen!=="undefined")v11MissionBriefOpen=false;
+ if(typeof v11RaceArmed!=="undefined")v11RaceArmed=false;
+ if(typeof introMissionArmed!=="undefined")introMissionArmed=false;
+
+ const modal=document.getElementById("modal");
+ if(modal && !activeMiniGame)modal.classList.add("hidden");
+
+ const mission=document.getElementById("missionBanner");
+ if(mission)mission.classList.add("hidden");
+
+ document.body?.classList?.remove("modal-open","locked","paused");
+}
+function v12c452FinishManagerRace(){
+ managerRaceDone=true;
+ introStage="done";
+ v12c452ReleaseGameplayLocks();
+
+ const m=npcs.find(n=>n.id==="manager");
+ if(m){
+   m.state="managerRoutine";
+   m.route=null;
+   m.routeIndex=0;
+   m.activity=null;
+   m.exclaimUntil=0;
+   m._lastOptionalTalk=performance.now();
+ }
+}
+let v12c452SoftLockFor=0;
+function v12c452GameplayWatchdog(dt){
+ if(!state||state.phase!=="shift")return;
+ if(!enteredStudio)return;
+
+ const physicallyBlocking=v12c452UiActuallyBlocking();
+ const suspicious=(introStage==="done"||managerRaceDone) && !physicallyBlocking;
+
+ if(suspicious){
+   v12c452SoftLockFor+=dt;
+   if(v12c452SoftLockFor>1.25){
+     v12c452ReleaseGameplayLocks();
+     v12c452SoftLockFor=0;
+   }
+ }else{
+   v12c452SoftLockFor=0;
+ }
+}
+
+
+function v1PaoAntiStuck(dt){
+ const p=[...ambientNPCs,...npcs].find(n=>n&&(n.id==="pao"||n.name==="PAO"));
+ if(!p||!p.route?.length)return;
+ p._v1Watch=(p._v1Watch??0)+dt;
+ if(p._v1Watch<1)return;
+ p._v1Watch=0;
+ if(p.routeIndex>=p.route.length){p.route=null;p.routeIndex=0;if(p.state==="specialReturn")p.state="work"}
+}
+
+
+/* VERSIONE1ITSHIFT 1.0.2 — ticket lifetime normalization */
+function v102NormalizeTicketLifetime(){
+ if(!Array.isArray(tickets)||!state)return;
+ for(const t of tickets){
+   if(t._v102LifetimeNormalized)continue;
+   const remaining=(typeof t.due==="number")?t.due-state.min:0;
+   const minimum=t.level==="CRITICAL"?28:t.level==="HIGH"?35:t.level==="MEDIUM"?45:60;
+   if(typeof t.due!=="number"||remaining<minimum)t.due=state.min+minimum;
+   t._v102LifetimeNormalized=true;
+ }
+}
+
+
+/* VERSIONE1ITSHIFT 1.0.2 — conservative soft-lock guard */
+let v102LastSafePlayer=null;
+
+function v102SoftLockGuard(){
+ if(!state||state.phase!=="shift"||!player)return;
+
+ if(Number.isFinite(player.x)&&Number.isFinite(player.y)&&walkable(player.x,player.y)){
+   v102LastSafePlayer={x:player.x,y:player.y};
+ }else if(v102LastSafePlayer){
+   player.x=v102LastSafePlayer.x;
+   player.y=v102LastSafePlayer.y;
+ }
+
+ const modal=document.getElementById("modal");
+ const modalVisible=!!(modal&&!modal.classList.contains("hidden")&&modal.offsetParent!==null);
+
+ // Clear stale narrative lock only when no real blocking UI exists.
+ if(!modalVisible&&!activeMiniGame&&storyOpen&&managerRaceDone){
+   storyOpen=false;
+   uiMessageBusy=false;
+   if(typeof v11MissionBriefOpen!=="undefined")v11MissionBriefOpen=false;
+ }
+}
+
+
+/* VERSIONE1ITSHIFT 1.0.6 — SPECIAL NPC ROAMING */
+const V106_SPECIAL_POINTS={
+ pao:[
+  {x:255,y:615,room:"CORRIDOIO"},
+  {x:355,y:585,room:"CORRIDOIO"},
+  {x:530,y:695,room:"CORRIDOIO"},
+  {x:730,y:700,room:"CORRIDOIO"}
+ ],
+ don:[
+  {x:760,y:700,room:"CORRIDOIO"},
+  {x:1040,y:710,room:"CORRIDOIO"},
+  {x:1180,y:700,room:"CORRIDOIO"},
+  {x:690,y:600,room:"CORRIDOIO"}
+ ]
+};
+
+function v106SpecialNpcById(id){
+ return [...ambientNPCs,...npcs].find(n=>n&&(n.id===id||String(n.name||"").toLowerCase()===id));
+}
+
+function v106RouteNpc(n,target,stateName){
+ if(!n||!target)return false;
+ const r=findNpcPath({x:n.x,y:n.y,room:n.currentRoom||n.homeRoom},target);
+ if(!r||!r.length)return false;
+ n.route=r.slice(0,140);
+ n.routeIndex=0;
+ n.routeGoal={...target};
+ n.state=stateName||"specialRoam";
+ n.stuckFor=0;n.blockedFor=0;
+ return true;
+}
+
+function v106SpecialRoamUpdate(dt){
+ if(v111PhysicalMissionBusy())return;
+ if(!state||state.phase!=="shift"||isLunch())return;
+ const cfgs={
+  pao:{home:{x:140,y:675,room:"BIM"},path:[{x:205,y:675,room:"BIM"},{x:245,y:675,room:"CORRIDOIO"},{x:330,y:680,room:"CORRIDOIO"},{x:450,y:700,room:"CORRIDOIO"},{x:570,y:700,room:"CORRIDOIO"}]},
+  don:{home:{x:1045,y:880,room:"CUCINA"},path:[{x:1045,y:805,room:"CUCINA"},{x:1045,y:740,room:"CORRIDOIO"},{x:960,y:705,room:"CORRIDOIO"},{x:850,y:700,room:"CORRIDOIO"},{x:740,y:700,room:"CORRIDOIO"}]}
+ };
+ for(const id of ["pao","don"]){
+   const n=v106SpecialNpcById(id),cfg=cfgs[id];if(!n)continue;
+   n._spT=(n._spT??(8+Math.random()*8))-dt;
+   if(n.state==="specialRoam"||n.state==="specialReturn"){
+     if(moveNpcRoute(n,dt)){
+       if(n.state==="specialRoam"){n.state="specialPause";n._spT=5+Math.random()*5}
+       else{n.state="work";n.route=null;n.routeIndex=0;n.x=cfg.home.x;n.y=cfg.home.y;n._spT=10+Math.random()*12}
+     }continue;
+   }
+   if(n.state==="specialPause"){
+     if(n._spT<=0){
+       n.route=[...cfg.path].reverse().map(p=>({...p}));n.route.push({...cfg.home});
+       n.routeIndex=0;n.routeGoal={...cfg.home};n.state="specialReturn";
+     }continue;
+   }
+   if(n._spT<=0){
+     n.route=cfg.path.map(p=>({...p}));n.routeIndex=0;
+     n.routeGoal={...cfg.path[cfg.path.length-1]};n.state="specialRoam";n.stuckFor=0;n.blockedFor=0;
+   }
+ }
+}
+
+
+function v106NpcSafetyPass(){
+ const all=[...ambientNPCs,...npcs];
+ for(const n of all){
+   if(!n)continue;
+   if(!Number.isFinite(n.x)||!Number.isFinite(n.y)){
+     n.x=Number.isFinite(n.homeX)?n.homeX:400;
+     n.y=Number.isFinite(n.homeY)?n.homeY:400;
+     n.route=null;n.routeIndex=0;n.state="work";
+   }
+   if(Array.isArray(n.route)&&n.route.length>160)n.route=n.route.slice(0,160);
+   if((n.routeIndex||0)>200){n.route=null;n.routeIndex=0;n.state="work"}
+ }
+}
+
+
+function v107PersistentCarryHud(){
+ if(!state||state.phase!=="shift")return;
+ if(studioEvent?.type==="AMAZON"){
+   const held=studioEvent.packages?.find(p=>p.owner==="PLAYER"&&p.taken&&!p.done&&inventory.includes(p.label));
+   if(held){
+     showStudioEventHud("CONSEGNA AMAZON",`${held.label} → ${v107PackageDestinationText()} // G = CONSEGNA`);
+   }
+ }
+}
+
+
+function v110RuntimeSafety(){
+ if(!state||state.phase!=="shift")return;
+ if(!Number.isFinite(state.min))state.min=540;
+ if(!Number.isFinite(player.x)||!Number.isFinite(player.y)){player.x=420;player.y=810}
+ for(const n of [...ambientNPCs,...npcs]){
+   if(!n)continue;
+   if(!Number.isFinite(n.x)||!Number.isFinite(n.y)){
+     n.x=Number.isFinite(n.homeX)?n.homeX:400;n.y=Number.isFinite(n.homeY)?n.homeY:400;
+     n.route=null;n.routeIndex=0;n.state="work";
+   }
+   if(Array.isArray(n.route)&&n.route.length>120)n.route=n.route.slice(0,120);
+ }
+}
+
+
+function v112BossSafety(){
+ if(!mokasa)return;
+ mokasa.x=1435; mokasa.y=555;
+ mokasa.homeX=1435; mokasa.homeY=555;
+ mokasa.state="bossIdle";
+ mokasa.hunter=false; mokasa.seeking=false;
+ mokasa.route=null; mokasa.routeIndex=0;
+ mokasa.stuckFor=0; mokasa.blockedFor=0;
+}
+
+
+function v113CapoProximitySafety(){
+ if(!mokasa)return;
+ mokasa.court=true;mokasa.seeking=false;
+ mokasa.route=null;mokasa.routeIndex=0;
+ mokasa.state="bossIdle";
+ if(state?.phase==="shift" && !(typeof v109EndShiftReady!=="undefined"&&v109EndShiftReady)){
+   if(typeof encounterLock!=="undefined")encounterLock=false;
+ }
+}
+
+
+function v114LunchRecoveryWatch(){
+ if(!state||state.phase!=="shift"||state.min<800||isLunch())return;
+ const specials=[
+   v106SpecialNpcById("pao"),
+   v106SpecialNpcById("don"),
+   npcs.find(n=>n.id==="hr"||n.name==="BETTY"),
+   npcs.find(n=>n.id==="zia"||n.name==="ZIA ALE"),
+   npcs.find(n=>n.id==="manager")
+ ].filter(Boolean);
+
+ let stuck=false;
+ for(const n of specials){
+   const inKitchen=n.x>=860&&n.x<=1180&&n.y>=700&&n.y<=930;
+   if(inKitchen){
+     n._v114KitchenStuck=(n._v114KitchenStuck||0)+1;
+     if(n._v114KitchenStuck>90)stuck=true;
+   }else{
+     n._v114KitchenStuck=0;
+   }
+ }
+ if(stuck)v114PostLunchReset();
+}
+
+let v114LastUiProgress=performance.now();
+let v114LastStateMin=null;
+
+function v114UiLockWatchdog(){
+ if(!state||state.phase!=="shift")return;
+ const now=performance.now();
+ if(v114LastStateMin!==state.min){
+   v114LastStateMin=state.min;
+   v114LastUiProgress=now;
+   return;
+ }
+ if(now-v114LastUiProgress>5000 && !activeMiniGame && !(typeof v109EndShiftReady!=="undefined"&&v109EndShiftReady)){
+   storyOpen=false;
+   uiMessageBusy=false;
+   if(typeof encounterLock!=="undefined")encounterLock=false;
+   if(typeof v11MissionBriefOpen!=="undefined")v11MissionBriefOpen=false;
+   const modal=document.getElementById("modal");
+   if(modal)modal.classList.add("hidden");
+   const story=document.getElementById("storyDialog");
+   if(story)story.classList.add("hidden");
+   storyOpen=false;storyCallback=null;
+   v114LastUiProgress=now;
+ }
+}
+
+function v116AmazonStorySafety(){
+ if(!storyOpen)return;
+ const who=document.getElementById("storyWho")?.textContent||"";
+ const text=document.getElementById("storyText")?.textContent||"";
+ if(who==="ZIA ALE"&&text.includes("pacchi Amazon")){
+   closeStory();
+ }
+}
+
+
+/* VERSIONE1ITSHIFT 1.0.17 DIAG — runtime trace + recovery */
+const V117_DIAG = {
+ lastSystem:"boot",
+ lastTickAt:performance.now(),
+ lastClock:null,
+ sameClockFor:0,
+ recoveries:0,
+ frameCount:0,
+ log:[]
+};
+
+function v117Trace(system,extra=""){
+ V117_DIAG.lastSystem=system;
+ V117_DIAG.lastTickAt=performance.now();
+ const line=`${state?.min??"?"}|${system}|${extra}`;
+ V117_DIAG.log.push(line);
+ if(V117_DIAG.log.length>80)V117_DIAG.log.shift();
+ try{localStorage.setItem("itshift_diag",JSON.stringify(V117_DIAG.log))}catch(e){}
+}
+
+function v117Recover(reason){
+ V117_DIAG.recoveries++;
+ v117Trace("RECOVER",reason);
+
+ // clear only stale/unsafe runtime locks
+ if(typeof encounterLock!=="undefined")encounterLock=false;
+ if(typeof uiMessageBusy!=="undefined")uiMessageBusy=false;
+ if(typeof storyOpen!=="undefined")storyOpen=false;
+ if(typeof v11MissionBriefOpen!=="undefined")v11MissionBriefOpen=false;
+
+ const modal=document.getElementById("modal");
+ if(modal && !activeMiniGame)modal.classList.add("hidden");
+ const story=document.getElementById("storyDialog");
+ if(story && !activeMiniGame)story.classList.add("hidden");
+
+ // sanitize player
+ if(!Number.isFinite(player.x)||!Number.isFinite(player.y)){
+   player.x=420;player.y=810;
+ }
+
+ // sanitize NPCs and kill pathological routes
+ const all=[...(ambientNPCs||[]),...(npcs||[])];
+ for(const n of all){
+   if(!n)continue;
+   if(!Number.isFinite(n.x)||!Number.isFinite(n.y)){
+     n.x=Number.isFinite(n.homeX)?n.homeX:400;
+     n.y=Number.isFinite(n.homeY)?n.homeY:400;
+   }
+   if(Array.isArray(n.route)&&n.route.length>80)n.route=n.route.slice(0,80);
+   if((n.routeIndex||0)>100){
+     n.route=null;n.routeIndex=0;
+   }
+   n.stuckFor=0;n.blockedFor=0;
+ }
+
+ // keep special static safety
+ if(typeof mokasa!=="undefined"&&mokasa){
+   mokasa.route=null;mokasa.routeIndex=0;mokasa.seeking=false;mokasa.court=true;
+ }
+}
+
+function v117RuntimeWatchdog(dt){
+ V117_DIAG.frameCount++;
+ const now=performance.now();
+
+ if(!state||state.phase!=="shift")return;
+
+ if(!Number.isFinite(state.min)){
+   state.min=540;
+   v117Recover("state.min NaN");
+ }
+
+ if(V117_DIAG.lastClock===state.min){
+   V117_DIAG.sameClockFor+=dt;
+ }else{
+   V117_DIAG.sameClockFor=0;
+   V117_DIAG.lastClock=state.min;
+ }
+
+ // If the clock does not move for 4 seconds and no true minigame is active,
+ // recover stale state instead of freezing forever.
+ if(V117_DIAG.sameClockFor>4 && !activeMiniGame && !(typeof v109EndShiftReady!=="undefined"&&v109EndShiftReady)){
+   v117Recover("clock-stalled:"+V117_DIAG.lastSystem);
+   V117_DIAG.sameClockFor=0;
+ }
+
+ // Hard cap on per-frame route complexity.
+ for(const n of [...(ambientNPCs||[]),...(npcs||[])]){
+   if(n&&Array.isArray(n.route)&&n.route.length>80)n.route=n.route.slice(0,80);
+ }
+}
+
 function update(dt) {
+ v117Trace('update-start');
+ v117RuntimeWatchdog(dt);
+ v116AmazonStorySafety();
+ v117Trace('v114UiLockWatchdog');v118SafeCall('v114UiLockWatchdog',()=>v114UiLockWatchdog());
+ v117Trace('v114LunchRecoveryWatch');v118SafeCall('v114LunchRecoveryWatch',()=>v114LunchRecoveryWatch());
+ v113CapoProximitySafety();
+ v112BossSafety();
+ v111RaceWatch();
+ dt=Math.min(Math.max(Number.isFinite(dt)?dt:0,0),0.04);v110RuntimeSafety();
+  dt=Math.min(Math.max(Number.isFinite(dt)?dt:0,0),0.05);
+ v107PersistentCarryHud();
+ v106NpcSafetyPass();
+ v117Trace('v106SpecialRoamUpdate');v118SafeCall('v106SpecialRoamUpdate',()=>v106SpecialRoamUpdate(dt));
+ v102SoftLockGuard();
+ v102NormalizeTicketLifetime();
+ v1PaoAntiStuck(dt);
+ v12c452GameplayWatchdog(dt);
+ v12c45PlayerAntiStuck();
+ v117Trace('v12c43UpdateWorkers');v118SafeCall('v12c43UpdateWorkers',()=>v12c43UpdateWorkers(dt));
+ v12c41BeginStressFrame();
+ v12cApplyDonLock();
  updateBettySupport(dt);
  updateWorkloadStress(dt);
 
@@ -2281,7 +3558,7 @@ function update(dt) {
    if(!m||Math.hypot(player.x-m.x,player.y-m.y)<190){introMissionArmed=false;startShiftFromEntrance()}
  }
 
- if(state.phase==="shift"){
+ if(state?.phase==="shift"){
   let dx=(keys.d||keys.arrowright||virtualKeys.right?1:0)-(keys.a||keys.arrowleft||virtualKeys.left?1:0)+(joyActive?joyX:0),
       dy=(keys.s||keys.arrowdown||virtualKeys.down?1:0)-(keys.w||keys.arrowup||virtualKeys.up?1:0)+(joyActive?joyY:0);
   if(!storyOpen&&introStage!=="entranceGreeting"&&(Math.abs(dx)>.04||Math.abs(dy)>.04)){let l=Math.max(1,Math.hypot(dx,dy)),vx=dx/l*player.s*dt,vy=dy/l*player.s*dt;if(playerCanMove(player.x,player.y,player.x+vx,player.y))player.x+=vx;if(playerCanMove(player.x,player.y,player.x,player.y+vy))player.y+=vy}
@@ -2291,12 +3568,12 @@ function update(dt) {
    if(m&&Math.hypot(player.x-m.x,player.y-m.y)<190){introMissionArmed=false;startShiftFromEntrance()}
   }
   
-  if(shiftStarted)state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed); if(state.min>=BOSS){startBoss();hud();return}
+  if(shiftStarted&&!v109EndShiftReady)state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed); if(state.min>=BOSS&&!v109EndShiftReady)v109ArmEndShift();
   spawnTimer+=dt;anomTimer+=dt;
  updateLunchMigration(dt);
- updateManager(dt);
+ v117Trace('updateManager');v118SafeCall('updateManager',()=>updateManager(dt));
  updateNarrative();
- v12cStoryProgression();
+ v117Trace('v12cStoryProgression');v118SafeCall('v12cStoryProgression',()=>v12cStoryProgression());
  maybeStartStudioEvent();
  updateStudioEvent(dt);
  if(!firstCarryTriggered && state.min>=START+3){ firstCarryTriggered=true; }
@@ -2315,66 +3592,24 @@ function update(dt) {
  mokasaTimer+=dt*difficultyConfig[difficulty].timeSpeed;
  if(introStage==="done"&&!isLunch()&&!mokasa&&state.min>960&&mokasaTimer>70&&Math.random()<.0022){spawnMokasa();mokasaTimer=0}
  if(mokasa){mokasa.life=Infinity;updateCapoRoutine(dt)}
- updateAmbient(dt);
- if(!isLunch()) for(const n of npcs.filter(x=>x.hunter)){
-   // PAO deve essere un incontro occasionale, DON un po' più mobile.
-   const chance=n.id==="pao"?.00055:.0014;
-   const gap=n.id==="pao"?105:65;
-   if(!n.seeking && state.min-(n.lastHunt??-999)>gap && Math.random()<chance){
-     n.seeking=true;
-     n.seekFor=n.id==="pao"?9:15;
-     n.lastHunt=state.min;
-   }
-
-   // V5.2 DON: routine reale su porte/corridoi, non più fermo in cucina.
-   if(n.id==="don"&&!n.seeking&&n.state!=="specialLunchTravel"&&n.state!=="lunch"&&n.state!=="specialReturn"){
-     n.donTimer=(n.donTimer??0)-dt;
-     if((!n.route||n.routeIndex>=n.route.length)&&n.donTimer<=0){
-       const stops=[
-        {x:900,y:705,room:"CORRIDOIO"},
-        {x:925,y:250,room:"SALA MEET"},
-        {x:1180,y:705,room:"STAMPANTI"},
-        {x:895,y:855,room:"CUCINA"},
-        {x:720,y:705,room:"CORRIDOIO"}
-       ];
-       const target=stops[Math.floor(Math.random()*stops.length)];
-       n.route=routeViaHub(n,target);n.routeIndex=0;n.donTimer=12+Math.random()*18;
-     }
-     if(n.route&&n.routeIndex<n.route.length)moveNpcRoute(n,dt);
-   }
-
-   if(n.seeking){
-     n.seekFor-=dt;
-     // Hunter segue il corridoio: evita di tagliare le pareti.
-     const dx=player.x-n.x,dy=player.y-n.y,d=Math.hypot(dx,dy);
-     if(d>55){
-       const step=48*dt;
-       const nx=n.x+Math.sign(dx)*Math.min(Math.abs(dx),step);
-       const ny=n.y+Math.sign(dy)*Math.min(Math.abs(dy),step);
-       if(playerCanMove(n.x,n.y,nx,n.y))n.x=nx;
-       else if(playerCanMove(n.x,n.y,n.x,ny))n.y=ny;
-     }
-     if(d<72&&!encounterLock){pokemonEncounter(n)}
-     if(n.seekFor<=0)n.seeking=false;
-   }
- }
+ v117Trace('updateAmbient');v118SafeCall('updateAmbient',()=>updateAmbient(dt));
+ /* 1.0.9 legacy hunter AI removed. */
  const moved=Math.hypot(player.x-lastPlayerPos.x,player.y-lastPlayerPos.y);
  if(moved<2)idleMinutes+=dt*difficultyConfig[difficulty].timeSpeed;else{idleMinutes=0;lastPlayerPos={x:player.x,y:player.y}}
- if(mokasa&&!mokasa.court&&Math.hypot(player.x-mokasa.x,player.y-mokasa.y)<92){
-   const last=npcCooldown.mokasa??-999;
-   if(state.min-last>20){
-     npcTalk(mokasa);
-     // V6.5: il CAPO è una presenza persistente; dopo l’interazione resta nello studio.
-     idleMinutes=0;
-   }
- }
-if(introStage==="done"&&!isLunch()&&spawnTimer>difficultyConfig[difficulty].spawnSeconds){spawnTimer=0;newTicket();maybeCritical()}
+ 
+  /* 1.0.13 CAPO proximity encounter removed */
+
+if(shiftStarted&&!isLunch()&&spawnTimer>difficultyConfig[difficulty].spawnSeconds){spawnTimer=0;newTicket();maybeCritical()}
  const phase=dayPhase();
  const anomalyEvery=phase==="MORNING"?26:phase==="LUNCH"?14:phase==="AFTERNOON"?21:10;
  if(anomTimer>anomalyEvery){anomTimer=0 /* V5: no supernatural anomaly system */}
   expireTickets();
  } else if(state.phase==="boss")state.min=BOSS;else state.min=END;
  hud();updateTaskProgress();
+
+ v12c41CapStressSpike();
+
+ v12c45PlayerAntiStuck();
 }
 
 /* V2.2 VISUAL MAP PASS — navigation/collisioni INALTERATE */
@@ -2528,8 +3763,11 @@ function furniture(){
  // Reparti normali compatti; CENTRALE V6.5: due tavoli distinti da 6.
  desk(72,185,145); drawHRRoom(); desk(70,405,135); desk(1080,205,115); desk(1280,205,145);
  centralDesk6(355,385,380); centralDesk6(355,505,380); // CENTRALE 6 + 6, corridoio centrale libero
- // Reparto IT: due postazioni soltanto, PG + Manager.
+ // BIM: postazioni migrate.
  desk(78,650,145); desk(78,585,145);
+ // V1.0.5 REPARTO IT: due postazioni reali, PG + IT Manager.
+ desk(78,795,145); desk(78,865,145);
+ desk(585,800,135); // V1.0.6 ZIA ALE // SEGRETERIA
  meetingRoomSetup(872,155,126,935,105);meetingRoomSetup(875,435,225,1030,405);meetingRoomSetup(1340,500,180,1430,450);
  drawDiningTable();
  desk(1190,850,190); // solo banco stampanti
@@ -2632,7 +3870,120 @@ function drawServerRacks(){
   g.fillStyle="#96a59c";g.font="7px monospace";g.fillText(r.id,r.x-1,r.y-4);
  });
 }
+
+function v12c45DrawLab(){return}
+
+
+/* VERSIONE1ITSHIFT 1.0.2 — standalone IT Lab extension, rooms[] untouched */
+const V102_LAB={x:770,y:55,w:225,h:150,name:"SERVER"};
+const V102_LAB_DROP={x:895,y:175};
+const V102_LAB_BENCH={x:945,y:140};
+
+function v102InsideLab(x,y){
+ return x>=V102_LAB.x&&x<=V102_LAB.x+V102_LAB.w&&y>=V102_LAB.y&&y<=V102_LAB.y+V102_LAB.h;
+}
+
+function v102DrawLab(){return}
+
+function v102LabRoute(from,to){
+ const fr=safeRoom(from,""),tr=safeRoom(to,"");
+ const wantsLab=(tr==="SERVER");
+ const leavesLab=(fr==="SERVER");
+ if(!wantsLab&&!leavesLab)return null;
+
+ // Server actual room ends around x755, so connector uses doorway immediately to the right.
+ return wantsLab
+ ?[{x:725,y:135,room:"SERVER"},{x:755,y:135,room:"SERVER"},{x:780,y:135,room:"SERVER"},{x:895,y:135,room:"SERVER"}]
+ :[{x:895,y:135,room:"SERVER"},{x:780,y:135,room:"SERVER"},{x:755,y:135,room:"SERVER"},{x:725,y:135,room:"SERVER"}];
+}
+
+
+function v104DrawTechnicalLabLabel(){
+ g.save();
+ g.fillStyle="#020706";
+ g.fillRect(440,64,270,25);
+ g.fillStyle="#55dfff";
+ g.font="12px monospace";
+ g.fillText("SERVER + SERVER / MAGAZZINO IT",448,81);
+ g.restore();
+}
+
+
+function v107DrawServerDeposit(){
+ g.save();
+ g.strokeStyle="#55dfff";g.lineWidth=3;
+ g.strokeRect(620,195,60,42);
+ g.fillStyle="#55dfff";g.font="10px monospace";
+ g.fillText("DEPOSITO IT",612,188);
+ g.restore();
+}
+
+
+function v110DrawBettyDesk(){
+ g.save();
+ g.fillStyle="#705b45";g.fillRect(92,176,126,22);
+ g.fillStyle="#1f2327";g.fillRect(135,155,42,22);
+ g.fillStyle="#9ba4a8";g.fillRect(151,177,8,16);
+ g.restore();
+}
+
+
+/* VERSIONE1ITSHIFT 1.0.11 — FIXED MATERIAL POINTS */
+const V111_PHYSICAL_POINTS={
+ SERVER_PICKUP:{x:650,y:220,room:"SERVER",label:"RITIRO IT"},
+ SERVER_DROP:{x:700,y:220,room:"SERVER",label:"DEPOSITO IT"},
+ MEET_DROP:{x:925,y:205,room:"SALA MEET",label:"CONSEGNA MEETING"},
+ IT_DROP:{x:150,y:825,room:"IT",label:"BANCO IT"}
+};
+
+function v111PhysicalMissionBusy(){
+ return !!((studioEvent&&["AMAZON","MEETING_RUSH"].includes(studioEvent.type))||(carryMission&&!carryMission.done));
+}
+
+function v111DrawPhysicalPoints(){
+ if(!v111PhysicalMissionBusy())return;
+ g.save();
+ for(const p of Object.values(V111_PHYSICAL_POINTS)){
+   g.strokeStyle="#55dfff";g.lineWidth=2;g.strokeRect(p.x-18,p.y-14,36,28);
+   g.fillStyle="#55dfff";g.font="8px monospace";g.fillText(p.label,p.x-28,p.y-20);
+ }
+ g.restore();
+}
+
+
+let v117DiagVisible=false;
+document.addEventListener("keydown",e=>{
+ if(e.code==="F3"){
+   e.preventDefault();
+   v117DiagVisible=!v117DiagVisible;
+ }
+});
+
+function v117DrawDiag(){
+ if(!v117DiagVisible)return;
+ g.save();
+ g.fillStyle="rgba(0,0,0,.88)";
+ g.fillRect(20,110,520,170);
+ g.fillStyle="#8dff47";
+ g.font="12px monospace";
+ g.fillText("DIAG 1.0.17",35,135);
+ g.fillStyle="#fff";
+ g.fillText(`LAST: ${V117_DIAG.lastSystem}`,35,158);
+ g.fillText(`CLOCK: ${state?.min} | STALL: ${V117_DIAG.sameClockFor.toFixed(2)}s`,35,180);
+ g.fillText(`RECOVERIES: ${V117_DIAG.recoveries} | JS ERR: ${v118RuntimeErrors}`,35,202);
+ const tail=V117_DIAG.log.slice(-3);
+ tail.forEach((x,i)=>g.fillText(x,35,226+i*18));
+ g.restore();
+}
+
 function draw(){
+ v117DrawDiag();
+ v111DrawPhysicalPoints();
+ v110DrawBettyDesk();
+ v107DrawServerDeposit();
+ v104DrawTechnicalLabLabel();
+ v102DrawLab();
+ v12c45DrawLab();
  g.setTransform(1,0,0,1,0,0);
  g.fillStyle="#020403";g.fillRect(0,0,W,H);
  const cam=computeCamera();
@@ -2777,7 +4128,7 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  drawPixelPerson(player.x,player.y,"#284f3a","#d0a887","#17231d");
 
 
- if(debug)drawV7Debug();
+ if(debug){drawV7Debug();v12c44DrawCollisionDebug();}v12c3DrawManagerRouteDebug();
 
  if(useCam)g.restore();
  drawMiniMap();
@@ -2787,6 +4138,77 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
    grad.addColorStop(1,"rgba(0,0,0,.48)");
    g.fillStyle=grad;g.fillRect(0,0,W,H);
  }
+}
+
+
+function v12c3DrawManagerRouteDebug(){
+ if(!debug)return;
+ const pts=[
+  {x:650,y:735},{x:520,y:705},{x:365,y:705},
+  {x:300,y:675},{x:255,y:650},{x:190,y:640}
+ ];
+ g.save();
+ g.strokeStyle="#ffcc33";g.lineWidth=3;g.beginPath();
+ pts.forEach((p,i)=>i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));
+ g.stroke();
+ g.fillStyle="#ffcc33";
+ pts.forEach((p,i)=>{g.fillRect(p.x-4,p.y-4,8,8);g.fillText("M"+i,p.x+6,p.y-6)});
+ g.restore();
+}
+
+
+/* V12 CLEAN.4.4 — restore collision/debug rendering */
+function v12c44DrawCollisionDebug(){
+ if(!debug)return;
+ g.save();
+
+ // Walkable grid
+ const step=24;
+ for(let y=0;y<H;y+=step){
+   for(let x=0;x<W;x+=step){
+     if(!walkable(x,y)){
+       g.fillStyle="rgba(255,70,70,.14)";
+       g.fillRect(x,y,step,step);
+     }else{
+       g.fillStyle="rgba(60,180,255,.035)";
+       g.fillRect(x,y,step,step);
+     }
+   }
+ }
+
+ // Room bounds
+ g.strokeStyle="rgba(255,220,80,.65)";
+ g.lineWidth=2;
+ for(const r of rooms){
+   g.strokeRect(r.x,r.y,r.w,r.h);
+ }
+
+ // NPC routes
+ for(const n of [...ambientNPCs,...npcs]){
+   if(!n?.route?.length)continue;
+   g.strokeStyle=v12c44IsPao(n)?"#ffd400":"#4de1ff";
+   g.lineWidth=2;
+   g.beginPath();
+   g.moveTo(n.x,n.y);
+   for(let i=n.routeIndex||0;i<n.route.length;i++){
+     const p=n.route[i];g.lineTo(p.x,p.y);
+   }
+   g.stroke();
+ }
+
+ // PAO reserved exit
+ g.strokeStyle="#ffcc33";
+ g.lineWidth=3;
+ g.beginPath();
+ V12C44_PAO_EXIT.forEach((p,i)=>i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));
+ g.stroke();
+ g.fillStyle="#ffcc33";
+ V12C44_PAO_EXIT.forEach((p,i)=>{
+   g.fillRect(p.x-4,p.y-4,8,8);
+   g.fillText("P"+i,p.x+6,p.y-6);
+ });
+
+ g.restore();
 }
 
 function drawV7Debug(){
@@ -2987,8 +4409,8 @@ function v911StartupSelfTest(){
      if(!cfg.table||!cfg.screen||!Array.isArray(cfg.seats))problems.push("meeting config "+name);
    }
  }catch(e){problems.push(e.message)}
- if(problems.length)console.error("V12 CLEAN SELF TEST",problems);
- else console.log("V12 CLEAN SELF TEST // OK");
+ if(problems.length)console.error("VERSIONE1ITSHIFT 1.0.18 SELF TEST",problems);
+ else console.log("VERSIONE1ITSHIFT 1.0.18 SELF TEST // OK");
  return problems;
 }
 
@@ -3015,3 +4437,50 @@ window.addEventListener("keydown",e=>{
 document.getElementById("toLore")?.addEventListener("click",()=>{
  document.querySelector(".v91Home")?.classList.add("leaving");
 },{capture:true});
+
+
+
+
+
+
+/* V1.0.15 — browser focus recovery: changing tab must never leave movement/time locks behind. */
+document.addEventListener("visibilitychange",()=>{
+  keys={};
+  if(!document.hidden){last=performance.now();v114LastUiProgress=performance.now();}
+});
+window.addEventListener("blur",()=>{keys={};});
+window.addEventListener("focus",()=>{keys={};last=performance.now();v114LastUiProgress=performance.now();});
+
+/* V12 CLEAN.4.5.1 — canonical physical-action keys */
+document.addEventListener("keydown",function v12c451PhysicalKeys(e){
+ if(e.repeat)return;
+ const k=(e.key||"").toLowerCase();
+ if(k!=="f"&&k!=="g")return;
+
+ const ae=document.activeElement;
+ if(ae && ["INPUT","TEXTAREA","SELECT"].includes(ae.tagName))return;
+
+ // Do not steal F/G on boot/lore screens.
+ const boot=document.getElementById("boot");
+ const lore=document.getElementById("lore");
+ if((boot&&boot.classList.contains("active"))||(lore&&lore.classList.contains("active")))return;
+
+ e.preventDefault();
+ e.stopImmediatePropagation();
+
+ if(k==="f")v12c45Pickup();
+ else v12c45Deliver();
+},true);
+
+
+(function v118SelfTest(){
+ const failures=[];
+ if(typeof sideMessage!=="function")failures.push("sideMessage");
+ if(typeof activityDestination!=="function")failures.push("activityDestination");
+ if(typeof v118ValidPoint!=="function")failures.push("v118ValidPoint");
+ const d=activityDestination({x:1,y:2,homeX:3,homeY:4,homeRoom:"TEST"},"wander");
+ if(!v118ValidPoint(d))failures.push("activityDestination-result");
+ if(failures.length)console.error("VERSIONE1ITSHIFT 1.0.18 SELF TEST // FAIL",failures);
+ else console.log("VERSIONE1ITSHIFT 1.0.18 SELF TEST // OK");
+})();
+
