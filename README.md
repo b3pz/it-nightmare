@@ -547,3 +547,12 @@ Basata sugli errori reali della Console della 1.0.17.
 - Sottosistemi opzionali del frame protetti: un errore viene loggato ma non interrompe l'intero game loop.
 - F3 continua a mostrare diagnostica e ora include il conteggio JS ERR.
 - Self-test specifico 1.0.18 all'avvio.
+
+## VERSIONE1ITSHIFT 1.0.19 — GOLD BASE HOTFIX
+Base: 1.0.18, mantenuta invariata nel gameplay.
+
+- Fix mirato dell'ultimo `Cannot read properties of undefined (reading 'x')`.
+- Aggiunte guardie sui punti/destinazioni prima di leggere `.x/.y`.
+- Nessuna modifica a mappa, NPC, eventi, gara, pranzo, CAPO o progressione.
+- Mantiene F3 DIAG e i controlli runtime della 1.0.18.
+- Aggiunto self-test 1.0.19 per le distanze sicure.

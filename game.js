@@ -9,7 +9,7 @@ function v911ShowError(message,source="",line=0,col=0){
  }
  const bar=document.getElementById("jsError");
  if(bar){
-   bar.textContent=`JS ERROR VERSIONE1ITSHIFT 1.0.18 // ${txt}${line?` @ ${line}:${col}`:""}`;
+   bar.textContent=`JS ERROR VERSIONE1ITSHIFT 1.0.19 // ${txt}${line?` @ ${line}:${col}`:""}`;
    bar.classList.remove("hidden");
  }
  console.error("V9.1 runtime error:",message,source,line,col);
@@ -1241,6 +1241,12 @@ function activityDestination(n,kind){
 function v118ValidPoint(p){
  return !!(p&&Number.isFinite(p.x)&&Number.isFinite(p.y));
 }
+
+function v119SafeDistanceTo(p){
+ if(!v118ValidPoint(p))return 9999;
+ return Math.hypot(player.x-p.x,player.y-p.y);
+}
+
 
 let v118RuntimeErrors=0;
 function v118SafeCall(label,fn){
@@ -2780,7 +2786,7 @@ function v12c45RepairPcTask(){
 
 function v113ManualCapoInteract(){
  if(!mokasa||state?.phase!=="shift")return false;
- if(Math.hypot(player.x-mokasa.x,player.y-mokasa.y)>65)return false;
+ if((v118ValidPoint(mokasa)?Math.hypot(player.x-mokasa.x,player.y-mokasa.y):9999)>65)return false;
  if(typeof v109EndShiftReady!=="undefined"&&v109EndShiftReady){
    v109EndShiftReady=false;startBoss();return true;
  }
@@ -2800,7 +2806,7 @@ function interact(){
  }
 
  if(v113ManualCapoInteract())return true;
- if(!v110FirstMissionResolved&&typeof IT_PC!=="undefined"&&v118ValidPoint(IT_PC)&&Math.hypot(player.x-IT_PC.x,player.y-IT_PC.y)<78){
+ if(!v110FirstMissionResolved&&typeof IT_PC!=="undefined"&&v118ValidPoint(IT_PC)&&(v118ValidPoint(IT_PC)?Math.hypot(player.x-IT_PC.x,player.y-IT_PC.y):9999)<78){
    if(bootWorkstation())return true;
  }
 
@@ -2816,7 +2822,7 @@ function interact(){
  /* 1.0.9: Betty is handled through npcTalk / pending offer */
 
  if(bootWorkstation())return;
- let i=tickets.findIndex(t=>Math.hypot(player.x-t.p.x,player.y-t.p.y)<75);
+ let i=tickets.findIndex(t=>(v118ValidPoint(t.p)?Math.hypot(player.x-t.p.x,player.y-t.p.y):9999)<75);
  if(i<0){
  const near=nearestNPC();
  if(near&&near.d<65){npcTalk(near.n);return}
@@ -4409,8 +4415,8 @@ function v911StartupSelfTest(){
      if(!cfg.table||!cfg.screen||!Array.isArray(cfg.seats))problems.push("meeting config "+name);
    }
  }catch(e){problems.push(e.message)}
- if(problems.length)console.error("VERSIONE1ITSHIFT 1.0.18 SELF TEST",problems);
- else console.log("VERSIONE1ITSHIFT 1.0.18 SELF TEST // OK");
+ if(problems.length)console.error("VERSIONE1ITSHIFT 1.0.19 SELF TEST",problems);
+ else console.log("VERSIONE1ITSHIFT 1.0.19 SELF TEST // OK");
  return problems;
 }
 
@@ -4480,7 +4486,16 @@ document.addEventListener("keydown",function v12c451PhysicalKeys(e){
  if(typeof v118ValidPoint!=="function")failures.push("v118ValidPoint");
  const d=activityDestination({x:1,y:2,homeX:3,homeY:4,homeRoom:"TEST"},"wander");
  if(!v118ValidPoint(d))failures.push("activityDestination-result");
- if(failures.length)console.error("VERSIONE1ITSHIFT 1.0.18 SELF TEST // FAIL",failures);
- else console.log("VERSIONE1ITSHIFT 1.0.18 SELF TEST // OK");
+ if(failures.length)console.error("VERSIONE1ITSHIFT 1.0.19 SELF TEST // FAIL",failures);
+ else console.log("VERSIONE1ITSHIFT 1.0.19 SELF TEST // OK");
 })();
 
+
+(function v119SelfTest(){
+ const failures=[];
+ if(typeof v119SafeDistanceTo!=="function")failures.push("v119SafeDistanceTo");
+ if(v119SafeDistanceTo(null)!==9999)failures.push("safeDistance-null");
+ if(!Number.isFinite(v119SafeDistanceTo({x:1,y:2})))failures.push("safeDistance-valid");
+ if(failures.length)console.error("VERSIONE1ITSHIFT 1.0.19 SELF TEST // FAIL",failures);
+ else console.log("VERSIONE1ITSHIFT 1.0.19 SELF TEST // OK");
+})();
