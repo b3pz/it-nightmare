@@ -556,3 +556,182 @@ Base: 1.0.18, mantenuta invariata nel gameplay.
 - Nessuna modifica a mappa, NPC, eventi, gara, pranzo, CAPO o progressione.
 - Mantiene F3 DIAG e i controlli runtime della 1.0.18.
 - Aggiunto self-test 1.0.19 per le distanze sicure.
+
+## VERSIONE1ITSHIFT 1.0.20 — MISSIONI FISICHE
+- Base invariata: 1.0.19 GOLD.
+- Marker visivo sul punto di ritiro/consegna.
+- F = PRENDI.
+- G = CONSEGNA / INSTALLA.
+- E vicino al punto ricorda il tasto corretto, senza completare la missione.
+- HUD esplicito con materiale, origine e destinazione.
+- Nessuna modifica a CAPO, NPC, pranzo, mappa o progressione.
+
+## VERSIONE1ITSHIFT 1.0.21 — NPC SPECIALI
+Base: 1.0.20 stabile.
+
+- PAO: alleato, battute Fiorentina, bonus o piccola bega in base al rapporto.
+- DON: super alleato, bonus forti e possibilità di rimuovere un errore.
+- BETTY: supporto HR, riduzione stress e possibile reputazione.
+- ZIA ALE: caffè, reputazione o +10 minuti su una scadenza.
+- IT MANAGER: interazioni dedicate dopo la gara.
+- Le interazioni speciali hanno priorità sul dialogo generico.
+- Cooldown per evitare farming continuo dei bonus.
+- Badge discreto sopra gli NPC speciali.
+- Nessuna modifica a mappa, fisica, task core, pranzo o CAPO.
+
+## 1.0.22
+- Rimossi i tag tecnici permanenti della 1.0.21.
+- PAO e DON percorrono più zone dello studio tramite il pathfinding esistente.
+- IT Manager preferisce il SERVER nella routine.
+- Betty e Zia Ale chiamano quando lo stress sale, offrendo bonus senza creare task.
+- Dialoghi stile Game Boy con testo progressivo; E/ENTER completa/passa la frase.
+
+## VERSIONE1ITSHIFT 1.0.23 — PRECISIONE / SERVER WORKSHOP / GUIDA
+Base: 1.0.22 stabile.
+
+### Marker fisici
+- Corretto il bug strutturale: il marker 1.0.20 veniva disegnato dopo il ripristino della camera.
+- Ora il marker è disegnato nello stesso spazio-mondo dell'oggetto e punta al punto interattivo esatto.
+- Reticolo preciso + freccia + comando F/G.
+- I vecchi punti fissi generici restano visibili solo in DEBUG.
+
+### Server Room
+- Aggiunti scaffali MAGAZZINO IT nello spazio libero della Server Room.
+- Aggiunto BANCO RIPARAZIONI.
+- I pickup SERVER ora puntano agli scaffali.
+- Le consegne/deposito SERVER puntano all'area Magazzino.
+- E sugli scaffali/banco mostra una descrizione; il sistema riparazioni vero arriverà dopo.
+- Nessuna nuova collisione è stata aggiunta: layout visuale senza rischio per il pathfinding.
+
+### Tutorial / accessibilità
+- TAB ha una nuova sezione GUIDA.
+- Tutorial contestuale leggero: movimento, primo ticket, prima missione fisica.
+- Usa il dialogo Game Boy della 1.0.22 e non modifica timer, spawn o loop di gioco.
+
+## 1.0.24
+- Ripristinata la priorità dell'intro originale: Zia Ale → ingresso → corsa IT Manager → turno.
+- Tutorial 1.0.23 rinviato fino a gara completata + prima missione iniziale risolta.
+- Nuovo dialogo pausante stile Game Boy.
+- Flag dedicato `dialogPause`: non usa storyOpen/encounterLock.
+- Durante il dialogo il mondo non avanza; il testo continua tramite timer DOM.
+- E/ENTER completa/passa la frase.
+- Conservati marker preciso, Magazzino IT, banco riparazioni e TAB→GUIDA.
+
+## VERSIONE1ITSHIFT 1.0.25 — NPC / MAGAZZINO / MISSION LIFECYCLE
+
+- IT Manager: vera routine Reparto IT → Server Room → sosta → ritorno.
+- PAO e DON: roaming più frequente e molto più ampio.
+- PAO/DON possono avviare piccole interazioni quando passano vicino al giocatore.
+- Magazzino IT: vero punto `G // DEPOSITA`.
+- Oggetti delle missioni fisiche vengono rimossi dall'inventario a successo/fallimento.
+- Meeting Urgente: tempo esteso e cleanup automatico del materiale se fallisce.
+- Fallimento Meeting: dialogo esplicito, niente missione che sparisce in silenzio.
+- Core 1.0.24, dialoghi Game Boy, marker preciso e workshop mantenuti.
+
+## VERSIONE1ITSHIFT 1.0.26
+- Gara iniziale: l'IT Manager deve partire realmente e completare il percorso.
+- La gara non può risultare conclusa prima che giocatore e manager abbiano entrambi finito.
+- Risultato finale corsa con tempi TU / IT MANAGER.
+- Missioni fisiche: HUD sempre con ORIGINE → DESTINAZIONE.
+- Cleanup forte dell'inventario su fallimento: HDMI, alimentatore e altri oggetti task-bound vengono rimossi.
+- Meeting urgente: timeout più lungo e materiale restituito automaticamente se fallisce.
+- Dialoghi Game Boy della 1.0.25 mantenuti.
+
+## VERSIONE1ITSHIFT 1.0.29 — CLEAN REBUILD
+
+Base: 1.0.26.
+
+### Cosa è stato rifatto
+- Eliminato tutto il ramo MAP REMASTER 1.0.28.x: nessuno scaleX/scaleY/offset.
+- Intro 08:58 e TELEFONO automatiche.
+- Unico input obbligatorio nell'intro: E alla porta.
+- Zia Ale apre automaticamente; non serve una seconda E per entrare.
+- Attraversata la soglia parte una cinematic automatica.
+- Durante la cinematic WASD/E/F/G/TAB/M/numeri sono ignorati e non alterano lo stato.
+- Zia Ale avvisa che il Manager è arrivato.
+- Countdown 3 → 2 → 1 → VIA automatico.
+- Gara del Manager completamente indipendente dal pathfinder: route fissa e movimento dedicato.
+- Nessun managerTrigger/proximity trigger per avviare la gara.
+- Il giocatore conclude la gara solo al LOGIN, non quando apre il minigioco.
+- La gara si risolve quando entrambi hanno terminato.
+- F4 = audit live dell'intro/gara.
+
+### Conservato dalla 1.0.26
+- Mappa originale e coordinate originali.
+- Magazzino IT e banco riparazioni.
+- Meeting Urgente.
+- Cleanup missioni fisiche.
+- Marker missioni.
+- Dialoghi Game Boy per il resto del gioco.
+- NPC speciali e sistemi del turno.
+
+## VERSIONE1ITSHIFT 1.0.29.1 — RECOVERY
+
+Correzioni di avvio:
+- `v119SafeDistanceTo()` non accede più a `player.x/player.y` prima che `reset()` abbia creato il player.
+- La cinematic usa il canvas reale `C` invece della variabile inesistente `canvas`.
+- Aggiornata la barra degli errori alla versione 1.0.29.1.
+
+Test browser eseguito:
+- schermata iniziale caricata senza eccezioni runtime;
+- INIZIA LA GIORNATA;
+- intro automatica fino a `doorReady`;
+- apertura porta;
+- attraversamento soglia;
+- cinematic automatica;
+- countdown;
+- `race === true`;
+- IT Manager osservato in movimento sulla route;
+- IT Manager osservato arrivare alla postazione IT;
+- nessuna eccezione runtime durante il flusso testato.
+
+## VERSIONE1ITSHIFT 1.0.29.2 — WALLS / PATHS
+
+Base: 1.0.29.1 RECOVERY, run completa confermata.
+
+### Collisioni
+- PLAYER e NPC usano la stessa regola.
+- Attraversare il confine di una stanza è possibile solo in corrispondenza di una porta.
+- Il controllo viene fatto lungo tutto il segmento di movimento, non soltanto sul punto finale.
+- Il pathfinder controlla anche l'arco tra due nodi: un nodo valido dall'altra parte del muro non basta più.
+- `moveNpcRoute()` non salta più waypoint bloccati per continuare attraverso il muro.
+- Se una route diventa invalida viene ricalcolata fino alla destinazione.
+
+### Gara
+- Rimossa la route "fantasma" che ignorava collisioni.
+- IT Manager usa lo stesso pathfinder con porte e muri.
+- Velocità gara Manager: 80 px/s invece di 122.
+- Durante la gara ignora solo gli altri NPC, NON muri/porte.
+- F4 segnala anche `RACE CROSSES WALL` se la route gara non è legale.
+
+### Nota
+Questa build mantiene la mappa della 1.0.29.1; non introduce ancora il nuovo layout.
+Il sistema di collisione è stato unificato proprio per rendere più semplice e sicura la futura nuova mappa.
+
+## VERSIONE1ITSHIFT 1.0.29.3 — LIFECYCLE FIX
+
+Base: 1.0.29.2 WALLS / PATHS.
+
+Correzioni isolate:
+- rientro NPC post-pranzo: vecchi stati lunch/return/activity vengono puliti;
+- NPC normali ricalcolano una route legale verso la scrivania;
+- PAO e DON riprendono il roaming speciale;
+- oggetti fisici orfani (ALIMENTATORE / HDMI / EXTENDER HDMI / PC da spostare) vengono rimossi quando non esiste più una missione attiva;
+- a fine giornata carryMission/eventi fisici residui vengono azzerati;
+- il task "CAMBIO POSTAZIONE" non deve più restare visibile con TASKS=0;
+- F4 ora segnala POST LUNCH STUCK, ORPHAN INVENTORY e GHOST CARRY AT END SHIFT.
+
+Nessuna modifica a:
+- collisioni 1.0.29.2;
+- intro 1.0.29.1;
+- gara IT Manager;
+- mappa;
+- Meeting se non per cleanup finale oggetti.
+
+## VERSIONE1ITSHIFT 1.0.29.4 — LUNCH TRAFFIC + LATE WORK FIX
+- rientro pranzo con una sola coda e partenze scaglionate;
+- NPC possono sovrapporsi solo durante il rientro, ma muri e porte restano attivi;
+- anti-stuck con ricalcolo route dopo 2 secondi;
+- niente nuovi eventi fisici negli ultimi 30 minuti prima del fine turno;
+- Amazon e cambio postazione rispettano il cutoff;
+- fine turno rimuove anche Amazon/Desk Setup residui, HUD e banner.

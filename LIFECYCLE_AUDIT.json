@@ -1,0 +1,11 @@
+{
+  "build": "1.0.29.3 LIFECYCLE FIX",
+  "base": "1.0.29.2 WALLS PATHS",
+  "fixes": [
+    "post-lunch NPC recovery",
+    "orphan physical inventory cleanup",
+    "end-of-day ghost carry cleanup"
+  ],
+  "runtime_audit": "F4",
+  "note": "Static validation passed; full 09:00→19:00 runtime still requires manual browser run."
+}

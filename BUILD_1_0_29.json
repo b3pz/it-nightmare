@@ -1,0 +1,9 @@
+{
+  "build": "1.0.29 CLEAN REBUILD",
+  "base": "1.0.26",
+  "map_transform": "NONE",
+  "intro": "automatic except E at doorbell",
+  "race": "dedicated fixed route, no pathfinder",
+  "player_finish": "LOGIN",
+  "runtime_audit": "F4"
+}

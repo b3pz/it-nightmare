@@ -1,0 +1,38 @@
+{
+  "build": "1.0.29.2 WALLS PATHS",
+  "base": "1.0.29.1 RECOVERY",
+  "collision_authority": "v1292SegmentAllowed",
+  "applies_to": [
+    "player",
+    "NPC route movement",
+    "NPC BFS pathfinder",
+    "IT Manager race"
+  ],
+  "manager_race_speed": 80,
+  "known_test_points": {
+    "IT_right_wall_non_door": {
+      "from": [
+        235,
+        750
+      ],
+      "to": [
+        245,
+        750
+      ],
+      "expected": "BLOCK"
+    },
+    "IT_right_wall_door": {
+      "from": [
+        235,
+        800
+      ],
+      "to": [
+        245,
+        800
+      ],
+      "expected": "ALLOW"
+    }
+  },
+  "cache_bust": "game.js?v=1.0.29.2 / style.css?v=1.0.29.2",
+  "note": "Browser automation was not available in the current sandbox, so runtime behavior still requires the manual game run."
+}

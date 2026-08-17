@@ -1,0 +1,15 @@
+{
+  "build": "1.0.29.4 LUNCH TRAFFIC FIX",
+  "base": "1.0.29.3",
+  "lunch_return": "staggered; NPC overlap only; walls/doors active",
+  "anti_stuck_seconds": 2,
+  "late_physical_work_cutoff": "BOSS - 30 in-game minutes",
+  "end_shift_cleanup": [
+    "carryMission",
+    "AMAZON",
+    "DESK_SETUP",
+    "MEETING",
+    "mission HUD/banner",
+    "orphan inventory"
+  ]
+}

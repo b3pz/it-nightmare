@@ -449,3 +449,16 @@ body{background:#010201;overflow:hidden}
 #boot .reflection,#boot .shine,#boot .glint{
  animation:none!important;transition:none!important;transform:none!important;
 }
+
+.v122Dialogue{position:fixed;z-index:9500;left:50%;bottom:34px;transform:translateX(-50%);width:min(820px,calc(100vw - 44px));min-height:122px;box-sizing:border-box;background:rgba(7,14,10,.97);border:4px solid #d9e5cf;outline:3px solid #17251b;box-shadow:0 8px 0 rgba(0,0,0,.55);padding:18px 24px 28px;font-family:monospace;color:#f0f4e9}.v122Dialogue.hidden{display:none}.v122Speaker{color:#9cff57;font-weight:900;font-size:15px;letter-spacing:1px;margin-bottom:12px}.v122Text{font-size:18px;line-height:1.45;font-weight:700;min-height:52px}.v122Continue{position:absolute;right:18px;bottom:9px;color:#aab6a7;font-size:11px}
+
+/* 1.0.23 — Tablet guide */
+.tabletTabs{grid-template-columns:repeat(5,1fr)!important}
+.v123Guide{display:grid;gap:10px}
+.v123GuideGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.v123GuideCard{background:#0a100c;border:1px solid #35463d;padding:9px;font:700 9px monospace;color:#d8e3dc}
+.v123GuideCard b{display:block;color:#b7ff4a;font-size:12px;margin-bottom:5px}
+.v123GuideCard span{color:#9aac9f;line-height:1.45}
+.v123GuideTip{border-left:3px solid #6ee7ff;padding:8px 10px;background:#09100d;color:#dff8ff;font:700 9px monospace}
+
+.v122Dialogue{position:fixed;z-index:12000;left:50%;bottom:24px;transform:translateX(-50%);width:min(920px,calc(100vw - 38px));min-height:176px;box-sizing:border-box;background:#e7eddc;border:5px solid #25302b;outline:4px solid #aabf98;box-shadow:0 10px 0 rgba(0,0,0,.5);padding:18px 24px 26px 164px;font-family:monospace;color:#22302a}.v122Dialogue.hidden{display:none}.v122Portrait{position:absolute;left:18px;top:18px;width:124px;height:124px;background:#b8cf9e;border:4px solid #25302b;display:grid;place-items:center;color:#25302b;font:bold 42px monospace}.v122Speaker{position:absolute;left:18px;top:-26px;background:#e7eddc;border:4px solid #25302b;padding:5px 12px;color:#25302b;font-weight:900;font-size:15px}.v122Text{font-size:20px;line-height:1.45;font-weight:900;min-height:90px;white-space:pre-wrap}.v122Continue{position:absolute;right:18px;bottom:10px;color:#405149;font-size:12px;font-weight:900}

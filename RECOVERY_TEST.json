@@ -1,0 +1,20 @@
+{
+  "build": "1.0.29.1 RECOVERY",
+  "root_causes_fixed": [
+    "undefined player access in pre-reset v119 self-test path",
+    "undefined canvas variable in v129 cinematic renderer"
+  ],
+  "browser_flow_verified": [
+    "start screen",
+    "start game",
+    "automatic intro to doorReady",
+    "door opens",
+    "threshold crossing",
+    "automatic cinematic",
+    "countdown",
+    "race active",
+    "manager moving",
+    "manager finishes in IT"
+  ],
+  "runtime_exceptions_during_verified_flow": 0
+}
