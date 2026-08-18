@@ -1,0 +1,16 @@
+{
+  "build": "VERSIONE1ITSHIFT 1.0.30A PIXEL FOUNDATION",
+  "base": "VERSIONE1ITSHIFT 1.0.29.4 LUNCH TRAFFIC FIX (GOLD)",
+  "scope": "visual-only vertical slice",
+  "restyled": [
+    "REPARTO IT",
+    "adjacent corridor",
+    "PLAYER prototype sprite",
+    "IT MANAGER prototype sprite"
+  ],
+  "gameplay_changed": false,
+  "geometry_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false,
+  "toggle": "F6"
+}

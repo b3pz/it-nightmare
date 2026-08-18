@@ -1,0 +1,22 @@
+{
+  "build": "1.0.30B4.2 UI POLISH PASS",
+  "base": "1.0.30B4.1 TABLET TOGGLE FIX",
+  "dialogue": {
+    "shared_dom_shell": true,
+    "desktop_target_css": [
+      760,
+      168
+    ],
+    "intro_canvas_dialogue_removed": true,
+    "countdown_canvas_retained": true,
+    "race_result_same_shell": true,
+    "explicit_text_content_rect": true,
+    "long_text_font_fit": true
+  },
+  "hud": "spacing/border polish only",
+  "tablet": "spacing/frame polish only",
+  "gameplay_changed": false,
+  "map_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

@@ -735,3 +735,478 @@ Nessuna modifica a:
 - niente nuovi eventi fisici negli ultimi 30 minuti prima del fine turno;
 - Amazon e cambio postazione rispettano il cutoff;
 - fine turno rimuove anche Amazon/Desk Setup residui, HUD e banner.
+
+
+## 1.0.30A — PIXEL FOUNDATION
+
+Base ufficiale: VERSIONE1ITSHIFT 1.0.29.4 LUNCH TRAFFIC FIX (GOLD).
+
+Scopo di questa build:
+- primo vertical slice grafico in stile Pokémon / Game Boy Color;
+- nessuna modifica alla geometria della mappa;
+- nessuna modifica a collisioni, pathfinding, AI, pranzo, gara, missioni o inventario;
+- REPARTO IT ridisegnato sopra le coordinate GOLD;
+- piccolo tratto di corridoio convertito a tile;
+- nuove workstation pixel-art mantenendo le hitbox GOLD;
+- prototipo sprite PLAYER: capelli lunghi, barba, occhiali;
+- prototipo sprite IT MANAGER: capelli bianchi, occhiali;
+- animazione visiva direzionale 4-way derivata dal movimento, senza influenzare il gameplay;
+- F6 confronta PIXEL FOUNDATION ON/OFF durante la stessa run.
+
+Questo non è ancora il restyling completo dello studio. Serve per approvare:
+1. scala dei tile;
+2. palette;
+3. proporzioni dei personaggi;
+4. leggibilità di muri, porte e mobili;
+5. direzione artistica prima di rifare l'intera mappa.
+
+
+## 1.0.30A.1 — ROOMS + VISITOR PROOF
+
+Prova concreta del nuovo linguaggio grafico, costruita sopra 1.0.30A:
+
+- REPARTO IT 1.0.30A mantenuto.
+- HR ridisegnato come ufficio individuale caldo/privato.
+- Betty ha sprite dedicato mora con MAGLIA A RIGHE ORIZZONTALI.
+- Ingresso/Segreteria ridisegnato con reception, 2 sedute, porta vetrata e area PACCHI.
+- Zia Ale ha sprite dedicato biondo.
+- Nomi permanenti rimossi sopra Betty, Zia Ale e IT Manager nel nuovo render.
+- Prima prova NPC VISITATORE:
+  camion sulla strada -> corriere -> ingresso -> consegna -> ritorno -> camion riparte.
+- L'evento Amazon avvia automaticamente la sequenza visiva del corriere.
+- F7 avvia manualmente il demo corriere per testarlo subito.
+- F6 continua a confrontare vecchio/nuovo render.
+
+IMPORTANTE:
+questa è ancora una vertical slice/prova. Non cambia le coordinate della GOLD,
+non migra la nuova mappa e non cambia il pathfinding. Le nuove sedute/decori
+sono lo standard visivo da tradurre in vere seat/collision node nella mappa 1.0.30D.
+
+
+## 1.0.30A.2 — SERVER / MAGAZZINO IT RESTYLE
+
+Quarta area convertita al nuovo linguaggio pixel/GBC.
+
+SERVER / MAGAZZINO IT è ora diviso visivamente in:
+
+- ZONA A // RICAMBI
+  scaffali tecnici, scatole/componenti, categorie CAVI / ADATT. / ALIM. / PERIF.
+  Il pickup GOLD resta alle coordinate originali.
+
+- SERVER RACK
+  3 rack A/B/C con LED e pannelli tecnici.
+  I rack usano le coordinate già esistenti nella GOLD.
+
+- ZONA B // CARICO-SCARICO
+  area pavimento marcata con bordo/hazard pixel,
+  simboli pacco + PC e scritta DEPOSITO IT.
+  Il drop point GOLD rimane invariato.
+
+- ZONA C // RIPARAZIONI
+  banco hardware più leggibile con PC aperto, utensili e display diagnostico.
+  Il benchPoint GOLD resta invariato.
+
+La nuova grafica sostituisce soltanto il disegno legacy di rack/scaffali/banco
+quando PIXEL FOUNDATION è attivo. Collisioni, interazioni, missioni e coordinate
+non sono state modificate.
+
+
+## 1.0.30A.3 — ENTRANCE + EXTERIOR FIX
+
+Fix mirato prima di proseguire con Centrale.
+
+SEGRETERIA:
+- reception riposizionata visivamente per non sovrapporsi ai pacchi;
+- area attesa separata dall'asse d'ingresso;
+- area PACCHI spostata completamente a destra;
+- scatole contenute nella loro zona;
+- porta vetrata doppia più leggibile;
+- corsia porta -> corridoio lasciata libera.
+
+ESTERNO FISSO:
+- facciata continua dello studio;
+- portale principale con doppia porta vetrata;
+- insegna "INGRESSO STUDIO";
+- marciapiede completo;
+- soglia / tappeto ingresso;
+- cordolo;
+- strada completa;
+- linea tratteggiata;
+- piccoli dissuasori fuori dall'asse della porta.
+
+Il camion/corriere della 1.0.30A.1 continua a usare la strada ed è renderizzato
+sopra il nuovo esterno.
+
+Nessuna modifica a collisioni, pathfinding, missioni, pranzo, gara o coordinate GOLD.
+
+
+## 1.0.30A.4 — FULL STUDIO RESTYLE
+
+Restyling visuale esteso a TUTTE le stanze rimaste:
+
+- EDITORIA
+- BIM
+- CENTRALE
+- SALA MEET
+- INTERIOR
+- RENDERISTI
+- SPAZIO A
+- BAGNI
+- RIFUGIO DIGITALE
+- SALA MEET CAPO
+- CUCINA
+- STAMPANTI
+- STAMPA 3D
+
+Restano inoltre attivi i restyling già approvati di:
+- REPARTO IT
+- HR
+- SEGRETERIA / INGRESSO
+- SERVER / MAGAZZINO IT
+
+Dettagli:
+- CENTRALE: 12 postazioni visivamente leggibili sui due tavoli già presenti nella geometria GOLD.
+- BIM / Editoria / Interior / Renderisti: 4 postazioni visuali per reparto.
+- Sala Meet: tavolo da 6 + display/AV.
+- Spazio A: tavolo da 8.
+- Sala Meet Capo: 6 posti + posto direzione.
+- Cucina: 12 posti ai tavoli + 4 sgabelli = 16 sedute visuali.
+- Stampanti: 3 macchine distinte con punti attesa.
+- Stampa 3D: 2 stampanti + PC di controllo.
+- Rifugio Digitale: 2 console tecniche + mini rack AV.
+- Bagni: 2 cabine + lavabo/specchio.
+- Tutte le insegne usano ora la stessa grammatica pixel/GBC.
+
+ESTERNO:
+- facciata, marciapiede e strada sono stati estesi fino ai bordi del mondo visivo.
+- la geometria vera dello studio NON è stata allargata: il problema delle stanze
+  troppo vicine tra loro verrà risolto nella nuova mappa, senza rompere la GOLD.
+
+IMPORTANTE:
+questo è ancora un RESTYLING sopra la geometria 1.0.29.4.
+Collisioni, porte, pathfinding, NPC, task e coordinate non sono stati migrati.
+
+
+## 1.0.30B0 — DEPARTMENT GAMEPLAY PROOF
+
+Questa build non prova a rifare tutto il gioco. Dimostra che i sistemi discussi
+possono convivere realmente sopra la base stabile.
+
+F8 apre un vertical slice con 5 casi:
+
+1. BIM / ARCHITETTI
+   "Non mi ricordo la password":
+   prima fai una domanda all'NPC, poi identifichi Windows/dominio e l'intervento.
+   Il problema non parte da un quiz tecnico casuale.
+
+2. EDITORIA / GRAFICI
+   Mac che non salva sul server:
+   problema coerente con Mac fuori dominio, SMB e credenziali.
+   Il secondo step è una sequenza operativa, non una domanda A/B/C.
+
+3. RENDERISTI
+   Chaos Vantage:
+   pannello 3ds Max / Live Link / GPU.
+   Si individua visivamente il nodo disconnesso e si riconnette.
+
+4. RIFUGIO DIGITALE
+   PIXERA:
+   remap di 4 output verso 4 schermi.
+
+5. SALA MEETING
+   video corretto ma audio sul portatile:
+   diagnosi AV e test finale.
+
+RAPPORTI:
+- viene usato l'NPC reale assegnato al reparto quando disponibile;
+- 0 errori = rapporto +1;
+- 1-2 errori = nessuna variazione;
+- 3+ errori = rapporto -1;
+- il valore modifica quindi il sistema rapporti già esistente (-5..+5).
+
+RITMO:
+- durante l'intervento il workday è completamente in pausa;
+- un errore diagnostico non genera immediatamente strike/stress;
+- il risultato esplicita il concetto di "pausa operativa" dopo un intervento.
+Il Game Director definitivo verrà implementato separatamente.
+
+F8 / ESC chiude il proof e riprende la partita.
+
+## 1.0.30B1 — HUD + GAMEPLAY FLOW
+- HUD laterale: minimappa, 3 attività max, ultimo alert, inventario.
+- massimo 2 ticket ordinari contemporanei.
+- F9 prova camera vicina a 1.18x senza cambiare collisioni/path.
+- F8 Department Gameplay Proof mantenuto.
+
+
+## 1.0.30B1.1 — HUD + VIEWPORT + CORRIDORS
+
+HUD CLEAN:
+- vecchia minimappa eliminata visivamente;
+- vecchio Studio Event box eliminato: gli eventi vivono nella sidebar;
+- sidebar destra diventa una rail completa, sempre dentro l'altezza disponibile;
+- inventario non viene più tagliato;
+- task normali mostrano collega + area tecnica coerente col reparto.
+
+VIEWPORT:
+- la camera vera ora tiene conto della larghezza della sidebar;
+- il giocatore viene centrato nell'area realmente visibile, non sotto la UI;
+- zoom standard 1.82x;
+- F9 alterna 1.82x / 2.06x usando la camera reale, non CSS scale.
+
+CORRIDOI:
+- nuova pavimentazione pixel/GBC;
+- nessun inset nero da 11px;
+- incroci più continui;
+- tile, luci a pavimento e segnaletica direzionale;
+- geometria GOLD e walk zone restano IDENTICHE.
+
+SPRITE:
+- corretto orientamento laterale di Player / IT Manager / Betty / Zia Ale;
+- capelli sul retro della testa e viso nella direzione del movimento;
+- fix del comportamento "gamberetto".
+
+Nessuna modifica a collisioni, pathfinding, task logic, pranzo o race.
+
+
+## 1.0.30B1.2 — CAMERA INPUT FIX
+Su macOS i tasti funzione possono essere intercettati dal sistema/browser.
+La camera ora può essere cambiata in tre modi:
+- C = cambia camera (metodo principale)
+- pulsante CAMERA nella sidebar destra
+- F9 resta disponibile dove il sistema operativo lo consente
+
+Il tasto C non viene intercettato mentre si sta scrivendo in input/textarea/select.
+
+
+## 1.0.30B1.3 — ENTRANCE + FLOOR + NPC FIX
+
+INGRESSO:
+- porta visiva, trigger, door-zone e walk-zone ora sono allineati;
+- corsia destra 635→755 completamente libera;
+- reception spostata a sinistra;
+- pacchi e sedute spostati fuori dal percorso;
+- collisione scrivania Zia Ale allineata alla grafica.
+
+GARA:
+- IT Manager non parte più già dentro lo studio;
+- parte nella stessa corsia d'ingresso (650,900);
+- attende 0.55 s dopo VIA;
+- velocità gara 78;
+- camera B1.2 invariata.
+
+PAVIMENTO:
+- corridoi usano una griglia tile GLOBALE;
+- le zone sovrapposte disegnano gli stessi pixel;
+- eliminato il vecchio "corridor slice" verde vicino all'IT;
+- soglie porte uniformate al pavimento corridoio.
+
+NPC:
+- postazioni riallineate ai mobili realmente disegnati;
+- Centrale: 12 sedute reali;
+- Editoria: 2 Mac reali;
+- BIM: 3 NPC + PAO = 4 persone/postazioni;
+- Interior: 4 postazioni;
+- Renderisti: 4 postazioni;
+- Betty, PAO e Zia Ale riposizionati;
+- destinazioni caffè/stampante/bagno/meeting spostate su punti sensati.
+
+NON è ancora la nuova AI definitiva: questa build corregge posizionamento e traffico
+prima del futuro NPC Life AI / Room Rules.
+
+
+## 1.0.30B2 — TITLE + CHARACTER SETUP
+
+TITLE SCREEN:
+- completamente ridisegnata in HTML/CSS pixel-art;
+- protagonista visto da dietro davanti allo studio;
+- facciata, porta, marciapiede e strada richiamano direttamente il gioco;
+- data reale locale mostrata a 08:58;
+- nuova voce NUOVA PARTITA.
+
+CHARACTER SETUP:
+- nome personalizzato (2–12 caratteri);
+- scelta UOMO / DONNA;
+- preview 8-bit live;
+- scelta difficoltà/ritmo;
+- profilo salvato in localStorage.
+
+IN GAME:
+- il nome viene salvato nel player e usato già nell'intro di Zia Ale;
+- UOMO mantiene il protagonista con capelli lunghi, barba e occhiali;
+- DONNA usa uno sprite differente con capelli lunghi, occhiali, niente barba e palette dedicata;
+- la scelta viene applicata allo sprite durante il gameplay;
+- nessuna modifica a collisioni, pathfinding, AI, camera, ticket o giornata.
+
+
+## 1.0.30B3 — TITLE REBUILD
+
+B2 title screen discarded.
+
+B3 title:
+- canvas-based scene, not CSS mockup;
+- drawn with the same pixel grammar as the actual game;
+- real studio facade/road/sidewalk logic;
+- protagonist from behind in the foreground;
+- animated passerby;
+- no giant opaque title panel;
+- no external/generated image assets;
+- same name/gender setup from B2 retained;
+- character setup visually simplified to match the RPG style.
+
+
+## 1.0.30B3.1 — NAME INPUT FIX
+- La cover B3 resta invariata.
+- Durante l'inserimento del nome, `E` non viene più interpretata come Interagisci/Conferma.
+- Lo stesso vale per gli altri shortcut globali mentre il focus è nel campo testo.
+- Il campo nome può quindi ricevere normalmente tutte le lettere.
+
+
+## 1.0.30B3.2 — DIALOGUE UI UNIFICATION
+
+Da questa build esiste un solo linguaggio grafico per i dialoghi:
+
+- Intro automatica (TELEFONO / ZIA ALE)
+- Story Dialog
+- Dialoghi NPC v122
+
+Tutti usano:
+- box chiaro verde/GBC;
+- doppia cornice;
+- tab del nome in alto;
+- area ritratto 8-bit a sinistra;
+- testo nello stesso font/dimensione;
+- indicatore in basso a destra.
+
+La cinematica intro mantiene il countdown 3-2-1-VIA a schermo intero,
+ma tutti i balloon normali sono ora coerenti.
+
+Nessuna modifica a gameplay, camera, collisioni, pathfinding o character setup.
+
+## 1.0.30B4 — RPG UI SYSTEM
+- Sidebar dashboard eliminata.
+- HUD minimale: mappa, una task, `+N ATTIVITÀ`, 3 slot.
+- Radio IT temporanea + storico Tablet.
+- TAB = desktop pixel con TASK / MAPPA / INVENTARIO / PERSONE / LOG / SISTEMA.
+- Nessun lavoro casuale prima del login.
+- Fix `[object Object]`.
+- Balloon normali target 760×164 CSS.
+
+
+## 1.0.30B4.1 — TABLET TOGGLE FIX
+- TAB non è più "hold to open".
+- Un colpo su TAB apre il Tablet.
+- Un secondo colpo su TAB lo chiude.
+- Il keyup di TAB non chiude più il Tablet.
+- Tenere premuto TAB non genera toggle ripetuti (`e.repeat` ignorato).
+- Con Tablet aperto il mouse può cliccare normalmente TASK / MAPPA / INVENTARIO /
+  PERSONE / LOG / SISTEMA.
+- I normali comandi di movimento/interazione vengono bloccati mentre il Tablet è aperto.
+
+
+## 1.0.30B4.2 — UI POLISH PASS
+
+DIALOGHI:
+- storyDialog, v122Dialogue e intro automatica usano ora la STESSA shell DOM.
+- dimensione desktop target unica: 760 × 168 CSS px.
+- stesso tab nome, stesso ritratto, stessa area testo, stesso indicatore.
+- RISULTATO CORSA non ha più geometria speciale: usa esattamente la stessa shell.
+- eliminato il balloon intro disegnato/scalato sul canvas: era la causa principale
+  delle differenze fisiche e del testo spostato/tagliato a sinistra.
+- il canvas dell'intro resta solo per 3-2-1-VIA.
+- area testo con coordinate esplicite + wrapping; nessun testo può partire sotto
+  il ritratto o fuori dal box.
+- font ridotto automaticamente solo per testi lunghi.
+
+HUD:
+- pannelli più separati tra loro;
+- bordi più leggeri;
+- più aria tra minimappa, task e inventario.
+
+TABLET:
+- frame leggermente più pulito;
+- più spazio tra le icone;
+- mantiene il toggle TAB della B4.1.
+
+Nessuna modifica a gameplay, mappa, collisioni, pathfinding, AI o task logic.
+
+
+## 1.0.30B4.3 — DIALOGUE SYSTEM REFACTOR
+
+QUATTRO FAMIGLIE UI:
+1. TOAST
+   - feedback brevissimo, non blocca il gioco.
+2. EVENTO
+   - missionBanner unico e sempre centrato.
+   - risolve casi come PACCHI IN INGRESSO visualizzati fuori asse/tagliati.
+3. DIALOGO
+   - box standard B4.2 per NPC/telefono/conversazioni normali.
+4. STORIA
+   - nuova scena narrativa full-screen con:
+     - ritratto grande 8-bit disegnato dal codice;
+     - name tab;
+     - testo progressivo;
+     - E/ENTER per completare/avanzare;
+     - pausa reale di timer e gameplay.
+
+STORY MOMENTS già collegati:
+- 10:15 ZIA ALE
+- 14:15 ZIA ALE
+- 16:45 IT MANAGER
+- 18:00 CAPO
+
+Messaggi minori come 11:45 Manager e 12:45 DON restano notifiche normali,
+così le scene narrative non diventano continue.
+
+Nessuna modifica a ticket, task content, mappa, collisioni, pathfinding o AI.
+La prossima fase può quindi tornare al gameplay: nuove task per reparto.
+
+
+## 1.0.30B5 — BIM + CENTRALE TASK REWORK
+
+Primo pacchetto gameplay nuovo.
+
+BIM:
+- PASSWORD DIMENTICATA
+- REVIT IN INGLESE
+- DESKTOP CONNECTOR FERMO
+- REVIT CRASHA ALL'AVVIO / ADD-IN
+
+CENTRALE:
+- XREF MANCANTE
+- AUTOCAD NON PARTE / AUTH-LICENZA
+- PC SENZA SERVER / 169.254
+- STAMPA CON SPESSORI SBAGLIATI / CTB
+
+NUOVO LOOP:
+1. Il collega descrive il sintomo.
+2. Il giocatore legge 3 stati reali della postazione.
+3. Identifica quello che spiega davvero il problema.
+4. Sceglie un intervento coerente.
+5. Verifica e completa.
+
+Le scelte sbagliate di diagnosi NON danno automaticamente uno strike:
+il gioco spiega perché quel dato non è rilevante e permette di continuare.
+Questo serve a rendere la diagnostica comprensibile senza farla sembrare
+un esame scolastico.
+
+I casi BIM/CENTRALE sostituiscono i vecchi minigiochi generici quando un
+ticket nasce in quei reparti. Tablet/HUD mostrano titolo e sintomo reali.
+
+Le altre stanze mantengono per ora il gameplay B4.3.
+
+
+## 1.0.30B5.1 — INTERACTIVE PUZZLE REWORK
+Gli 8 casi BIM/Centrale non sono più quiz.
+
+- CTB: drag/selezione CTB + anteprima stampa.
+- XREF: ricostruzione percorso + relink.
+- 169.254: riparazione link + Renew DHCP.
+- Revit lingua: installazione/selezione ITA + avvio.
+- Revit add-in: switch plugin + test avvio.
+- Desktop Connector: sign-in + sync.
+- AutoCAD licensing: token + servizio + avvio.
+- Password: pannello admin + reset account bloccato.
+
+Regola: il testo descrive il sintomo; il giocatore risolve agendo.
+Errore = feedback + piccolo stress, non quiz "risposta corretta".

@@ -1,0 +1,24 @@
+{
+  "build": "1.0.30A.3 ENTRANCE + EXTERIOR FIX",
+  "base": "1.0.30A.2 SERVER / MAGAZZINO RESTYLE",
+  "entrance_fixes": [
+    "reception separated from packages",
+    "waiting area moved left",
+    "package area moved right",
+    "clear door-to-corridor axis",
+    "double glazed door"
+  ],
+  "fixed_exterior": [
+    "studio facade",
+    "main entrance portal",
+    "sidewalk",
+    "curb",
+    "road",
+    "lane markings",
+    "bollards"
+  ],
+  "truck_delivery_retained": true,
+  "collision_changed": false,
+  "pathfinding_changed": false,
+  "gold_coordinates_changed": false
+}

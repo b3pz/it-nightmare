@@ -1,0 +1,18 @@
+{
+  "build": "1.0.30B5.1 INTERACTIVE PUZZLE REWORK",
+  "base": "1.0.30B5 BIM + CENTRALE TASK REWORK",
+  "puzzles": [
+    "CTB drag/drop",
+    "XREF relink",
+    "network link+DHCP",
+    "Revit language",
+    "Revit add-in switches",
+    "Desktop Connector sign-in+sync",
+    "Autodesk licensing",
+    "Windows/domain password reset"
+  ],
+  "multiple_choice_removed": true,
+  "map_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

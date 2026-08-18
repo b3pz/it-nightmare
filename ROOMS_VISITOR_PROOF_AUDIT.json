@@ -1,0 +1,30 @@
+{
+  "build": "1.0.30A.1 ROOMS + VISITOR PROOF",
+  "base": "1.0.30A PIXEL FOUNDATION / 1.0.29.4 GOLD gameplay",
+  "visual_rooms": [
+    "REPARTO IT",
+    "HR",
+    "INGRESSO / SEGRETERIA"
+  ],
+  "principal_sprites": {
+    "PLAYER": "long hair, beard, glasses (from 1.0.30A)",
+    "IT_MANAGER": "white hair, glasses (from 1.0.30A)",
+    "BETTY": "brunette, horizontal striped shirt",
+    "ZIA_ALE": "blonde"
+  },
+  "visitor_demo": {
+    "manual_key": "F7",
+    "automatic_trigger": "Amazon event",
+    "sequence": [
+      "truck arrives",
+      "courier carries parcel",
+      "enters reception",
+      "handoff",
+      "returns",
+      "truck leaves"
+    ]
+  },
+  "geometry_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

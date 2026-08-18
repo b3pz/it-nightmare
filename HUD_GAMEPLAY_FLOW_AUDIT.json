@@ -1,0 +1,8 @@
+{
+  "build": "1.0.30B1 HUD + GAMEPLAY FLOW",
+  "base": "1.0.30B0",
+  "ordinary_ticket_cap": 2,
+  "camera_test": "F9 / CSS scale 1.18",
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

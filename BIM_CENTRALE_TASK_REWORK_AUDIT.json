@@ -1,0 +1,33 @@
+{
+  "build": "1.0.30B5 BIM + CENTRALE TASK REWORK",
+  "base": "1.0.30B4.3 DIALOGUE SYSTEM REFACTOR",
+  "new_cases": {
+    "BIM": [
+      "PASSWORD",
+      "REVIT LANGUAGE",
+      "DESKTOP CONNECTOR",
+      "REVIT ADD-IN"
+    ],
+    "CENTRALE": [
+      "XREF",
+      "AUTOCAD AUTH/LICENSE",
+      "169.254 DHCP/LINK",
+      "CTB/PLOT STYLE"
+    ]
+  },
+  "case_count": 8,
+  "flow": [
+    "symptom",
+    "read workstation state",
+    "diagnose",
+    "intervene",
+    "verify"
+  ],
+  "wrong_diagnosis_immediate_strike": false,
+  "hud_uses_real_case_title": true,
+  "tablet_uses_real_symptom": true,
+  "other_departments_changed": false,
+  "map_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

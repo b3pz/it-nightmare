@@ -1,0 +1,15 @@
+{
+  "build": "1.0.30B1.2 CAMERA INPUT FIX",
+  "base": "1.0.30B1.1 HUD + VIEWPORT + CORRIDORS",
+  "camera_inputs": [
+    "C",
+    "sidebar button",
+    "F9 fallback"
+  ],
+  "camera_modes": [
+    "STANDARD 1.82x",
+    "VICINA 2.06x"
+  ],
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

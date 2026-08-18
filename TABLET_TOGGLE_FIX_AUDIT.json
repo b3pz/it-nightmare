@@ -1,0 +1,12 @@
+{
+  "build": "1.0.30B4.1 TABLET TOGGLE FIX",
+  "base": "1.0.30B4 RPG UI SYSTEM",
+  "tab_behavior": "press-to-toggle",
+  "keyup_closes_tablet": false,
+  "keyboard_repeat_ignored": true,
+  "mouse_interaction_while_open": true,
+  "gameplay_keys_blocked_while_open": true,
+  "gameplay_logic_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

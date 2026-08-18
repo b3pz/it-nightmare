@@ -1,0 +1,14 @@
+{
+  "build": "1.0.30B3 TITLE REBUILD",
+  "base": "1.0.30B2 TITLE + CHARACTER SETUP",
+  "title": {
+    "canvas_scene": true,
+    "generated_images": false,
+    "player_back_view": true,
+    "animated": true
+  },
+  "character_setup_retained": true,
+  "gameplay_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

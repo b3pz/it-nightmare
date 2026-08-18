@@ -1,0 +1,15 @@
+{
+  "build": "1.0.30B4 RPG UI SYSTEM",
+  "base": "1.0.30B3.2",
+  "prelogin_work_blocked": true,
+  "tablet_apps": [
+    "TASK",
+    "MAPPA",
+    "INVENTARIO",
+    "PERSONE",
+    "LOG",
+    "SISTEMA"
+  ],
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

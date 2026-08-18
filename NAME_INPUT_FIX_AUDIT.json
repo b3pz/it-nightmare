@@ -1,0 +1,8 @@
+{
+  "build": "1.0.30B3.1 NAME INPUT FIX",
+  "base": "1.0.30B3 TITLE REBUILD",
+  "title_changed": false,
+  "character_setup_changed": "input routing only",
+  "typing_guard": true,
+  "gameplay_changed": false
+}

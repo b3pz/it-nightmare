@@ -1,0 +1,24 @@
+{
+  "build": "1.0.30B1.1 HUD + VIEWPORT + CORRIDORS",
+  "base": "1.0.30B1 HUD + GAMEPLAY FLOW",
+  "hud": {
+    "legacy_minimap_hidden": true,
+    "legacy_studio_event_hidden": true,
+    "right_rail_integrated": true,
+    "task_titles_department_aware": true
+  },
+  "viewport": {
+    "sidebar_width_reserved_in_camera": true,
+    "default_zoom": 1.82,
+    "F9_zoom": 2.06,
+    "css_scale_removed": true
+  },
+  "corridors": {
+    "visual_restyle": true,
+    "geometry_changed": false,
+    "walkzones_changed": false
+  },
+  "sprite_side_orientation_fixed": true,
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

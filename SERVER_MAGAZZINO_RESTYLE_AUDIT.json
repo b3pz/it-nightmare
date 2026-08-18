@@ -1,0 +1,19 @@
+{
+  "build": "1.0.30A.2 SERVER / MAGAZZINO RESTYLE",
+  "base": "1.0.30A.1 ROOMS + VISITOR PROOF",
+  "restyled_room": "SERVER",
+  "zones": {
+    "A": "RICAMBI / shelves / existing pickup",
+    "B": "CARICO-SCARICO / existing drop point",
+    "C": "BANCO RIPARAZIONI / existing benchPoint"
+  },
+  "server_racks": [
+    "A",
+    "B",
+    "C"
+  ],
+  "gameplay_coordinates_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false,
+  "legacy_server_renderer": "hidden only while PIXEL FOUNDATION is active"
+}

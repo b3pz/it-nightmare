@@ -1,79 +1,75 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>VERSIONE1ITSHIFT 1.0.29.4 LUNCH TRAFFIC FIX // IT SHIFT — A DAY IN IT SUPPORT</title><link rel="stylesheet" href="style.css?v=1.0.29.4"></head>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>VERSIONE1ITSHIFT 1.0.30B5.1 INTERACTIVE PUZZLE REWORK // IT SHIFT — A DAY IN IT SUPPORT</title><link rel="stylesheet" href="style.css?v=1.0.30B5.1"></head>
 <body>
-<section id="boot" class="screen active">
- <div class="v91Home">
-  <div class="v91Scene" aria-hidden="true">
-   <div class="v91SkyGlow"></div>
-   <div class="v91Facade">
-    <div class="v91Sign">STUDIO</div>
-    <div class="v91Glass g1"><span></span></div>
-    <div class="v91Glass g2"><span></span></div>
-    <div class="v91Glass g3"><span></span></div>
-    <div class="v91Entrance">
-      <div class="v91DoorPanel left"></div><div class="v91DoorPanel right"></div>
-      <div class="v91LobbyGlow"></div>
-    </div>
-    <div class="v91InteriorDesk d1"></div><div class="v91InteriorDesk d2"></div>
-   </div>
-   <div class="v91Sidewalk">
-    <div class="v91Planter"></div>
-    <div class="v91Bench"></div>
-    <div class="v91Bike"></div>
-   </div>
-   <div class="v91Road"><span></span><span></span><span></span></div>
-   <div class="v91Walker walker1"><i></i></div>
-   <div class="v91Walker walker2"><i></i></div>
-   <div class="v91Walker walker3"><i></i></div>
-   <div class="v91Car"></div>
-  </div>
 
-  <div class="v91TitlePanel">
-   <div id="realDateLine" class="v91DateLine">08:58 // OGGI</div>
-   <h1>IT SHIFT</h1>
-   <div class="subtitle">A DAY IN IT SUPPORT</div>
-   <p class="v91Tagline">Un altro giorno in studio. Per ora sembra tutto tranquillo.</p>
-   <div class="v91Status">STUDIO APERTO · SERVER ONLINE · UTENTI IMPREVEDIBILI · CAFFÈ NON GARANTITO</div>
-   <div class="v91Credit">CREATO E SVILUPPATO DA <b>B3pZ</b> <span class="buildTag">V12 CLEAN // GAMEPLAY LOCK</span></div>
-   
-<div class="bootIntel" aria-label="Pre-shift diagnostics">
- <div class="bootIntelTitle">PRE-SHIFT DIAGNOSTICS</div>
- <div class="bootIntelGrid">
-  <div><span>UTENTE</span><b>GIUSEPPE // IT SPECIALIST</b></div>
-  <div><span>SEDE</span><b>STUDIO // FIRENZE</b></div>
-  <div><span>SERVER</span><b class="ok">ONLINE</b></div>
-  <div><span>DOMINIO</span><b class="ok">RAGGIUNGIBILE</b></div>
-  <div><span>TICKET</span><b>0 // DESTINATI A SALIRE</b></div>
-  <div><span>STAMPANTI</span><b class="warn">STATO: SOSPETTO</b></div>
-  <div><span>MEETING</span><b>NESSUN HDMI DISPERSO. ANCORA.</b></div>
-  <div><span>CAFFÈ</span><b class="warn">NESSUN SLA GARANTITO</b></div>
- </div>
- <div class="bootLog">
-  <div><i>[OK]</i> Backup presente. Nessuno ha ancora chiesto il file cancellato ieri.</div>
-  <div><i>[OK]</i> VPN stabile. È presto.</div>
-  <div><i>[WARN]</i> Qualcuno ha già pensato: “Ieri funzionava”.</div>
-  <div><i>[INFO]</i> Riavviare resta una soluzione tecnicamente sottovalutata.</div>
-  <div><i>[INFO]</i> “Già che ti vedo...” non è ancora un ticket.</div>
- </div>
-</div>
-<button id="toLore" class="mainbtn">INIZIA LA GIORNATA</button>
-   <div class="v91Hint">ENTER / E / CLICK</div>
-  </div>
+
+<section id="boot" class="screen active">
+ <div class="v130b3-title">
+   <canvas id="v130b3TitleCanvas" width="1280" height="720"></canvas>
+
+   <div class="v130b3-brand">
+     <div id="realDateLine" class="v130b3-date">08:58 // OGGI</div>
+     <h1>IT SHIFT</h1>
+     <div class="v130b3-sub">A DAY IN IT SUPPORT</div>
+   </div>
+
+   <div class="v130b3-start">
+     <button id="toLore" class="v130b3-startbtn">
+       <span class="arrow">▶</span>
+       <span>NUOVA PARTITA</span>
+     </button>
+     <div class="v130b3-caption">Un giorno normale. Finché qualcuno non apre un ticket.</div>
+   </div>
+
+   <div class="v130b3-footer">
+     ENTER / E / CLICK
+   </div>
  </div>
 </section>
 <section id="lore" class="screen">
- <div class="card lore v7Setup">
-  <div class="kicker">TURNO // 09:00 → 19:00</div>
-  <h2>Una giornata nel supporto IT.</h2>
-  <p>Ticket, persone, meeting, workstation, server e richieste che arrivano mentre stai già facendo altro.</p>
-  <div class="difficulty-box"><label for="difficulty">DIFFICOLTÀ</label>
-   <select id="difficulty">
-    <option value="easy">EASY — giornata tranquilla</option>
-    <option value="normal" selected>NORMAL — giornata standard</option>
-    <option value="hard">HARD — pressione alta</option>
-    <option value="nightmare">CAOS — nessuno ti lascia in pace</option>
-   </select>
-  </div>
-  <button id="start" class="mainbtn">ENTRA IN STUDIO — 08:58</button>
+ <div class="v130b2-setup">
+   <header>
+     <div>
+       <small>NUOVA PARTITA // DATI PERSONAGGIO</small>
+       <h2>CREA IL TUO PERSONAGGIO</h2>
+     </div>
+     <button id="v130b2Back" type="button">← MENU</button>
+   </header>
+
+   <div class="v130b2-setupgrid">
+     <section class="v130b2-previewbox">
+       <canvas id="v130b2CharacterPreview" width="128" height="160"></canvas>
+       <strong id="v130b2PreviewName">NUOVO IT</strong>
+       <span id="v130b2PreviewGender">UOMO</span>
+     </section>
+
+     <section class="v130b2-form">
+       <label class="v130b2-label" for="v130b2PlayerName">NOME</label>
+       <input id="v130b2PlayerName" maxlength="12" autocomplete="off" spellcheck="false" placeholder="INSERISCI IL NOME">
+
+       <div class="v130b2-label">PERSONAGGIO</div>
+       <div class="v130b2-genders">
+         <button class="v130b2-gender selected" data-gender="male" type="button">UOMO</button>
+         <button class="v130b2-gender" data-gender="female" type="button">DONNA</button>
+       </div>
+
+       <label class="v130b2-label" for="difficulty">RITMO DELLA GIORNATA</label>
+       <select id="difficulty">
+         <option value="easy">TRANQUILLA — più tempo, meno pressione</option>
+         <option value="normal" selected>NORMALE — giornata standard</option>
+         <option value="hard">INTENSA — pressione alta</option>
+         <option value="nightmare">CAOS — nessuno ti lascia in pace</option>
+       </select>
+
+       <div class="v130b2-profileinfo">
+         <span>RUOLO</span><b>IT SUPPORT</b>
+         <span>TURNO</span><b>09:00 → 19:00</b>
+         <span>SEDE</span><b>STUDIO // FIRENZE</b>
+       </div>
+
+       <div id="v130b2SetupError" class="v130b2-error"></div>
+       <button id="start" class="v130b2-mainbtn">INIZIA // 08:58</button>
+     </section>
+   </div>
  </div>
 </section>
 <section id="gameScreen" class="screen"><header id="hud"><div><b id="clock">09:00</b><small>TIME</small></div><div><b id="stress">0%</b><small>STRESS</small></div><div><b id="rep">★★★★★</b><small>REPUTAZIONE</small></div><div><b id="strikes">0/3</b><small>ERRORI</small></div><div><b id="xp">0</b><small>XP</small></div><div><b id="incident">0%</b><small>INCIDENT</small></div></header>
@@ -81,9 +77,14 @@
 <main>
 <div id="viewportFrame"><canvas id="game" width="1600" height="1040"></canvas></div>
 <div id="miniMapWrap"><div class="mapTitle">STUDIO // MAP</div><canvas id="miniMap" width="260" height="150"></canvas></div>
-<div id="pda" class="hidden"><div class="pdaHead"><b>TABLET IT</b><span>TAB · TASK / INVENTARIO / RAPPORTI / STATO</span></div><div id="pdaBody"></div></div>
+<div id="pda" class="hidden"><div class="pdaHead"><b>IT TABLET</b><span id="v130b4TabletClock">09:00 // ONLINE</span></div><div id="pdaBody"></div><div class="v130b4TabletFoot">TAB — CHIUDI</div></div>
 <div id="encounterOverlay"><div class="encBang">!</div><div id="encounterName">PAO</div><small>ORA CHE TI VEDO...</small></div>
-<div id="storyDialog" class="hidden"><div id="storyWho"></div><div id="storyText"></div><small>ENTER / E — CONTINUA</small></div><div id="phoneNotification"><div class="phoneApp">MESSAGGIO</div><b id="phoneSender">ZIA ALE</b><span id="phoneText"></span></div>
+<div id="storyDialog" class="v130b42-dialogShell hidden">
+ <div id="storyPortrait" class="v130b32Portrait v130b42-dialogPortrait">IT</div>
+ <div id="storyWho" class="v130b42-dialogSpeaker"></div>
+ <div id="storyText" class="v130b42-dialogText"></div>
+ <small>ENTER / E — CONTINUA</small>
+</div><div id="phoneNotification"><div class="phoneApp">MESSAGGIO</div><b id="phoneSender">ZIA ALE</b><span id="phoneText"></span></div>
 <div id="inventoryWrap"><small>INVENTARIO</small><div id="inventory"></div></div>
 <div id="missionBanner" class="hidden">
  <small id="missionKicker">MISSIONE</small>
@@ -114,6 +115,70 @@
 </div>
 <button id="debugTouch" type="button">DEBUG</button>
 <button id="act">E<span>INTERAGISCI</span></button>
-</div></main><footer><b>VERSIONE1ITSHIFT 1.0.29.4 LUNCH TRAFFIC FIX</b> · WASD/FRECCE — MUOVITI · E — INTERAGISCI · TAB — TABLET IT · M — MAP · F2 — DEBUG · F3 — DIAG</footer></section>
-<div id="jsError" class="hidden"></div><div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=1.0.29.4"></script><div id="endGameOverlay" class="hidden"><div class="endGameCard"><div class="kicker">FINE TURNO // 19:00</div><h2>GIORNATA CONCLUSA</h2><div id="endGameStats"></div><div class="endGameActions"><button id="retryRun">RIPROVA SUBITO</button><button id="newDay">NUOVA GIORNATA</button></div><small>ENTER / E — RIPROVA · N — HOME</small></div></div><div id="v122Dialogue" class="v122Dialogue hidden"><div id="v122Portrait" class="v122Portrait">IT</div><div id="v122Speaker" class="v122Speaker"></div><div id="v122Text" class="v122Text"></div><div id="v122Continue" class="v122Continue">● ● ●</div></div>
+</div></main>
+<aside id="v130b1SideHud" class="v130b4-hud">
+ <section class="v130b4-map"><canvas id="v130b1MiniMap" width="184" height="108"></canvas></section>
+ <section class="v130b4-primary">
+   <div id="v130b4TaskIcon" class="v130b4-icon">✓</div>
+   <div class="v130b4-taskcopy"><b id="v130b4TaskTitle">NESSUNA ATTIVITÀ</b><span id="v130b4TaskText">Turno sotto controllo.</span></div>
+   <em id="v130b4MoreTasks"></em>
+ </section>
+ <section id="v130b1Inventory" class="v130b4-quickinv"></section>
+</aside>
+
+<footer><b>VERSIONE1ITSHIFT 1.0.30B5.1 INTERACTIVE PUZZLE REWORK</b> · WASD/FRECCE — MUOVITI · E — INTERAGISCI · TAB — TABLET IT · M — MAP · F2 — DEBUG · F3 — DIAG · F6 — PIXEL TEST · F7 — DEMO CORRIERE · F8 — TEST GAMEPLAY · C — CAMERA · F9 — CAMERA</footer></section>
+<div id="jsError" class="hidden"></div><div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=1.0.30B5.1"></script><div id="endGameOverlay" class="hidden"><div class="endGameCard"><div class="kicker">FINE TURNO // 19:00</div><h2>GIORNATA CONCLUSA</h2><div id="endGameStats"></div><div class="endGameActions"><button id="retryRun">RIPROVA SUBITO</button><button id="newDay">NUOVA GIORNATA</button></div><small>ENTER / E — RIPROVA · N — HOME</small></div></div>
+
+<div id="v130b43StoryScene" class="hidden" aria-hidden="true">
+ <div class="v130b43StoryBackdrop"></div>
+ <div class="v130b43PortraitStage">
+   <canvas id="v130b43StoryPortrait" width="160" height="136"></canvas>
+ </div>
+ <div class="v130b43StoryBox">
+   <div id="v130b43StoryWho" class="v130b43StoryWho">ZIA ALE</div>
+   <div id="v130b43StoryText" class="v130b43StoryText"></div>
+   <div id="v130b43StoryContinue" class="v130b43StoryContinue">E / ENTER ▶</div>
+ </div>
+</div>
+
+<div id="v130b42AutoDialogue" class="v130b42-dialogShell hidden" aria-hidden="true">
+ <div id="v130b42AutoPortrait" class="v130b42-dialogPortrait">IT</div>
+ <div id="v130b42AutoSpeaker" class="v130b42-dialogSpeaker">IT</div>
+ <div id="v130b42AutoText" class="v130b42-dialogText"></div>
+ <div class="v130b42-dialogContinue">SEQUENZA AUTOMATICA ▶</div>
+</div>
+
+<div id="v122Dialogue" class="v122Dialogue v130b42-dialogShell hidden"><div id="v122Portrait" class="v122Portrait v130b42-dialogPortrait">IT</div><div id="v122Speaker" class="v122Speaker v130b42-dialogSpeaker"></div><div id="v122Text" class="v122Text v130b42-dialogText"></div><div id="v122Continue" class="v122Continue v130b42-dialogContinue">● ● ●</div></div>
+
+<div id="v130b0Proof" class="v130b0-proof hidden" aria-hidden="true">
+  <div class="v130b0-shell">
+    <div class="v130b0-top">
+      <div>
+        <small>IT SHIFT // SYSTEM PROOF</small>
+        <h2 id="v130b0Title">TEST GAMEPLAY PER REPARTO</h2>
+      </div>
+      <button id="v130b0Close" type="button">×</button>
+    </div>
+    <div class="v130b0-main">
+      <aside class="v130b0-side">
+        <canvas id="v130b0Portrait" width="64" height="64"></canvas>
+        <b id="v130b0Npc">NPC</b>
+        <span id="v130b0Dept">REPARTO</span>
+        <div class="v130b0-rel">
+          <small>RAPPORTO</small>
+          <strong id="v130b0Relation">NEUTRALE</strong>
+          <div class="v130b0-relbar"><i id="v130b0RelFill"></i></div>
+          <em id="v130b0RelValue">0</em>
+        </div>
+        <div id="v130b0Pace" class="v130b0-pace">RITMO // CALMO</div>
+      </aside>
+      <section id="v130b0Body" class="v130b0-body"></section>
+    </div>
+    <div class="v130b0-bottom">
+      <span id="v130b0Hint">Scegli un reparto da provare.</span>
+      <span>ESC / F8 — CHIUDI</span>
+    </div>
+  </div>
+</div>
+
 </body></html>

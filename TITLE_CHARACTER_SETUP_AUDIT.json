@@ -1,0 +1,26 @@
+{
+  "build": "1.0.30B2 TITLE + CHARACTER SETUP",
+  "base": "1.0.30B1.3 ENTRANCE + FLOOR + NPC FIX",
+  "title_screen": {
+    "pixel_css_scene": true,
+    "protagonist_back_view": true,
+    "studio_facade": true,
+    "real_date": true
+  },
+  "character_setup": {
+    "name_min": 2,
+    "name_max": 12,
+    "genders": [
+      "male",
+      "female"
+    ],
+    "live_preview": true,
+    "difficulty": true,
+    "local_storage_profile": true
+  },
+  "profile_used_in_intro": true,
+  "profile_used_in_player_sprite": true,
+  "collision_changed": false,
+  "pathfinding_changed": false,
+  "camera_changed": false
+}

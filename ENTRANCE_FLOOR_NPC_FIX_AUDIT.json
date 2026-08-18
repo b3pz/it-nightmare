@@ -1,0 +1,45 @@
+{
+  "build": "1.0.30B1.3 ENTRANCE + FLOOR + NPC FIX",
+  "base": "1.0.30B1.2 CAMERA INPUT FIX",
+  "entrance": {
+    "real_door": {
+      "x": 635,
+      "y": 835,
+      "w": 120,
+      "h": 105
+    },
+    "studio_trigger": {
+      "x": 635,
+      "y": 930,
+      "w": 120,
+      "h": 70
+    },
+    "desk_obstacle": {
+      "x": 515,
+      "y": 770,
+      "w": 110,
+      "h": 24
+    },
+    "traffic_lane": "right side kept clear"
+  },
+  "race": {
+    "manager_start": [
+      650,
+      900
+    ],
+    "manager_speed": 78,
+    "manager_delay_ms": 550
+  },
+  "npc_layout": {
+    "CENTRALE": 12,
+    "EDITORIA": 2,
+    "BIM": "3 ambient + PAO",
+    "INTERIOR": 4,
+    "RENDERISTI": 4
+  },
+  "floor": "global corridor tile phase; IT-only corridor slice removed",
+  "camera_changed": false,
+  "collision_system_changed": false,
+  "pathfinding_system_changed": false,
+  "note": "Door/desk geometry was aligned; core collision/path algorithms unchanged."
+}

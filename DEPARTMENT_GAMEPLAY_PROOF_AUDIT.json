@@ -1,0 +1,37 @@
+{
+  "build": "1.0.30B0 DEPARTMENT GAMEPLAY PROOF",
+  "base": "1.0.30A.4 FULL STUDIO RESTYLE",
+  "proof_key": "F8",
+  "scenarios": {
+    "BIM_ARCHITETTI": [
+      "diagnostic dialogue",
+      "Windows/domain password"
+    ],
+    "EDITORIA_GRAFICI": [
+      "Mac",
+      "SMB server",
+      "ordered troubleshooting sequence"
+    ],
+    "RENDERISTI": [
+      "3ds Max",
+      "Chaos Vantage",
+      "Live Link",
+      "GPU status panel"
+    ],
+    "RIFUGIO_DIGITALE": [
+      "PIXERA",
+      "4-output remap"
+    ],
+    "SALA_MEETING": [
+      "HDMI video",
+      "audio routing",
+      "room test"
+    ]
+  },
+  "relationship": "actual NPC rapporto -5..+5, delta +1/0/-1 based on diagnostic errors",
+  "pacing": "workday paused while case is open; no automatic stress on first diagnostic error",
+  "geometry_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false,
+  "note": "Static validation only; browser interaction must be manually tested."
+}

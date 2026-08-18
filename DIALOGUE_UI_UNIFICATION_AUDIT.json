@@ -1,0 +1,18 @@
+{
+  "build": "1.0.30B3.2 DIALOGUE UI UNIFICATION",
+  "base": "1.0.30B3.1 NAME INPUT FIX",
+  "unified_surfaces": [
+    "intro automatic dialogue",
+    "storyDialog",
+    "v122Dialogue"
+  ],
+  "shared_elements": [
+    "speaker tab",
+    "portrait area",
+    "light GBC dialogue box",
+    "bottom-right continuation indicator"
+  ],
+  "gameplay_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false
+}

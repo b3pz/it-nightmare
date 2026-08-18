@@ -1,0 +1,39 @@
+{
+  "build": "1.0.30A.4 FULL STUDIO RESTYLE",
+  "base": "1.0.30A.3 ENTRANCE + EXTERIOR FIX",
+  "restyled_rooms": [
+    "IT",
+    "HR",
+    "SERVER",
+    "INGRESSO / SEGRETERIA",
+    "EDITORIA",
+    "BIM",
+    "CENTRALE",
+    "SALA MEET",
+    "INTERIOR",
+    "RENDERISTI",
+    "SPAZIO A",
+    "BAGNI",
+    "RIFUGIO DIGITALE",
+    "SALA MEET CAPO",
+    "CUCINA",
+    "STAMPANTI",
+    "STAMPA 3D"
+  ],
+  "visual_capacity_targets": {
+    "CENTRALE": 12,
+    "BIM": 4,
+    "EDITORIA": 4,
+    "INTERIOR": 4,
+    "RENDERISTI": 4,
+    "SALA MEET": 6,
+    "SPAZIO A": 8,
+    "SALA MEET CAPO": 6,
+    "CUCINA": 16
+  },
+  "exterior_full_width": true,
+  "geometry_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false,
+  "note": "visual restyle on GOLD geometry; spacing/new map migration comes later"
+}

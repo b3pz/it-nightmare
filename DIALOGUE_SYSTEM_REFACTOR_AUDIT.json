@@ -1,0 +1,24 @@
+{
+  "build": "1.0.30B4.3 DIALOGUE SYSTEM REFACTOR",
+  "base": "1.0.30B4.2 UI POLISH PASS",
+  "ui_families": {
+    "TOAST": "short non-blocking feedback",
+    "EVENT": "centered mission/event banner",
+    "DIALOGUE": "standard 760px conversation shell",
+    "STORY": "large portrait narrative pause"
+  },
+  "story_portraits_code_drawn": true,
+  "story_pauses_game": true,
+  "story_keys": [
+    "1015",
+    "1415",
+    "1645",
+    "1800"
+  ],
+  "pacchi_ingresso_layout_fix": "mission banner forced screen-centered",
+  "task_content_changed": false,
+  "map_changed": false,
+  "collision_changed": false,
+  "pathfinding_changed": false,
+  "ai_changed": false
+}
