@@ -1,0 +1,19 @@
+{
+  "build": "1.0.30B5.6.3 ESC BACK NAVIGATION",
+  "base": "1.0.30B5.6.2",
+  "esc_closes": [
+    "proof/debug menu",
+    "tablet",
+    "full map",
+    "reward overlay",
+    "task/puzzle modal",
+    "ordinary non-story UI"
+  ],
+  "esc_does_not_close": [
+    "Story Portrait",
+    "locked intro cinematic"
+  ],
+  "puzzle_cancel_counts_as_error": false,
+  "ticket_remains_open_after_escape": true,
+  "other_gameplay_changed": false
+}

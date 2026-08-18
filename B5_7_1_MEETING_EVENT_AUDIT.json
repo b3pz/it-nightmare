@@ -1,0 +1,25 @@
+{
+  "build": "1.0.30B5.7.1 MEETING EVENT PLAYABLE FIX",
+  "base": "1.0.30B5.7",
+  "meeting": {
+    "pickup": [
+      535,
+      225
+    ],
+    "pickup_room": "SERVER",
+    "pickup_key": "F",
+    "delivery": [
+      940,
+      285
+    ],
+    "delivery_room": "SALA MEET",
+    "delivery_key": "G",
+    "pickup_marker": true,
+    "delivery_marker": true,
+    "intro_portrait": "IT MANAGER",
+    "completion_portrait": "IT MANAGER",
+    "hidden_deadline": false,
+    "legacy_false_fail_removed": true
+  },
+  "other_gameplay_changed": false
+}

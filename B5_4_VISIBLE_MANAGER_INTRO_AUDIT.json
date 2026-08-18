@@ -1,0 +1,30 @@
+{
+  "build": "1.0.30B5.4 VISIBLE MANAGER INTRO + DIALOGUE PASS",
+  "base": "1.0.30B5.3",
+  "zia_dialogue_rewritten": true,
+  "tutorial_still_embedded": true,
+  "cinematic_camera": {
+    "mode": "fixed",
+    "zoom": 1.18,
+    "focus": [
+      820,
+      900
+    ]
+  },
+  "manager": {
+    "start": [
+      985,
+      985
+    ],
+    "finish": [
+      705,
+      895
+    ],
+    "speed": 132,
+    "visible_sidewalk_route": true
+  },
+  "controls_locked_until_via": true,
+  "hero_portrait_changed": false,
+  "puzzles_changed": false,
+  "map_changed": false
+}

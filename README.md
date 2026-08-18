@@ -1210,3 +1210,348 @@ Gli 8 casi BIM/Centrale non sono più quiz.
 
 Regola: il testo descrive il sintomo; il giocatore risolve agendo.
 Errore = feedback + piccolo stress, non quiz "risposta corretta".
+
+
+## 1.0.30B5.2 — INTRO CINEMATIC + SPECIAL NPCS
+
+INTRO:
+1. 08:58 — Story Portrait del protagonista.
+   - speaker = nome inserito dall'utente;
+   - portrait rispetta UOMO/DONNA;
+   - nessun riferimento alla sigaretta/fumo.
+2. 09:00 — il giocatore raggiunge la porta e preme E.
+3. Entrato in Segreteria — Story Portrait di ZIA ALE:
+   - chiama il protagonista col nome scelto;
+   - avverte che sta arrivando l'IT Manager;
+   - spiega la corsa/login.
+4. Cinematica senza balloon:
+   - IT Manager compare sul marciapiede;
+   - cammina fisicamente verso l'ingresso;
+   - attraversa la porta;
+   - entra in Segreteria e si ferma sulla linea di partenza.
+5. 3-2-1-VIA.
+6. La corsa continua dalla posizione reale del Manager verso il Reparto IT.
+
+La partenza del Manager ha 700 ms di ritardo dopo VIA per non dargli
+un vantaggio ingiusto.
+
+SPECIAL NPC SPRITES:
+- PAO ha ora uno sprite dedicato: più alto e magro, palette propria.
+- DON ha ora uno sprite dedicato: pelle più scura, capelli scuri,
+  maglia verde a due toni.
+- entrambi sono trattati come NPC speciali: niente vecchia targhetta
+  permanente sopra la testa.
+- i loro portrait Story erano già supportati e restano disponibili.
+
+FUMO:
+- rimosso il riferimento alla sigaretta dall'intro;
+- rimossa anche la battuta di DON che invitava a fumare.
+
+Gameplay B5.1, puzzle, mappa, collisioni e pathfinding restano invariati.
+
+
+## 1.0.30B5.3 — INTRO TUTORIAL CINEMATIC
+
+La intro è ora completamente guidata fino al VIA.
+
+FLOW:
+1. Story Portrait del protagonista.
+2. Il protagonista entra automaticamente dallo studio.
+3. Story Portrait Zia Ale.
+4. Zia introduce il tutorial dentro la narrazione:
+   - nessun comando richiesto fino a quel momento;
+   - al VIA: WASD oppure FRECCE;
+   - raggiungi REPARTO IT;
+   - E sulla workstation;
+   - LOGIN.
+5. Camera cinematica dedicata sul marciapiede/ingresso.
+6. IT Manager parte da x1040 sul marciapiede, entra realmente in Segreteria.
+7. Velocità ingresso Manager aumentata da 72 a 145.
+8. 3-2-1-VIA.
+9. Solo al VIA vengono sbloccati i controlli e parte la corsa.
+
+Il vecchio step "raggiungi la porta e premi E" è stato rimosso dall'intro.
+E/ENTER restano utilizzabili mentre è aperto uno Story Portrait esclusivamente
+per avanzare il dialogo.
+
+Gameplay, puzzle, NPC speciali e mappa restano invariati.
+
+
+## 1.0.30B5.4 — VISIBLE MANAGER INTRO + DIALOGUE PASS
+
+ZIA ALE:
+- dialogo riscritto in tono più naturale;
+- il tutorial resta dentro la narrazione;
+- rimossa la frase "fin qui non devi toccare niente";
+- istruzioni conservate: WASD/FRECCE, E sulla workstation, LOGIN.
+
+MANAGER ARRIVAL:
+- camera NON segue più il Manager;
+- inquadratura cinematica fissa;
+- zoom dedicato 1.18 per vedere contemporaneamente marciapiede + ingresso;
+- Manager nasce già dentro l'inquadratura a x985/y985;
+- percorre visibilmente il marciapiede;
+- svolta verso la porta;
+- entra in Segreteria;
+- termina a x705/y895;
+- velocità cinematic 132: passo deciso ma leggibile.
+
+CONTROLLI:
+- restano bloccati fino al VIA;
+- E/ENTER continuano a servire solo per avanzare gli Story Portrait;
+- al VIA torna il normale gameplay.
+
+Il portrait del protagonista NON è stato modificato in questa build.
+Puzzle e gameplay B5.1 restano invariati.
+
+
+## 1.0.30B5.4.1 — START KEYS + MANAGER SPRITE FIX
+
+START / MENU:
+- schermata titolo: ENTER / E / SPAZIO apre la creazione personaggio;
+- creazione personaggio:
+  - ENTER avvia la partita anche mentre il cursore è nel campo nome;
+  - E / SPAZIO avviano la partita quando il campo nome non è in modifica;
+- digitare la lettera E o spazi nel nome NON avvia accidentalmente il gioco.
+
+IT MANAGER:
+- corretto il vero bug di rendering della cinematica.
+- gli NPC venivano disegnati prima del marciapiede;
+- il marciapiede veniva poi disegnato sopra lo sprite del Manager;
+- durante `managerArrival` il Manager viene ridisegnato DOPO il layer esterno;
+- la sua posizione, percorso, velocità e camera B5.4 restano invariati.
+
+Puzzle, mappa, dialoghi e pathfinding non sono stati modificati.
+
+
+## 1.0.30B5.4.2 — START INPUT GATE FIX
+
+Corretto il bug:
+- premendo E/ENTER/SPACE su "NUOVA PARTITA", la stessa pressione poteva
+  essere letta subito anche dalla schermata di creazione personaggio;
+- risultato: la scelta del PG veniva saltata.
+
+NUOVO COMPORTAMENTO:
+- E / ENTER / SPAZIO su titolo -> apre SOLO creazione personaggio;
+- il tasto viene consumato con stopImmediatePropagation;
+- un input gate resta attivo fino al KEYUP;
+- per iniziare la partita serve una NUOVA pressione;
+- il mouse continua a funzionare come prima;
+- E e SPAZIO restano digitabili normalmente nel campo nome;
+- ENTER nel campo nome può avviare la partita, ma soltanto con una nuova pressione.
+
+Nessuna modifica a intro, Manager, puzzle, mappa o gameplay.
+
+
+## 1.0.30B5.5 — PUZZLE CLARITY + AUTOSAVE / RESUME
+
+PUZZLE:
+- ogni caso BIM/CENTRALE mostra ora un riquadro OBIETTIVO;
+- l'obiettivo descrive il GESTO da fare, non la soluzione;
+- esempi:
+  - trascina/seleziona CTB -> anteprima;
+  - seleziona percorso -> ricollega XREF;
+  - clicca link guasto -> Renew DHCP;
+  - switch add-in -> avvia Revit;
+- INDIZIO separato dall'OBIETTIVO;
+- elementi interattivi hanno hover più leggibile;
+- il cavo guasto pulsa leggermente.
+
+AUTOSAVE:
+- si attiva dopo la missione iniziale/login, quando il turno vero è iniziato;
+- salva ogni ~5 secondi;
+- salva anche quando la scheda va in background e prima di chiudere/ricaricare;
+- conserva:
+  - ora/stress/reputazione/errori/XP/incident;
+  - posizione giocatore;
+  - ticket aperti;
+  - inventario;
+  - missione fisica/evento studio;
+  - relazioni;
+  - stato base NPC speciali;
+  - principali flag del turno.
+
+RESUME:
+- al menu appare CONTINUA TURNO quando esiste un autosave;
+- C = CONTINUA;
+- ENTER/E/SPACE mantengono NUOVA PARTITA;
+- il resume riapre il mondo, NON un modal/minigame a metà:
+  se il refresh avviene dentro un puzzle, il ticket resta aperto e puoi
+  riaprire il puzzle dalla postazione.
+
+REFRESH:
+- Cmd/Ctrl+R e F5 vengono intercettati durante il gameplay quando possibile;
+- prima viene comunque eseguito un autosave;
+- l'autosave resta la protezione principale perché alcune scorciatoie browser
+  possono essere riservate dalla piattaforma.
+
+Una NUOVA PARTITA cancella volontariamente il vecchio autosave.
+
+
+## 1.0.30B5.6 — INPUT + PACKAGE + LEGACY CLEANUP
+
+BUG NUOVA PARTITA:
+Trovati più handler storici contemporaneamente:
+- vecchio handler V9 E/ENTER per boot+lore;
+- secondo handler boot-only;
+- handler B5.4.x recente.
+
+Sono stati consolidati.
+Ora esiste un solo router canonico per titolo/creazione personaggio:
+`v130b541StartKeyboard`.
+
+COMPORTAMENTO:
+- E / ENTER / SPAZIO sul titolo -> SOLO schermata creazione PG;
+- bisogna rilasciare il tasto;
+- serve una nuova pressione per iniziare;
+- E/SPACE nel campo nome restano testo;
+- ENTER nel campo nome avvia solo con pressione nuova;
+- C continua l'autosave.
+
+PACCHI:
+La causa era una biforcazione legacy:
+un vecchio handler F/G richiedeva `carryMission`, ma i pacchi appartengono a
+`studioEvent`. Quindi F non arrivava al pickup dei pacchi.
+
+Ora F/G hanno un unico router canonico:
+- F -> `v12c45Pickup()` per carryMission, pacchi ed eventi fisici;
+- G -> deposito Magazzino se pertinente, altrimenti `v12c45Deliver()`;
+- feedback "PRESO // PACCO...";
+- HUD indica F per prendere e G per consegnare.
+
+CLEANUP:
+Rimossi handler input duplicati, helper fisici superati, workaround Amazon
+legacy e un ramo `if(false)` morto.
+Non sono stati eliminati sistemi storici che risultano ancora dipendenze attive.
+
+Branding visibile dei pacchi reso neutro ("CONSEGNA PACCHI", etichetta IT).
+La chiave interna `type:"AMAZON"` resta per compatibilità con il gameplay
+esistente e non è mostrata al giocatore.
+
+
+## 1.0.30B5.6.1 — PACING + PUZZLE FEEDBACK FIX
+
+PACING:
+- una sola attività importante alla volta;
+- durante un puzzle NON partono:
+  - nuovi ticket;
+  - missioni fisiche;
+  - meeting;
+  - eventi studio;
+  - missioni storia;
+- lo stesso vale mentre stai trasportando un oggetto o completando un evento;
+- terminata/fallita l'attività, 5 secondi reali di respiro prima del prossimo
+  evento importante.
+
+FIX SALA MEET:
+La Story Progression mostrava il banner PRIMA di sapere se il meeting poteva
+davvero partire. Ora:
+1. verifica slot libero;
+2. tenta l'avvio;
+3. solo se l'avvio riesce mostra banner e avanza la storia.
+
+PUZZLE:
+- tentativo di verifica sbagliato = ERRORE reale;
+- feedback rosso `ERRORE n/3`;
+- incremento del contatore ERRORI come gli altri minigame;
+- al terzo errore l'intervento fallisce come da sistema esistente;
+- aggiunti indizi direttamente dentro il pannello:
+  non serve conoscere a memoria CTB, XREF, add-in ecc.;
+- l'obiettivo descrive sempre il gesto e il pannello contiene il dato necessario
+  per dedurre la soluzione.
+
+Questa build parte dalla B5.6 che include già:
+- cleanup handler titolo/creazione PG;
+- fix F/G pacchi;
+- branding pacchi neutro;
+- autosave/resume.
+
+
+## 1.0.30B5.6.2 — MANAGER RACE SPEED FIX
+
+La gara iniziale è stata ribilanciata.
+
+PRIMA:
+- Player speed ≈ 205
+- Manager race speed = 78
+- Manager delay = 700 ms
+
+ORA:
+- Player speed ≈ 205
+- Manager race speed = 168
+- Manager delay = 280 ms
+
+Obiettivo:
+- il Manager deve sembrare che stia davvero correndo;
+- deve essere una gara leggibile e tesa;
+- il giocatore conserva comunque un vantaggio di velocità e può vincere
+  scegliendo bene il percorso.
+
+La velocità della cinematica d'arrivo sul marciapiede NON è stata modificata.
+Pacing, puzzle feedback, pacchi, autosave e cleanup B5.6/B5.6.1 restano invariati.
+
+
+## 1.0.30B5.6.3 — ESC BACK NAVIGATION
+
+Aggiunto ESC come tasto BACK universale per l'interfaccia.
+
+ESC chiude, in ordine:
+- pannello debug/proof se aperto;
+- Tablet;
+- mappa completa;
+- schermata ricompensa;
+- puzzle/modal corrente;
+- normali pannelli/dialoghi UI non narrativi.
+
+REGOLE:
+- ESC dentro un puzzle NON conta come errore;
+- il ticket resta aperto e può essere riaperto dalla postazione;
+- ESC non chiude Story Portrait importanti;
+- ESC non interrompe la cinematica iniziale;
+- se il focus è in un input, ESC toglie prima il focus;
+- nel mondo normale, senza UI aperta, ESC non fa nulla.
+
+Pacing, Manager race, pacchi, autosave e puzzle feedback restano invariati.
+
+
+## VERSIONE 30B5.7 — Map Solid + NPC Portrait Pass
+
+- hard perimeter interno dopo l'ingresso: niente ritorno accidentale in strada;
+- Betty resta HR; Zia Ale Segreteria; PAO BIM-biased; DON gira davvero nello studio;
+- NPC ordinari, Capo, corriere e furgone uniformati al linguaggio Game Boy;
+- interazioni attive speciali usano Story Portrait;
+- finale skeleton: auto-walk Sala Meet Capo, pubblico in sala, Capo portrait,
+  poi boss fight esistente come placeholder.
+
+
+## 1.0.30B5.7.1 — MEETING EVENT PLAYABLE FIX
+
+Corretto l'evento Sala Meeting che risultava praticamente impossibile/illeggibile.
+
+NUOVO FLOW:
+1. Story Portrait IT Manager:
+   - Sala Meet senza segnale;
+   - recupera EXTENDER HDMI.
+2. Pickup in punto sicuro e raggiungibile del SERVER / MAGAZZINO IT:
+   x535 / y225.
+3. Marker giallo visibile:
+   `F // PRENDI EXTENDER`.
+4. Dopo il pickup:
+   obiettivo cambia automaticamente.
+5. Destinazione in punto sicuro della SALA MEET:
+   x940 / y285.
+6. Marker:
+   `G // COLLEGA EXTENDER`.
+7. Completamento:
+   +220 XP, evento chiuso, Story Portrait Manager di conferma.
+
+RIMOSSI I PROBLEMI:
+- nessun marker grafico per MEETING_RUSH;
+- pickup poco leggibile;
+- banner vago "controlla la sala meeting";
+- possibile falso fallimento ereditato dal vecchio watcher carryMission.
+
+L'evento non ha una deadline nascosta: deve poter essere completato sempre,
+purché il turno sia ancora attivo.
+
+Tutto B5.7 resta invariato.

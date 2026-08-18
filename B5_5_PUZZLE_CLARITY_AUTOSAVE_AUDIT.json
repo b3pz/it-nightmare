@@ -1,0 +1,27 @@
+{
+  "build": "1.0.30B5.5 PUZZLE CLARITY + AUTOSAVE RESUME",
+  "base": "1.0.30B5.4.2",
+  "puzzle_clarity": {
+    "objective_box": true,
+    "reveals_solution": false,
+    "action_affordance": true,
+    "cases": 8
+  },
+  "autosave": {
+    "key": "itshift_shift_autosave_v130b55",
+    "interval_seconds": 5,
+    "eligible_after_intro_login": true,
+    "visibilitychange": true,
+    "beforeunload": true
+  },
+  "resume": {
+    "menu_button": "CONTINUA TURNO",
+    "keyboard": "C",
+    "restores_active_modal": false,
+    "keeps_open_tickets": true
+  },
+  "new_game_clears_save": true,
+  "manager_intro_changed": false,
+  "map_changed": false,
+  "pathfinding_changed": false
+}

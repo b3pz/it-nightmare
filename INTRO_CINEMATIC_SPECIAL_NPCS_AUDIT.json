@@ -1,0 +1,54 @@
+{
+  "build": "1.0.30B5.2 INTRO CINEMATIC + SPECIAL NPCS",
+  "base": "1.0.30B5.1 INTERACTIVE PUZZLE REWORK",
+  "intro_flow": [
+    "user-name protagonist story portrait",
+    "door interaction",
+    "Zia Ale story portrait warning",
+    "visible Manager sidewalk arrival",
+    "Manager enters reception",
+    "3-2-1-VIA",
+    "race to IT"
+  ],
+  "player_name_hardcoded": false,
+  "player_gender_portrait": true,
+  "smoking_references_removed": true,
+  "manager_cinematic_route": [
+    [
+      1080,
+      985
+    ],
+    [
+      960,
+      985
+    ],
+    [
+      820,
+      985
+    ],
+    [
+      720,
+      985
+    ],
+    [
+      690,
+      955
+    ],
+    [
+      690,
+      920
+    ],
+    [
+      690,
+      900
+    ]
+  ],
+  "special_world_sprites": [
+    "PAO",
+    "DON"
+  ],
+  "puzzles_changed": false,
+  "map_changed": false,
+  "collision_algorithm_changed": false,
+  "pathfinding_algorithm_changed": false
+}

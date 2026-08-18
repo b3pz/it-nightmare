@@ -297,11 +297,334 @@ $("#start").onclick=()=>{
  V130B2_PROFILE.name=name.slice(0,12);
  difficulty=$("#difficulty")?.value||"normal";
  v130b2SaveProfile();
+ if(typeof v130b55ClearSave==="function")v130b55ClearSave();
  if(err)err.textContent="";
  show("game");
  reset();
  requestAnimationFrame(loop);
 };
+
+
+
+/* ============================================================
+   1.0.30B5.5 — AUTOSAVE / RESUME
+   ============================================================ */
+const V130B55_SAVE_KEY="itshift_shift_autosave_v130b55";
+let V130B55_LAST_SAVE_AT=0;
+
+function v130b55SaveEligible(){
+ return !!(
+   state&&player&&
+   state.phase==="shift"&&
+   state.min>=540&&state.min<END&&
+   introStage==="done"&&
+   workstationOnline&&firstMissionResolved
+ );
+}
+
+function v130b55Snapshot(){
+ if(!v130b55SaveEligible())return null;
+ return {
+   version:"1.0.30B5.5",
+   savedAt:Date.now(),
+   difficulty,
+   profile:{
+     name:String(V130B2_PROFILE.name||"").slice(0,12),
+     gender:V130B2_PROFILE.gender==="female"?"female":"male"
+   },
+   state:{...state},
+   player:{...player},
+   tickets:JSON.parse(JSON.stringify(tickets||[])),
+   inventory:JSON.parse(JSON.stringify(inventory||[])),
+   carryMission:carryMission?JSON.parse(JSON.stringify(carryMission)):null,
+   studioEvent:studioEvent?JSON.parse(JSON.stringify(studioEvent)):null,
+   studioEventNext,
+   eventSerial,
+   pendingOffers:JSON.parse(JSON.stringify(pendingOffers||{})),
+   dayFlags:JSON.parse(JSON.stringify(dayFlags||{})),
+   npcRelations:JSON.parse(JSON.stringify(npcRelations||{})),
+   npcState:(npcs||[]).filter(Boolean).map(n=>({
+     id:n.id,name:n.name,x:n.x,y:n.y,state:n.state,
+     homeRoom:n.homeRoom,activity:n.activity||null
+   })),
+   flags:{
+     enteredStudio:true,
+     shiftStarted:true,
+     managerRaceDone:true,
+     managerPenaltyDone:!!managerPenaltyDone,
+     raceState,
+     workstationOnline:true,
+     firstMissionResolved:true,
+     firstCarryTriggered:!!firstCarryTriggered,
+     lunchMode:!!lunchMode
+   }
+ };
+}
+
+function v130b55SaveNow(force=false){
+ try{
+   if(!v130b55SaveEligible()){
+     if(state&&state.min>=END)v130b55ClearSave();
+     return false;
+   }
+   const now=Date.now();
+   if(!force&&now-V130B55_LAST_SAVE_AT<4500)return false;
+   const snap=v130b55Snapshot();if(!snap)return false;
+   localStorage.setItem(V130B55_SAVE_KEY,JSON.stringify(snap));
+   V130B55_LAST_SAVE_AT=now;
+   v130b55RefreshContinueButton();
+   return true;
+ }catch(err){
+   console.warn("AUTOSAVE SKIPPED",err);
+   return false;
+ }
+}
+
+function v130b55LoadSave(){
+ try{
+   const s=JSON.parse(localStorage.getItem(V130B55_SAVE_KEY)||"null");
+   if(!s||!s.state||!s.player||s.version!=="1.0.30B5.5")return null;
+   if(!Number.isFinite(s.state.min)||s.state.min<540||s.state.min>=END)return null;
+   return s;
+ }catch(err){return null}
+}
+
+function v130b55ClearSave(){
+ try{localStorage.removeItem(V130B55_SAVE_KEY)}catch(err){}
+ v130b55RefreshContinueButton();
+}
+
+function v130b55RefreshContinueButton(){
+ const btn=document.getElementById("v130b55Continue");
+ const meta=document.getElementById("v130b55ContinueMeta");
+ if(!btn)return;
+ const s=v130b55LoadSave();
+ btn.classList.toggle("hidden",!s);
+ if(s&&meta){
+   const when=new Date(s.savedAt||Date.now());
+   meta.textContent=`${fmt(s.state.min)} // ${String(s.profile?.name||"IT").toUpperCase()} // SALVATO ${String(when.getHours()).padStart(2,"0")}:${String(when.getMinutes()).padStart(2,"0")}`;
+ }
+}
+
+function v130b55RestoreNpcState(saved){
+ if(!Array.isArray(saved))return;
+ saved.forEach(src=>{
+   const n=(npcs||[]).find(x=>x&&(src.id?x.id===src.id:x.name===src.name));
+   if(!n)return;
+   if(Number.isFinite(src.x))n.x=src.x;
+   if(Number.isFinite(src.y))n.y=src.y;
+   if(src.state)n.state=src.state;
+   if(src.homeRoom)n.homeRoom=src.homeRoom;
+   n.activity=src.activity||null;
+   n.route=null;n.routeIndex=0;n.routeGoal=null;
+   n.stuckFor=0;n.blockedFor=0;n.ignoreNpcCollision=false;
+ });
+}
+
+function v130b55ApplySave(s){
+ if(!s)return false;
+
+ difficulty=s.difficulty&&difficultyConfig[s.difficulty]?s.difficulty:"normal";
+ V130B2_PROFILE.name=String(s.profile?.name||V130B2_PROFILE.name||"IT").slice(0,12);
+ V130B2_PROFILE.gender=s.profile?.gender==="female"?"female":"male";
+ v130b2SaveProfile();
+
+ state={...state,...s.state,phase:"shift"};
+ player={...player,...s.player,name:v130b2PlayerName(),gender:V130B2_PROFILE.gender};
+ tickets=Array.isArray(s.tickets)?s.tickets:[];
+ inventory=Array.isArray(s.inventory)?s.inventory:[];
+ carryMission=s.carryMission||null;
+ studioEvent=s.studioEvent||null;
+ studioEventNext=Number.isFinite(s.studioEventNext)?s.studioEventNext:Math.max(610,state.min+20);
+ eventSerial=Number.isFinite(s.eventSerial)?s.eventSerial:0;
+ pendingOffers=s.pendingOffers&&typeof s.pendingOffers==="object"?s.pendingOffers:{};
+ dayFlags=s.dayFlags&&typeof s.dayFlags==="object"?s.dayFlags:{};
+
+ Object.keys(npcRelations).forEach(k=>delete npcRelations[k]);
+ if(s.npcRelations&&typeof s.npcRelations==="object"){
+   Object.assign(npcRelations,s.npcRelations);
+ }
+
+ enteredStudio=true;
+ entranceOpened=true;
+ introFreeWalk=false;
+ shiftStarted=true;
+ managerRaceDone=true;
+ managerPenaltyDone=!!s.flags?.managerPenaltyDone;
+ raceState=s.flags?.raceState||"done";
+ workstationOnline=true;
+ firstMissionResolved=true;
+ v110FirstMissionResolved=true;
+ firstCarryTriggered=s.flags?.firstCarryTriggered!==false;
+ lunchMode=!!s.flags?.lunchMode;
+ introStage="done";
+
+ V129_INTRO.phase="resume";
+ V129_INTRO.timer=0;
+ V129_INTRO.locked=false;
+ V129_INTRO.doorOpen=true;
+ V129_INTRO.crossed=true;
+ V129_RACE.active=false;
+ V129_RACE.managerFinished=true;
+ V129_RACE.playerFinished=true;
+
+ if(typeof V130B43_STORY!=="undefined"){
+   clearInterval(V130B43_STORY.timer);
+   V130B43_STORY.active=false;
+   document.getElementById("v130b43StoryScene")?.classList.add("hidden");
+ }
+ storyOpen=false;dialogPause=false;uiMessageBusy=false;activeMiniGame=null;
+ document.getElementById("modal")?.classList.add("hidden");
+ document.getElementById("missionBanner")?.classList.add("hidden");
+ v130b42HideAutoDialogue();
+
+ v130b55RestoreNpcState(s.npcState);
+
+ last=performance.now();
+ spawnTimer=0;
+ anomTimer=0;
+ updateInventoryUI();
+ renderTickets();
+ updateTaskProgress();
+ setupCompactHUD();
+ setupMiniMapControls();
+ hud();
+ if(typeof toast==="function")toast(`TURNO RIPRISTINATO // ${fmt(state.min)}`);
+ return true;
+}
+
+function v130b55ContinueGame(){
+ const s=v130b55LoadSave();
+ if(!s){v130b55RefreshContinueButton();return false}
+ difficulty=s.difficulty&&difficultyConfig[s.difficulty]?s.difficulty:"normal";
+ show("game");
+ reset();
+ if(!v130b55ApplySave(s)){
+   show("boot");
+   return false;
+ }
+ requestAnimationFrame(loop);
+ return true;
+}
+
+document.getElementById("v130b55Continue")?.addEventListener("click",()=>{
+ v130b55ContinueGame();
+});
+
+document.addEventListener("DOMContentLoaded",v130b55RefreshContinueButton);
+setTimeout(v130b55RefreshContinueButton,0);
+
+setInterval(()=>v130b55SaveNow(false),5000);
+document.addEventListener("visibilitychange",()=>{
+ if(document.visibilityState==="hidden")v130b55SaveNow(true);
+});
+window.addEventListener("beforeunload",()=>v130b55SaveNow(true));
+
+// Optional extra protection. Chrome may reserve some browser shortcuts,
+// so autosave remains the actual safety net.
+window.addEventListener("keydown",e=>{
+ if(!document.getElementById("gameScreen")?.classList.contains("active"))return;
+ if((e.metaKey||e.ctrlKey)&&String(e.key||"").toLowerCase()==="r"){
+   v130b55SaveNow(true);
+   e.preventDefault();
+   if(typeof toast==="function")toast("REFRESH BLOCCATO // TURNO SALVATO");
+ }
+ if(e.key==="F5"){
+   v130b55SaveNow(true);
+   e.preventDefault();
+   if(typeof toast==="function")toast("REFRESH BLOCCATO // TURNO SALVATO");
+ }
+},true);
+
+
+/* ============================================================
+   1.0.30B5.4.1 — START KEYBOARD SUPPORT
+   ============================================================ */
+function v130b541ScreenActive(id){
+ const el=document.getElementById(id);
+ return !!(el&&el.classList.contains("active"));
+}
+
+function v130b541StartKeyboard(e){
+ if(e.repeat)return;
+
+ const boot=v130b541ScreenActive("boot");
+ const lore=v130b541ScreenActive("lore");
+ if(!boot&&!lore)return;
+
+ const code=e.code;
+ const isEnter=code==="Enter";
+ const isE=code==="KeyE";
+ const isSpace=code==="Space";
+ const isContinue=code==="KeyC";
+ if(!(isEnter||isE||isSpace||isContinue))return;
+
+ // If this physical key opened the current screen, ignore it until KEYUP.
+ if(window.__v130b56MenuGate){
+   e.preventDefault();
+   e.stopImmediatePropagation();
+   return;
+ }
+
+ if(boot){
+   e.preventDefault();
+   e.stopImmediatePropagation();
+
+   if(isContinue&&!document.getElementById("v130b55Continue")?.classList.contains("hidden")){
+     window.__v130b56MenuGate=true;
+     window.__v130b56MenuGateCode=code;
+     document.getElementById("v130b55Continue")?.click();
+     return;
+   }
+
+   if(isContinue)return;
+
+   window.__v130b56MenuGate=true;
+   window.__v130b56MenuGateCode=code;
+   document.getElementById("toLore")?.click();
+   return;
+ }
+
+ // Character creation: never let E or SPACE act as shortcuts while typing.
+ if(lore){
+   if(isContinue)return;
+
+   const input=document.getElementById("v130b2PlayerName");
+   const typing=document.activeElement===input ||
+     ["INPUT","TEXTAREA","SELECT"].includes(String(document.activeElement?.tagName||"").toUpperCase()) ||
+     document.activeElement?.isContentEditable;
+
+   if(typing){
+     // ENTER may submit on a NEW key press; E/SPACE remain normal text.
+     if(isEnter){
+       e.preventDefault();
+       e.stopImmediatePropagation();
+       document.getElementById("start")?.click();
+     }
+     return;
+   }
+
+   e.preventDefault();
+   e.stopImmediatePropagation();
+   document.getElementById("start")?.click();
+ }
+}
+document.addEventListener("keydown",v130b541StartKeyboard,true);
+
+document.addEventListener("keyup",function v130b56ReleaseMenuGate(e){
+ if(!window.__v130b56MenuGate)return;
+ if(!window.__v130b56MenuGateCode||e.code===window.__v130b56MenuGateCode){
+   window.__v130b56MenuGate=false;
+   window.__v130b56MenuGateCode=null;
+ }
+},true);
+
+window.addEventListener("blur",()=>{
+ window.__v130b56MenuGate=false;
+ window.__v130b56MenuGateCode=null;
+});
+
+
 
 
 /* V12 CLEAN.4.5 — IT LAB / MAGAZZINO */
@@ -513,7 +836,7 @@ function drawQuestion(category){
 const npcDefs=[
  {id:"pao",name:"PAO",role:"BIMER",x:176,y:696,homeRoom:"BIM",homeX:176,homeY:696,tone:"mixed",shirt:"#536f8b",hunter:false,speed:58,state:"work"},
  {id:"zia",name:"ZIA ALE",role:"SEGRETERIA",x:565,y:825,homeRoom:"INGRESSO / SEGRETERIA",homeX:565,homeY:825,tone:"good",shirt:"#765d78",state:"idle"},
- {id:"don",name:"DON",role:"JOLLY",x:1045,y:880,homeRoom:"CUCINA",homeX:1045,homeY:880,tone:"good",shirt:"#566a51",skin:"#6b432f",skin:"#8b5a3c",hair:"#17120f",hunter:false,state:"idle"},{id:"hr",name:"BETTY",role:"HR",x:150,y:165,homeX:150,homeY:165,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle",homeRoom:"HR"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:900,homeX:185,homeY:842,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:118,state:"outside"}];
+ {id:"don",name:"DON",role:"JOLLY",x:700,y:700,homeRoom:"CUCINA",homeX:1045,homeY:880,tone:"good",shirt:"#566a51",skin:"#8b5a3c",hair:"#17120f",hunter:false,speed:66,state:"specialPause"},{id:"hr",name:"BETTY",role:"HR",x:150,y:165,homeX:150,homeY:165,tone:"good",shirt:"#6f6258",hunter:false,speed:48,state:"idle",homeRoom:"HR"},{id:"manager",name:"IT MANAGER",role:"IT // DISPATCH",x:650,y:900,homeX:185,homeY:842,tone:"neutral",shirt:"#5d6570",hunter:false,speed:58,raceSpeed:118,state:"outside"}];
 const ambientNames=["ALE","CRI","RIDER","FABI","GIADA","TOM","LUCA","MARTI","SARA","NICO","VALE","ANNA","MARCO","ELI"];
 
 let bettySupportCooldown=0,bettyPinged=false,bettyLastStressBand=0;
@@ -1144,6 +1467,7 @@ function startTutorialCarryMission(){
 }
 function startCarryMission(){
  if(!workstationOnline||!managerRaceDone||introStage!=="done")return;
+ if(v130b561MainActivityBusy())return;
  if(state&&state.min>=BOSS-30)return;
  if(carryMission||Math.random()>.38)return;
  carryMission=makeCarryMission();
@@ -1262,10 +1586,10 @@ function startAmazonEvent(){
   {id:"AMZ-IT-2",label:"PACCO IT // PERIFERICHE",owner:"PLAYER",x:730,y:800,to:{x:535,y:225,room:"SERVER",label:"DEPOSITO MAGAZZINO IT"},taken:false,done:false},
   ...helpers.map((n,i)=>({id:"AMZ-NPC-"+i,label:"PACCO "+n.name,owner:n.id,x:755+i*22,y:800,to:{x:n.homeX,y:n.homeY,room:n.homeRoom},taken:false,done:false}))
  ];
- studioEvent={id:"amazon-"+(++eventSerial),type:"AMAZON",title:"CONSEGNA AMAZON",stage:"pickup",packages,helpers,started:state.min};
+ studioEvent={id:"amazon-"+(++eventSerial),type:"AMAZON",title:"CONSEGNA PACCHI",stage:"pickup",packages,helpers,started:state.min};
  v130a1StartDelivery(false);
  showMissionBanner("PACCHI IN INGRESSO","Zia Ale ha ricevuto una consegna. Ritira i 2 pacchi IT e depositali nel SERVER / MAGAZZINO IT.","2 PACCHI IT // +240 XP","EVENTO STUDIO");
- const amazonMsg="Sono arrivati i pacchi Amazon. Gli altri prendono i loro: questi due sono per il Magazzino IT.";
+ const amazonMsg="Sono arrivati dei pacchi. Gli altri prendono i loro: questi due sono per il Magazzino IT.";
  // 1.0.16: Amazon is a non-blocking notification. Never set storyOpen.
  phoneMessage("ZIA ALE",amazonMsg);
  helpers.forEach((n,i)=>{
@@ -1273,7 +1597,7 @@ function startAmazonEvent(){
    n.eventCarry=p.id;n.state="eventPickup";n.routeGoal={x:p.x,y:p.y,room:"INGRESSO / SEGRETERIA"};
    n.route=findNpcPath({x:n.x,y:n.y},n.routeGoal);n.routeIndex=0;
  });
- showStudioEventHud("CONSEGNA AMAZON","0/2 pacchi IT consegnati");
+ showStudioEventHud("CONSEGNA PACCHI","F // PRENDI I 2 PACCHI IT IN SEGRETERIA");
  return true;
 }
 
@@ -1302,35 +1626,60 @@ function v12c42MeetingNotify(title,text){
 }
 function v12c42MeetingStart(){
   if(!v12c42CanGenerateWork())return false;
+  if(typeof v130b561MainActivityBusy==="function"&&v130b561MainActivityBusy())return false;
   if(v12c42MeetingActive() || v12c42MeetingClosed())return false;
   if(studioEvent && studioEvent.type==="MEETING_RUSH")return false;
 
-  // If player is inside a task/minigame, defer until it closes.
   if(v12c42MeetingBusyUi()){
     v12c42MeetingQueued=true;
     v12c42MeetingDeferredStart=true;
-    v12c42MeetingNotify("MEETING TRA 2 MINUTI","Evento accodato: termina prima l'intervento corrente.");
     return false;
   }
 
-  v12c42MeetingState="ANNOUNCED";
+  v12c42MeetingState="PICKUP";
   v12c42MeetingLateWarned=false;
+
   studioEvent={
     id:"meet-"+(++eventSerial),
     type:"MEETING_RUSH",
-    title:"MEETING TRA 2 MINUTI",
+    title:"SALA MEET // EXTENDER HDMI",
     stage:"pickup",
     started:state.min,
-    pickup:{x:440,y:188,room:"SERVER",label:"SCAFFALI MAGAZZINO IT"},
-    to:{x:925,y:205,room:"SALA MEET"},
+
+    // B5.7.1 safe walkable points, away from furniture hitboxes.
+    pickup:{x:535,y:225,room:"SERVER",label:"MAGAZZINO IT // BANCO USCITA"},
+    to:{x:940,y:285,room:"SALA MEET",label:"POSTAZIONE AV SALA MEET"},
+
     item:"EXTENDER HDMI",
     carried:false,
     completed:false,
     failed:false,
     lateWarned:false
   };
-  v12c42MeetingNotify("MEETING TRA 2 MINUTI","Recupera l'EXTENDER HDMI nel SERVER / MAGAZZINO IT e portalo in SALA MEET.");
-  v12c42MeetingState="PICKUP";
+
+  const startObjective=()=>{
+    showMissionBanner(
+      "SALA MEET // EXTENDER HDMI",
+      "Vai nel SERVER / MAGAZZINO IT. Sul marker premi F per prendere l'EXTENDER HDMI.",
+      "EVENTO STORIA",
+      "F = PRENDI"
+    );
+    v12c42MeetingNotify(
+      "SALA MEET",
+      "SERVER / MAGAZZINO IT → marker giallo → F // PRENDI EXTENDER HDMI"
+    );
+  };
+
+  if(typeof v130b43StorySay==="function"){
+    v130b43StorySay("IT MANAGER",[
+      "La Sala Meet non aggancia più il segnale video.",
+      "Nel Magazzino IT c'è un extender HDMI pronto.",
+      "Prendilo e collegalo alla postazione AV della Sala Meet."
+    ],startObjective);
+  }else{
+    startObjective();
+  }
+
   return true;
 }
 
@@ -1395,7 +1744,7 @@ function startDeskSetupEvent(){
 }
 function maybeStartStudioEvent(){
  if(!workstationOnline||!managerRaceDone||introStage!=="done")return;
- if(activeMiniGame||!$("#modal")?.classList.contains("hidden"))return;
+ if(v130b561MainActivityBusy())return;
  if(!v12c42CanGenerateWork())return;
  if(state.min>=BOSS-30)return;
  if(studioEvent||introStage!=="done"||state.min<studioEventNext||isLunch())return;
@@ -1438,7 +1787,7 @@ function updateStudioEvent(dt){
    }
   }
  }
- if(false){/* V12 CLEAN.4.2 old repeating meeting warning disabled */}
+
 }
 function drawStudioEventObjects(){
  if(!studioEvent)return;
@@ -1446,9 +1795,29 @@ function drawStudioEventObjects(){
   for(const p of studioEvent.packages){
    if(p.done||p.taken)continue;
    g.fillStyle=p.owner==="PLAYER"?"#d8a44c":"#a87943";g.fillRect(p.x-10,p.y-8,20,16);
-   g.fillStyle="#2a1a0c";g.font="bold 6px monospace";g.fillText("AMZ",p.x-8,p.y+2);
+   g.fillStyle="#2a1a0c";g.font="bold 6px monospace";g.fillText("IT",p.x-5,p.y+2);
   }
   for(const n of studioEvent.helpers){if(n.eventCarry){g.fillStyle="#b9874d";g.fillRect(n.x-9,n.y-2,18,13)}}
+ }
+ if(studioEvent.type==="MEETING_RUSH"){
+   const t=studioEvent.carried?studioEvent.to:studioEvent.pickup;
+   if(t){
+     const pulse=5+Math.sin(performance.now()/150)*2;
+     g.save();
+     g.strokeStyle="#f2d85c";g.lineWidth=3;
+     g.strokeRect(t.x-18-pulse/2,t.y-14-pulse/2,36+pulse,28+pulse);
+     g.fillStyle="#f2d85c";
+     g.font="bold 9px monospace";g.textAlign="center";
+     g.fillText(
+       studioEvent.carried?"G // COLLEGA EXTENDER":"F // PRENDI EXTENDER",
+       t.x,t.y-24
+     );
+     g.fillStyle="#1c2a24";
+     g.fillRect(t.x-8,t.y-5,16,10);
+     g.fillStyle="#d9e7cb";
+     g.fillRect(t.x-5,t.y-2,10,4);
+     g.restore();
+   }
  }
  if(studioEvent.type==="DESK_SETUP"){
    const t=studioEvent.carried?studioEvent.to:studioEvent.pickup;
@@ -1526,6 +1895,8 @@ function v12cIntroProtected(){
  return introStage!=="done" || !enteredStudio;
 }
 function v12cNpcAllowedDuringIntro(n){
+ if(n&&n.id==="manager"&&["introWait","managerArrivalWait","managerArrivalCinematic","managerArrivalReady","managerRace129"].includes(n.state))return true;
+
  if(!n)return false;
  if(!v12cIntroProtected())return true;
  return n.id==="zia" || n.id==="manager";
@@ -1779,8 +2150,10 @@ function v121CanSpecial(n){
 }
 
 function v121SpecialCard(name,title,body,effect){
- const msg=`${title} // ${body}${effect?` // ${effect}`:""}`;
- sideMessage(name,msg);
+ const who=String(name||"NPC"),parts=[String(title||""),String(body||"")].filter(Boolean);
+ if(effect)parts.push(String(effect));
+ if(typeof v130b43StorySay==="function")v130b43StorySay(who,parts);
+ else sideMessage(who,parts.join(" // "));
  return true;
 }
 
@@ -1922,14 +2295,16 @@ let V122_CALLS={hr:-999,zia:-999};
 function v122SpecialCalls(){if(!state||state.phase!=="shift"||storyOpen||activeMiniGame||isLunch())return;const m=state.min||0,s=state.stress||0;if(s>=45&&m-V122_CALLS.hr>=100&&!pendingOffers.hr){V122_CALLS.hr=m;pendingOffers.hr={title:"SUPPORTO HR",stress:s>=70?-22:-14,xp:35,text:"Passa da me in HR."};v122Say("BETTY","Quando puoi passa da me in HR. Ti vedo un po' sotto pressione.","BONUS HR DISPONIBILE — nessuna nuova task.")}if(s>=30&&m-V122_CALLS.zia>=120&&!pendingOffers.zia){V122_CALLS.zia=m;pendingOffers.zia={title:"CAFFÈ TATTICO",stress:-9,xp:20,text:"Passa da me in Segreteria."};v122Say("ZIA ALE","Quando hai un attimo passa in Segreteria. Ti tengo da parte un caffè.","BONUS SEGRETERIA DISPONIBILE — nessuna nuova task.")}}
 
 function npcTalk(n){
- if(["pao","don","hr","zia","manager"].includes(String(n?.id||"").toLowerCase())){const id=String(n.id||"").toLowerCase(),had=!!pendingOffers[id];if(v121SpecialNpcInteract(n)){const msg=id==="pao"?"Oh, finalmente ti becco. Vediamo se oggi sopravviviamo senza drammi.":id==="don"?"Dimmi. Se posso coprirti su qualcosa, ci penso io.":id==="hr"?"Una cosa alla volta. Se sei sotto pressione, passa da me.":id==="zia"?"Se ti serve una mano, sai dove trovarmi.":"Controlla le priorità. Il resto viene dopo.";v122Say(n.name||id,msg,had?"BONUS RICEVUTO.":"INTERAZIONE SPECIALE.");return true}}
+ if(["pao","don","hr","zia","manager"].includes(String(n?.id||"").toLowerCase())){
+   if(v121SpecialNpcInteract(n))return true;
+ }
  if(!n)return false;
 
  // 1.0.9: a promised special interaction ALWAYS wins over generic chatter.
 
  if(n?.id==="manager"&&managerRaceDone){
    if(!v12c451ManagerTalkAllowed(n))return false;
-   sideMessage("IT MANAGER","Controlla i ticket e tieni d'occhio il server.");
+   v130b43StorySay("IT MANAGER","Controlla i ticket e tieni d'occhio il server.");
    return true;
  }
  if(!v12c451ManagerTalkAllowed(n))return false;
@@ -2160,13 +2535,7 @@ function startShiftFromEntrance(){
  if(typeof sideMessage==="function")sideMessage("IT TASK","Raggiungi IT e avvia la tua workstation prima del manager."); else toast("IT TASK // Raggiungi IT prima del Manager");
 }
 
-function v12c462PhysicalPickupNearby(){
- const ct=carryMission?.stage==="pickup"?carryTarget():null;
- if(ct&&Math.hypot(player.x-ct.x,player.y-ct.y)<85)return true;
- if(studioEvent?.type==="AMAZON"&&studioEvent.packages.some(p=>p.owner==="PLAYER"&&!p.taken&&!p.done&&Math.hypot(player.x-p.x,player.y-p.y)<85))return true;
- if(studioEvent&&!studioEvent.carried&&studioEvent.pickup&&Math.hypot(player.x-studioEvent.pickup.x,player.y-studioEvent.pickup.y)<85)return true;
- return false;
-}
+
 
 
 let v110FirstMissionResolved=false;
@@ -2532,20 +2901,80 @@ function narrativeOnce(key,sender,text){
 }
 
 let v12cStoryMission=0;
+
+/* ============================================================
+   1.0.30B5.6.1 — MAIN ACTIVITY PACING
+   One important activity at a time.
+   ============================================================ */
+const V130B561_PACING={
+ blockUntil:0,
+ graceMs:5000
+};
+
+function v130b561ModalBusy(){
+ const modal=document.getElementById("modal");
+ return !!(modal&&!modal.classList.contains("hidden"));
+}
+
+function v130b561MainActivityBusy(){
+ if(!state||state.phase!=="shift")return true;
+ if(activeMiniGame)return true;
+ if(carryMission)return true;
+ if(studioEvent)return true;
+ if(storyOpen||dialogPause)return true;
+ if(v130b561ModalBusy())return true;
+ if(performance.now()<V130B561_PACING.blockUntil)return true;
+ return false;
+}
+
+function v130b561GiveBreath(ms=V130B561_PACING.graceMs){
+ V130B561_PACING.blockUntil=Math.max(
+   V130B561_PACING.blockUntil,
+   performance.now()+Math.max(0,ms||0)
+ );
+}
+
+function v130b561CanStartMainActivity(){
+ return !v130b561MainActivityBusy() &&
+   workstationOnline &&
+   managerRaceDone &&
+   introStage==="done" &&
+   !isLunch() &&
+   state.min<BOSS-30;
+}
+
 function v12cStoryProgression(){
  if(!state||introStage!=="done"||storyOpen||isLunch())return;
+ if(v130b561MainActivityBusy())return;
+
  if(v12cStoryMission<1&&state.min>=600&&!studioEvent){
-   v12cStoryMission=1;
-   showMissionBanner("MISSIONE 2 // SALA MEET","Controlla la sala meeting: qualcosa non torna.","EVENTO STORIA","STORIA");
-   startMeetingRushEvent();
- }else if(v12cStoryMission<2&&state.min>=690&&!studioEvent){
-   v12cStoryMission=2;
-   showMissionBanner("MISSIONE 3 // CONSEGNA","Zia Ale ha ricevuto dei pacchi. Quelli IT sono tuoi.","EVENTO STORIA","STORIA");
-   startAmazonEvent();
- }else if(v12cStoryMission<3&&state.min>=900&&!studioEvent){
-   v12cStoryMission=3;
-   showMissionBanner("MISSIONE 4 // POMERIGGIO","Cambio postazione urgente: serve un monitor.","EVENTO STORIA","STORIA");
-   startDeskSetupEvent();
+   if(startMeetingRushEvent())v12cStoryMission=1;
+   return;
+ }
+
+ if(v12cStoryMission<2&&state.min>=690&&!studioEvent){
+   if(startAmazonEvent()){
+     v12cStoryMission=2;
+     showMissionBanner(
+       "MISSIONE 3 // CONSEGNA",
+       "Zia Ale ha ricevuto dei pacchi. Quelli IT sono tuoi.",
+       "EVENTO STORIA",
+       "STORIA"
+     );
+   }
+   return;
+ }
+
+ if(v12cStoryMission<3&&state.min>=900&&!studioEvent){
+   if(startDeskSetupEvent()){
+     v12cStoryMission=3;
+     showMissionBanner(
+       "MISSIONE 4 // POMERIGGIO",
+       "Cambio postazione urgente: serve un monitor.",
+       "EVENTO STORIA",
+       "STORIA"
+     );
+   }
  }
 }
 
@@ -2554,7 +2983,7 @@ function updateNarrative(){
  if(!state||!shiftStarted)return;
  if(state.min>=615)narrativeOnce("1015","ZIA ALE","La Sala Meet tra poco è occupata. Se passa qualcuno di corsa, sai già perché.");
  if(state.min>=705)narrativeOnce("1145","IT MANAGER","Occhio ai ticket della direzione: se arrivano, hanno priorità.");
- if(state.min>=765)narrativeOnce("1245","DON","Io tra poco vado a pranzo. Se vuoi fumare, questo è il momento.");
+ if(state.min>=765)narrativeOnce("1245","DON","Io tra poco vado a pranzo. Se vuoi staccare cinque minuti, questo è il momento.");
  if(state.min>=855)narrativeOnce("1415","ZIA ALE","Bentornato. Il pomeriggio di solito è peggio della mattina.");
  if(state.min>=1005)narrativeOnce("1645","IT MANAGER","Da ora in poi preparati ai classici: prima di andare via avrei una cosina...");
  if(state.min>=1080)narrativeOnce("1800","CAPO","Prima di andare via devo fare una presentazione. Tieniti libero per la Sala Meet.");
@@ -2579,6 +3008,24 @@ function computeCamera(){
  const vw=playableScreenW/z;
  const vh=H/z;
  const maxX=Math.max(0,W-vw),maxY=Math.max(0,H-vh);
+
+ // B5.4: fixed cinematic shot. The camera no longer follows the Manager.
+ // A wider zoom keeps both the sidewalk and studio entrance visible at once.
+ if(typeof V129_INTRO!=="undefined"&&V129_INTRO.phase==="managerArrival"){
+   const cinematicZoom=1.18;
+   const cineVw=playableScreenW/cinematicZoom;
+   const cineVh=H/cinematicZoom;
+   const cineMaxX=Math.max(0,W-cineVw);
+   const cineMaxY=Math.max(0,H-cineVh);
+
+   // Fixed composition: Manager appears on the right sidewalk and walks
+   // left toward the central entrance, then upward into reception.
+   const focusX=820;
+   const focusY=900;
+   camera.x=Math.max(0,Math.min(cineMaxX,focusX-cineVw/2));
+   camera.y=Math.max(0,Math.min(cineMaxY,focusY-cineVh/2));
+   return {x:camera.x,y:camera.y,zoom:cinematicZoom};
+ }
 
  camera.x=Math.max(0,Math.min(maxX,player.x-vw/2));
  camera.y=Math.max(0,Math.min(maxY,player.y-vh/2));
@@ -2761,7 +3208,14 @@ function v102FinalAudit(){
    Intro does not depend on E/ENTER except the doorbell itself.
    ============================================================ */
 const V129_INTRO={
- phase:"idle", timer:0, locked:false, doorOpen:false, crossed:false
+ phase:"idle",
+ timer:0,
+ locked:false,
+ doorOpen:false,
+ crossed:false,
+ storyLaunched:false,
+ managerArrivalDone:false,
+ autoEntryDone:false
 };
 
 const V129_RACE={
@@ -2798,12 +3252,16 @@ function v129Lock(v){
 function v129IntroSet(phase,duration=0,locked=true){
  V129_INTRO.phase=phase;
  V129_INTRO.timer=Math.max(0,duration||0);
+ V129_INTRO.storyLaunched=false;
  v129Lock(locked);
 }
 
 function v129ResetIntro(){
- V129_INTRO.phase="pre1";
- V129_INTRO.timer=3.4;
+ V129_INTRO.phase="heroStory";
+ V129_INTRO.timer=0;
+ V129_INTRO.storyLaunched=false;
+ V129_INTRO.managerArrivalDone=false;
+ V129_INTRO.autoEntryDone=false;
  V129_INTRO.locked=true;
  V129_INTRO.doorOpen=false;
  V129_INTRO.crossed=false;
@@ -2832,7 +3290,7 @@ function v129ResetIntro(){
 
  const m=npcs.find(n=>n&&n.id==="manager");
  if(m){
-   m.x=650;m.y=900;
+   m.x=985;m.y=985;
    m.route=null;m.routeIndex=0;m.state="introWait";
    m.stuckFor=0;m.blockedFor=0;
  }
@@ -2846,7 +3304,7 @@ function v129OpenDoor(){
  v12cDoorbellRung=true;
  v12cDoorOpened=true;
  entranceOpened=true;
- v129IntroSet("opening",2.5,true);
+ v129IntroSet("opening",1.25,true);
  return true;
 }
 
@@ -2862,18 +3320,135 @@ function v129BeginInsideCinematic(){
  enteredStudio=true;
  introFreeWalk=false;
  introStage="cinematic";
+
  const m=npcs.find(n=>n&&n.id==="manager");
- if(m){m.x=650;m.y=900;m.route=null;m.routeIndex=0;m.state="introWait"}
- v129IntroSet("zia1",4.2,true);
+ if(m){
+   // He is still outside, to the right of the player's camera.
+   m.x=1080;m.y=985;
+   m.route=null;m.routeIndex=0;
+   m.routeGoal=null;
+   m.state="managerArrivalWait";
+   m.speed=70;
+   m.ignoreNpcCollision=true;
+ }
+
+ v129IntroSet("ziaStory",0,true);
 }
 
+
+
+function v130b53StartAutoEntry(){
+ V129_INTRO.doorOpen=true;
+ v12cDoorbellRung=true;
+ v12cDoorOpened=true;
+ entranceOpened=true;
+ introFreeWalk=true;
+ introStage="autoEntry";
+ V129_INTRO.autoEntryDone=false;
+ if(player){player.x=705;player.y=985}
+}
+
+function v130b53UpdateAutoEntry(dt){
+ if(!player)return true;
+ const targets=[
+   {x:705,y:955},
+   {x:705,y:920},
+   {x:705,y:895}
+ ];
+ const idx=Number.isFinite(V129_INTRO.autoEntryIndex)?V129_INTRO.autoEntryIndex:0;
+ const target=targets[Math.min(idx,targets.length-1)];
+ const dx=target.x-player.x,dy=target.y-player.y;
+ const dist=Math.hypot(dx,dy);
+ const step=128*Math.min(.05,Math.max(0,dt||0));
+
+ if(dist<=Math.max(3,step)){
+   player.x=target.x;player.y=target.y;
+   V129_INTRO.autoEntryIndex=idx+1;
+   if(V129_INTRO.autoEntryIndex>=targets.length){
+     enteredStudio=true;
+     introFreeWalk=false;
+     introStage="cinematic";
+     V129_INTRO.autoEntryDone=true;
+     return true;
+   }
+   return false;
+ }
+
+ const nx=player.x+(dx/dist)*step,ny=player.y+(dy/dist)*step;
+ // Door is already open; use the normal collision rules for the cinematic walk.
+ if(playerCanMove(player.x,player.y,nx,ny)){
+   player.x=nx;player.y=ny;
+ }else{
+   // deterministic fallback avoids an intro softlock if map geometry changes.
+   player.x=target.x;player.y=target.y;
+ }
+ return false;
+}
+
+function v130b52StartManagerArrival(){
+ const m=npcs.find(n=>n&&n.id==="manager");if(!m)return false;
+
+ // B5.4: he starts INSIDE the dedicated cinematic frame.
+ // This route gives the player a readable sidewalk -> door -> reception movement.
+ const route=[
+   {x:930,y:985},
+   {x:865,y:985},
+   {x:800,y:985},
+   {x:750,y:985},
+   {x:720,y:972},
+   {x:705,y:948},
+   {x:705,y:922},
+   {x:705,y:895}
+ ];
+
+ m.x=985;m.y=985;
+ m.route=route;
+ m.routeIndex=0;
+ m.routeGoal={x:705,y:895,room:navAreaAt(705,895)};
+ m.state="managerArrivalCinematic";
+ m.speed=132;
+ m.raceSpeed=132;
+ m.ignoreNpcCollision=true;
+ m.stuckFor=0;m.blockedFor=0;
+ V129_INTRO.managerArrivalDone=false;
+ return true;
+}
+
+function v130b52UpdateManagerArrival(dt){
+ const m=npcs.find(n=>n&&n.id==="manager");
+ if(!m)return true;
+ if(V129_INTRO.managerArrivalDone)return true;
+
+ const done=moveNpcRoute(m,Math.min(.05,Math.max(0,dt||0)));
+ if(done){
+   m.x=705;m.y=895;
+   m.route=null;m.routeIndex=0;
+   m.routeGoal=null;
+   m.state="managerArrivalReady";
+   m.ignoreNpcCollision=false;
+   V129_INTRO.managerArrivalDone=true;
+   return true;
+ }
+ return false;
+}
+
+/* 1.0.30B5.6.2 RACE TUNING
+   Player speed: ~205
+   Manager race speed: 168
+   Manager start reaction delay: 280 ms
+   Target: visibly competitive but still beatable with a clean route.
+*/
 function v129StartRace(){
  v130b42HideAutoDialogue();
  if(V129_RACE.active)return;
 
  const m=npcs.find(n=>n&&n.id==="manager");
- // B1.3: Manager starts at the SAME entrance lane, not already deep inside the studio.
- const start={x:650,y:900,room:navAreaAt(650,900)};
+ // B5.2: the race continues from the position reached in the visible entrance cinematic.
+ const start={
+   x:Number.isFinite(m?.x)?m.x:705,
+   y:Number.isFinite(m?.y)?m.y:895,
+   room:navAreaAt(Number.isFinite(m?.x)?m.x:705,Number.isFinite(m?.y)?m.y:895)
+ };
  const finish={x:185,y:842,room:"IT"};
  let route=findNpcPath(start,finish);
 
@@ -2889,7 +3464,7 @@ function v129StartRace(){
  V129_RACE.managerFinished=false;
  V129_RACE.playerFinished=false;
  V129_RACE.startAt=performance.now();
- V129_RACE.managerDelayUntil=performance.now()+550;
+ V129_RACE.managerDelayUntil=performance.now()+280;
  V129_RACE.managerFinishAt=0;
  V129_RACE.playerFinishAt=0;
  V129_RACE.routeIndex=0;
@@ -2906,8 +3481,8 @@ function v129StartRace(){
    m.routeIndex=0;
    m.routeGoal={...finish};
    m.state="managerRace129";
-   m.speed=78;
-   m.raceSpeed=78;
+   m.speed=168;
+   m.raceSpeed=168;
    m.ignoreNpcCollision=true;
    m.stuckFor=0;m.blockedFor=0;
  }
@@ -2989,13 +3564,55 @@ function v129IntroUpdate(dt){
  if(!state||state.phase!=="shift")return;
  const t=Math.min(Math.max(Number.isFinite(dt)?dt:0,0),0.1);
 
- if(V129_INTRO.phase==="doorReady"){
-   if(V129_INTRO.doorOpen)return;
+ if(V129_INTRO.phase==="heroStory"){
+   if(!V129_INTRO.storyLaunched){
+     V129_INTRO.storyLaunched=true;
+     const who=typeof v130b2PlayerName==="function"?v130b2PlayerName():"IT";
+     v130b43StorySay(who,[
+       "Ho ancora due minuti prima di entrare.",
+       "Entro, faccio login, prendo un caffè. In quest'ordine. Se nessuno rompe niente."
+     ],()=>{
+       V129_INTRO.autoEntryIndex=0;
+       v130b53StartAutoEntry();
+       v129IntroSet("autoEntry",0,true);
+     });
+   }
    return;
  }
 
- if(V129_INTRO.phase==="doorOpen"){
-   if(v129PastThreshold())v129BeginInsideCinematic();
+ // The protagonist enters automatically: no movement keys required yet.
+ if(V129_INTRO.phase==="autoEntry"){
+   if(v130b53UpdateAutoEntry(t)){
+     v129IntroSet("ziaStory",0,true);
+   }
+   return;
+ }
+
+ if(V129_INTRO.phase==="ziaStory"){
+   if(!V129_INTRO.storyLaunched){
+     V129_INTRO.storyLaunched=true;
+     const name=typeof v130b2PlayerName==="function"?v130b2PlayerName():"IT";
+     v130b43StorySay("ZIA ALE",[
+       `${name}! Guarda chi sta arrivando...`,
+       "L'IT Manager. E stamattina mi sembra pure di fretta.",
+       "Appena entra, prova ad arrivare nel Reparto IT prima di lui.",
+       "Al VIA muoviti con W A S D oppure con le FRECCE.",
+       "Alla tua postazione premi E, accendila e fai il LOGIN.",
+       "Preparati... eccolo."
+     ],()=>{
+       v130b52StartManagerArrival();
+       v129IntroSet("managerArrival",0,true);
+     });
+   }
+   return;
+ }
+
+ // Camera follows this beat separately; controls stay locked.
+ if(V129_INTRO.phase==="managerArrival"){
+   v130b42HideAutoDialogue();
+   if(v130b52UpdateManagerArrival(t)){
+     v129IntroSet("count3",1.0,true);
+   }
    return;
  }
 
@@ -3007,50 +3624,15 @@ function v129IntroUpdate(dt){
  }
 
  switch(V129_INTRO.phase){
-   case "pre1":
-     v129IntroSet("pre2",3.0,true);
-     break;
-   case "pre2":
-     introFreeWalk=true;
-     introStage="doorReady";
-     state.min=Math.max(state.min,540);
-     v129IntroSet("doorReady",0,false);
-     if(typeof toast==="function")toast("09:00 // RAGGIUNGI LA PORTA E PREMI E");
-     break;
-   case "opening":
-     introFreeWalk=true;
-     introStage="doorOpen";
-     v129IntroSet("doorOpen",0,false);
-     if(typeof toast==="function")toast("PORTA APERTA // ENTRA");
-     break;
-   case "zia1":
-     v129IntroSet("zia2",4.6,true);
-     break;
-   case "zia2":
-     v129IntroSet("count3",1.15,true);
-     break;
-   case "count3":
-     v129IntroSet("count2",1.15,true);
-     break;
-   case "count2":
-     v129IntroSet("count1",1.15,true);
-     break;
-   case "count1":
-     v129IntroSet("via",0.75,true);
-     break;
-   case "via":
-     v129StartRace();
-     break;
+   case "count3":v129IntroSet("count2",1.0,true);break;
+   case "count2":v129IntroSet("count1",1.0,true);break;
+   case "count1":v129IntroSet("via",0.65,true);break;
+   case "via":v129StartRace();break;
  }
 }
 
 function v129IntroTitleText(){
  switch(V129_INTRO.phase){
-   case "pre1":return ["08:58","Ho ancora due minuti. Mi fumo una sigaretta prima di entrare."];
-   case "pre2":return ["TELEFONO","A dopo. Entro in studio."];
-   case "opening":return ["ZIA ALE","Arrivo! Ti apro subito."];
-   case "zia1":return ["ZIA ALE",`${typeof v130b2PlayerName==="function"?v130b2PlayerName():"IT"}, eccoti. Il Manager è appena arrivato.`,"Se vuoi arrivare prima di lui in IT devi sbrigarti."];
-   case "zia2":return ["ZIA ALE","Al VIA correte entrambi verso il Reparto IT.","Tu devi accendere la workstation e completare il LOGIN."];
    case "count3":return ["","3"];
    case "count2":return ["","2"];
    case "count1":return ["","1"];
@@ -3149,7 +3731,18 @@ function inDoorZone(x,y){
  - crossing a room wall is allowed only inside a door zone
  This prevents "walking through the wall" while preserving wide, forgiving doors.
 */
+
+/* 1.0.30B5.7 — MAP SOLID */
+const V130B57_STUDIO_PERIMETER={left:22,right:1592,top:28,bottom:927};
+function v130b57PlayerInsideStudioBounds(x,y){
+ return Number.isFinite(x)&&Number.isFinite(y) &&
+   x>=V130B57_STUDIO_PERIMETER.left && x<=V130B57_STUDIO_PERIMETER.right &&
+   y>=V130B57_STUDIO_PERIMETER.top && y<=V130B57_STUDIO_PERIMETER.bottom;
+}
+
 function playerCanMove(ox,oy,nx,ny){
+ // Once inside, facade/sidewalk/road are no longer player walk-space.
+ if(enteredStudio && !v130b57PlayerInsideStudioBounds(nx,ny))return false;
  if(typeof V129_INTRO!=="undefined"&&!V129_INTRO.doorOpen&&typeof STUDIO_ENTRANCE!=="undefined"){
    const d=STUDIO_ENTRANCE;
    if(nx>d.x+4&&nx<d.x+d.w-4&&ny>918&&ny<952)return false;
@@ -3242,6 +3835,7 @@ function miniSuccess(i,label,skipContext=false){
  }
  const t=tickets[i],xp={LOW:120,MEDIUM:290,HIGH:560,CRITICAL:820}[t.level];
  tickets.splice(i,1);activeMiniGame=null;$("#modal").classList.add("hidden");
+ v130b561GiveBreath();
  const stressBefore=state.stress;
  state.xp+=xp;state.solved++;state.stress=Math.max(0,state.stress-6);
  state.incident=Math.max(0,state.incident-({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]));
@@ -3267,7 +3861,7 @@ function failMiniGameCurrent(){
    tickets.splice(i,1);repLoss=t.level==="CRITICAL"?2:1;state.rep-=repLoss;
    state.incident+=({LOW:5,MEDIUM:8,HIGH:12,CRITICAL:16}[t.level]||6)*difficultyConfig[difficulty].incidentMult;
  }
- activeMiniGame=null;$("#modal").classList.add("hidden");renderTickets();hud();checkEarlyEnd();
+ activeMiniGame=null;$("#modal").classList.add("hidden");v130b561GiveBreath();renderTickets();hud();checkEarlyEnd();
  showRewardResult("INTERVENTO FALLITO",[
    "3 ERRORI NELLO STESSO INTERVENTO",
    `REPUTAZIONE -${repLoss}`,
@@ -3544,7 +4138,7 @@ function bettySupport(){
  const rel=ensureRelation(hr);
 
  if(bettySupportCooldown>0){
-   storyDialog("BETTY","Respira e vai per priorità. Una cosa alla volta.");
+   v130b43StorySay("BETTY","Respira e vai per priorità. Una cosa alla volta.");
    return true;
  }
 
@@ -3563,23 +4157,23 @@ function bettySupport(){
    bettySupportCooldown=120;
    bettyPinged=false;
    changeRelation(hr,4);
-   storyDialog("BETTY",`${tip} Ti copro io cinque minuti. // STRESS -24 · +80 XP`);
+   v130b43StorySay("BETTY",`${tip} Ti copro io cinque minuti. // STRESS -24 · +80 XP`);
  }else if(band>=2){
    state.stress=Math.max(0,state.stress-16);
    state.xp+=45;
    bettySupportCooldown=95;
    bettyPinged=false;
    changeRelation(hr,3);
-   storyDialog("BETTY",`${tip} // STRESS -16 · +45 XP`);
+   v130b43StorySay("BETTY",`${tip} // STRESS -16 · +45 XP`);
  }else if(band>=1){
    state.stress=Math.max(0,state.stress-9);
    bettySupportCooldown=75;
    bettyPinged=false;
    changeRelation(hr,2);
-   storyDialog("BETTY",`${tip} // STRESS -9`);
+   v130b43StorySay("BETTY",`${tip} // STRESS -9`);
  }else{
    changeRelation(hr,1);
-   storyDialog("BETTY",tip);
+   v130b43StorySay("BETTY",tip);
  }
  clamp();hud();
  return true;
@@ -3624,8 +4218,8 @@ function v12c45Pickup(){
    const p=studioEvent.packages.find(p=>p.owner==="PLAYER"&&!p.done&&!p.taken&&Math.hypot(player.x-p.x,player.y-p.y)<85);
    if(p){
      if(inventory.length>=3){toast("INVENTARIO PIENO");return true}
-     p.taken=true;inventory.push(p.label);updateInventoryUI();
-     showStudioEventHud("CONSEGNA AMAZON",`Porta ${p.label} in ${v107PackageDestinationText()}`);
+     p.taken=true;inventory.push(p.label);updateInventoryUI();toast(`PRESO // ${p.label}`);
+     showStudioEventHud("CONSEGNA PACCHI",`${p.label} PRESO // ${v107PackageDestinationText()} // G = CONSEGNA`);
      return true;
    }
  }
@@ -3637,7 +4231,16 @@ function v12c45Pickup(){
      studioEvent.carried=true;studioEvent.stage="deliver";
      const item=studioEvent.item||"OGGETTO";
      if(!inventory.includes(item))inventory.push(item);
-     if(studioEvent.type==="MEETING_RUSH")v12c42MeetingState="DELIVER";
+     if(studioEvent.type==="MEETING_RUSH"){
+       v12c42MeetingState="DELIVER";
+       showMissionBanner(
+         "EXTENDER PRESO",
+         "Vai in SALA MEET. Sul marker della postazione AV premi G per collegarlo.",
+         "SALA MEET",
+         "G = COLLEGA"
+       );
+       v12c42MeetingNotify("SALA MEET","EXTENDER HDMI PRESO → SALA MEET → marker giallo → G // COLLEGA");
+     }
      if(studioEvent.type==="DESK_SETUP")showStudioEventHud("CAMBIO POSTAZIONE",`G: INSTALLA PC → ${studioEvent.recipient?.name||"DESTINAZIONE"} // ${studioEvent.to?.room||"POSTAZIONE"}`);
      updateInventoryUI();toast(`PRESO // ${item}`);return true;
    }
@@ -3668,7 +4271,7 @@ function v12c45Deliver(){
      const recipient=carryMission.recipient?.name||safeRoom(carryMission.to,"POSTAZIONE");
      state.xp+=180;state.solved++;state.stress=Math.max(0,state.stress-3);
      toast(`CONSEGNATO // ${carryMission.item} → ${recipient} // +180 XP`);
-     carryMission=null;updateInventoryUI();updateTaskProgress();return true;
+     carryMission=null;v130b561GiveBreath();updateInventoryUI();updateTaskProgress();return true;
    }
  }
 
@@ -3677,11 +4280,11 @@ function v12c45Deliver(){
    if(p){
      inventory.splice(inventory.indexOf(p.label),1);p.done=true;updateInventoryUI();
      const done=studioEvent.packages.filter(x=>x.owner==="PLAYER"&&x.done).length;
-     showStudioEventHud("CONSEGNA AMAZON",`${done}/2 pacchi IT depositati`);
+     showStudioEventHud("CONSEGNA PACCHI",`${done}/2 PACCHI IT DEPOSITATI`);
      if(done>=2){
        state.xp+=240;state.solved++;
        showRewardResult("EVENTO COMPLETATO",["PACCHI IT DEPOSITATI","XP +240"],"success");
-       studioEvent=null;hideStudioEventHud();updateTaskProgress();
+       studioEvent=null;v130b561GiveBreath();hideStudioEventHud();updateTaskProgress();
      }
      return true;
    }
@@ -3697,7 +4300,15 @@ function v12c45Deliver(){
      const xp=type==="MEETING_RUSH"?220:200;
      state.xp+=xp;state.solved++;updateInventoryUI();
      toast(`CONSEGNATO // ${item} // XP +${xp}`);
-     studioEvent=null;hideStudioEventHud();updateTaskProgress();return true;
+     studioEvent=null;v130b561GiveBreath();hideStudioEventHud();updateTaskProgress();
+
+     if(type==="MEETING_RUSH"&&typeof v130b43StorySay==="function"){
+       v130b43StorySay("IT MANAGER",[
+         "Perfetto. Segnale tornato.",
+         "La Sala Meet è pronta."
+       ]);
+     }
+     return true;
    }
  }
  toast("Niente da consegnare qui.");return false;
@@ -3722,11 +4333,9 @@ function v12c45RepairPcTask(){
 function v113ManualCapoInteract(){
  if(!mokasa||state?.phase!=="shift")return false;
  if((v118ValidPoint(mokasa)?Math.hypot(player.x-mokasa.x,player.y-mokasa.y):9999)>65)return false;
- if(typeof v109EndShiftReady!=="undefined"&&v109EndShiftReady){
-   v109EndShiftReady=false;startBoss();return true;
- }
- sideMessage("CAPO","Ci vediamo a fine turno.");
- return true;
+ if(typeof V130B57_ENDING!=="undefined"&&V130B57_ENDING.active)return true;
+ if(typeof v109EndShiftReady!=="undefined"&&v109EndShiftReady){v109EndShiftReady=false;v130b57StartEndingCinematic();return true}
+ v130b43StorySay("CAPO","Ci vediamo a fine turno.");return true;
 }
 
 
@@ -3884,14 +4493,83 @@ function anomalyEvent(){
 let v109EndShiftReady=false;
 const V109_BOSS_DOOR={x:1325,y:545};
 
+
+/* 1.0.30B5.7 — ENDING CINEMATIC SKELETON */
+const V130B57_ENDING={active:false,phase:"idle",route:[],routeIndex:0,assembled:false,storyStarted:false};
+
+function v130b57EndingPlayerTarget(){return {x:1430,y:640,room:"SALA MEET CAPO"}}
+
+function v130b57PrepareFinaleCrowd(){
+ if(V130B57_ENDING.assembled)return;V130B57_ENDING.assembled=true;
+ const slots={manager:{x:1368,y:575},zia:{x:1408,y:575},hr:{x:1488,y:575},pao:{x:1368,y:480},don:{x:1490,y:480}};
+ for(const n of npcs){
+   const s=slots[n.id];if(!s)continue;
+   n.x=s.x;n.y=s.y;n.route=null;n.routeIndex=0;n.routeGoal=null;n.state="finaleAudience";n.activity=null;
+ }
+ const crowd=[{x:1325,y:610},{x:1535,y:610},{x:1325,y:455},{x:1535,y:455},{x:1335,y:650},{x:1525,y:650}];
+ ambientNPCs.slice(0,crowd.length).forEach((n,i)=>{
+   n.x=crowd[i].x;n.y=crowd[i].y;n.route=null;n.routeIndex=0;n.routeGoal=null;n.state="finaleAudience";n.activity=null;
+ });
+ if(mokasa){mokasa.x=1430;mokasa.y=445;mokasa.route=null;mokasa.routeIndex=0;mokasa.state="finaleCapo"}
+}
+
+function v130b57StartEndingCinematic(){
+ if(V130B57_ENDING.active)return true;
+ tickets=[];renderTickets();if(typeof v1293ClearGhostPhysicalMission==="function")v1293ClearGhostPhysicalMission();
+ carryMission=null;studioEvent=null;activeMiniGame=null;
+ document.getElementById("modal")?.classList.add("hidden");if(typeof hideStudioEventHud==="function")hideStudioEventHud();
+ const target=v130b57EndingPlayerTarget();
+ let route=findNpcPath({x:player.x,y:player.y,room:navAreaAt(player.x,player.y)},target);
+ if(!route||!route.length)route=[target];
+ Object.assign(V130B57_ENDING,{active:true,phase:"walk",route,routeIndex:0,assembled:false,storyStarted:false});
+ keys={};if(typeof v129ClearMovement==="function")v129ClearMovement();
+ sideMessage("FINE TURNO","Il Capo ha chiamato tutti in Sala Meet Capo.");
+ return true;
+}
+
+function v130b57EndingWalk(dt){
+ const e=V130B57_ENDING,p=e.route[Math.min(e.routeIndex,e.route.length-1)];if(!p)return true;
+ const dx=p.x-player.x,dy=p.y-player.y,dist=Math.hypot(dx,dy),step=180*Math.min(.05,Math.max(0,dt||0));
+ if(dist<=Math.max(4,step)){player.x=p.x;player.y=p.y;e.routeIndex++;return e.routeIndex>=e.route.length}
+ const nx=player.x+(dx/dist)*step,ny=player.y+(dy/dist)*step;
+ if(playerCanMove(player.x,player.y,nx,ny)){player.x=nx;player.y=ny}
+ else{
+   const reroute=findNpcPath({x:player.x,y:player.y,room:navAreaAt(player.x,player.y)},v130b57EndingPlayerTarget());
+   if(reroute&&reroute.length){e.route=reroute;e.routeIndex=0}
+ }
+ return false;
+}
+
+function v130b57EndingUpdate(dt){
+ const e=V130B57_ENDING;if(!e.active)return false;
+ if(e.phase==="walk"){
+   if(v130b57EndingWalk(dt)){v130b57PrepareFinaleCrowd();e.phase="story"}
+   return true;
+ }
+ if(e.phase==="story"&&!e.storyStarted){
+   e.storyStarted=true;const name=typeof v130b2PlayerName==="function"?v130b2PlayerName():"IT";
+   v130b43StorySay("CAPO",[
+     "Bene. Adesso che ci siamo tutti...",
+     `${name}, giornata interessante.`,
+     "Prima di andare via avrei ancora una cosina.",
+     "Facciamo l'ultimo controllo insieme. Poi vediamo com'è andata davvero."
+   ],()=>{e.active=false;e.phase="done";startBoss()});
+   return true;
+ }
+ return true;
+}
+
+document.addEventListener("keydown",function v130b57EndingInputGuard(e){
+ if(!V130B57_ENDING.active)return;
+ if(typeof V130B43_STORY!=="undefined"&&V130B43_STORY.active&&["KeyE","Enter","Space"].includes(e.code))return;
+ if(["KeyW","KeyA","KeyS","KeyD","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","KeyE","Enter","Space","KeyF","KeyG","Tab","KeyM","Escape"].includes(e.code)){
+   e.preventDefault();e.stopImmediatePropagation();if(typeof v129ClearMovement==="function")v129ClearMovement();
+ }
+},true);
+
 function v109ArmEndShift(){
- v1293ClearGhostPhysicalMission();
- if(v109EndShiftReady)return;
- v109EndShiftReady=true;
- state.min=BOSS;
- phoneMessage("IT MANAGER","Fine turno. Il Capo ti aspetta in SALA MEET CAPO.");
- showMissionBanner("FINE TURNO","Vai fisicamente in Sala Meet Capo e premi E sul Capo.","18:43 // DIREZIONE","FINALE");
- hud();
+ v1293ClearGhostPhysicalMission();if(v109EndShiftReady)return;
+ v109EndShiftReady=true;state.min=BOSS;v130b57StartEndingCinematic();hud();
 }
 function v109TryStartFinale(){return false;}
 
@@ -4241,7 +4919,7 @@ function v106SpecialNpcById(id){
 
 function v106RouteNpc(n,target,stateName){
  if(!n||!target)return false;
- const r=findNpcPath({x:n.x,y:n.y,room:n.currentRoom||n.homeRoom},target);
+ const r=findNpcPath({x:n.x,y:n.y,room:navAreaAt(n.x,n.y)},target);
  if(!r||!r.length)return false;
  n.route=r.slice(0,140);
  n.routeIndex=0;
@@ -4252,47 +4930,47 @@ function v106RouteNpc(n,target,stateName){
 }
 
 function v106SpecialRoamUpdate(dt){
- if(v111PhysicalMissionBusy()||!state||state.phase!=="shift"||isLunch()||dialogPause)return;
+ if(!state||state.phase!=="shift"||isLunch()||dialogPause)return;
+ if(typeof V130B57_ENDING!=="undefined"&&V130B57_ENDING.active)return;
  const T={
   pao:[
-   {x:520,y:690,room:"CORRIDOIO"},{x:745,y:690,room:"CORRIDOIO"},{x:925,y:610,room:"CORRIDOIO"},
-   {x:1110,y:520,room:"CORRIDOIO"},{x:1130,y:330,room:"CORRIDOIO"},{x:900,y:300,room:"CORRIDOIO"},
-   {x:700,y:300,room:"CORRIDOIO"},{x:545,y:410,room:"CORRIDOIO"}
+   {x:176,y:696,room:"BIM"},{x:120,y:625,room:"BIM"},{x:185,y:670,room:"BIM"},
+   {x:280,y:700,room:"CORRIDOIO"},{x:520,y:700,room:"CORRIDOIO"},
+   {x:1215,y:865,room:"STAMPANTI"}
   ],
   don:[
-   {x:1030,y:710,room:"CORRIDOIO"},{x:860,y:700,room:"CORRIDOIO"},{x:700,y:700,room:"CORRIDOIO"},
-   {x:540,y:690,room:"CORRIDOIO"},{x:540,y:430,room:"CORRIDOIO"},{x:700,y:300,room:"CORRIDOIO"},
-   {x:930,y:300,room:"CORRIDOIO"},{x:1120,y:360,room:"CORRIDOIO"}
+   {x:700,y:700,room:"CORRIDOIO"},{x:760,y:540,room:"CORRIDOIO"},
+   {x:900,y:350,room:"CORRIDOIO"},{x:1215,y:865,room:"STAMPANTI"},
+   {x:680,y:220,room:"SERVER"},{x:1000,y:835,room:"CUCINA"},
+   {x:820,y:700,room:"CORRIDOIO"}
   ]
  };
- const H={pao:{x:176,y:696,room:"BIM"},don:{x:1045,y:880,room:"CUCINA"}};
  for(const id of ["pao","don"]){
    const n=v106SpecialNpcById(id);if(!n)continue;
    if(["postLunchWait","lunchReturnDesk","lunchReturnSpecial"].includes(n.state))continue;
-   n._spT=(n._spT??(4+Math.random()*5))-dt;
-
+   n._spT=(n._spT??(id==="don"?1.5:3.5))-dt;
    if(n.state==="specialRoam"||n.state==="specialReturn"){
      if(moveNpcRoute(n,dt)){
-       n.route=null;n.routeIndex=0;n.state="specialPause";n._spT=2+Math.random()*4;
+       n.route=null;n.routeIndex=0;n.routeGoal=null;n.state="specialPause";
+       n._spT=id==="don"?1.5+Math.random()*3:2.5+Math.random()*4;
      }
      continue;
    }
    if(n.state==="specialPause"&&n._spT>0)continue;
-
    if(n._spT<=0){
-     const goHome=Math.random()<.12;
-     const target=goHome?H[id]:T[id][Math.floor(Math.random()*T[id].length)];
-     if(v106RouteNpc(n,target,goHome?"specialReturn":"specialRoam"))n._spT=6+Math.random()*8;
-     else n._spT=2;
+     const target=(id==="pao"&&Math.random()<.48)
+       ?{x:176,y:696,room:"BIM"}
+       :T[id][Math.floor(Math.random()*T[id].length)];
+     if(v106RouteNpc(n,target,target.room==="BIM"?"specialReturn":"specialRoam"))
+       n._spT=id==="don"?4+Math.random()*6:6+Math.random()*8;
+     else n._spT=1.5;
    }
-
-   // Proactive encounter only when physically close, never as a task.
    if(Math.hypot(player.x-n.x,player.y-n.y)<52){
      n._nearT=(n._nearT||0)+dt;
-     if(n._nearT>3.5 && !V122_DIALOG.active){
+     if(n._nearT>4.2&&!V122_DIALOG.active&&!storyOpen){
        n._nearT=0;
-       if(id==="pao"&&Math.random()<.18)v122Say("PAO","Oh, già che ci siamo... tutto sotto controllo?");
-       if(id==="don"&&Math.random()<.18)v122Say("DON","Se ti serve una mano, dimmelo.");
+       if(id==="pao"&&Math.random()<.12)v122Say("PAO","Tutto sotto controllo?");
+       if(id==="don"&&Math.random()<.12)v122Say("DON","Se serve, sono in giro.");
      }
    }else n._nearT=0;
  }
@@ -4316,10 +4994,17 @@ function v106NpcSafetyPass(){
 
 function v107PersistentCarryHud(){
  if(!state||state.phase!=="shift")return;
+ if(studioEvent?.type==="MEETING_RUSH"){
+   if(studioEvent.carried){
+     showStudioEventHud("SALA MEET","EXTENDER HDMI → SALA MEET // G = COLLEGA");
+   }else{
+     showStudioEventHud("SALA MEET","MAGAZZINO IT // F = PRENDI EXTENDER HDMI");
+   }
+ }
  if(studioEvent?.type==="AMAZON"){
    const held=studioEvent.packages?.find(p=>p.owner==="PLAYER"&&p.taken&&!p.done&&inventory.includes(p.label));
    if(held){
-     showStudioEventHud("CONSEGNA AMAZON",`${held.label} → ${v107PackageDestinationText()} // G = CONSEGNA`);
+     showStudioEventHud("CONSEGNA PACCHI",`${held.label} → ${v107PackageDestinationText()} // G = CONSEGNA`);
    }
  }
 }
@@ -4410,14 +5095,7 @@ function v114UiLockWatchdog(){
  }
 }
 
-function v116AmazonStorySafety(){
- if(!storyOpen)return;
- const who=document.getElementById("storyWho")?.textContent||"";
- const text=document.getElementById("storyText")?.textContent||"";
- if(who==="ZIA ALE"&&text.includes("pacchi Amazon")){
-   closeStory();
- }
-}
+
 
 
 /* VERSIONE1ITSHIFT 1.0.17 DIAG — runtime trace + recovery */
@@ -4584,12 +5262,8 @@ function v125MeetingUrgentWatch(){
    return;
  }
  if(V125_MEETING.tracked){
-   // If the event vanished while its mission object still remains, treat as fail and clean.
-   const c=typeof carryMission!=="undefined"?carryMission:null;
-   const item=String(c?.item||c?.object||c?.label||"").toUpperCase();
-   if(item.includes("HDMI")||item.includes("EXTENDER")||item.includes("ALIMENTATORE")){
-     v125FailPhysicalMission("MEETING URGENTE // FALLITO");
-   }
+   // B5.7.1: MEETING_RUSH is a self-contained studioEvent.
+   // Its disappearance after completion must never trigger a legacy carryMission failure.
    V125_MEETING.tracked=false;
  }
 
@@ -4893,12 +5567,16 @@ function update(dt) {
  }
  v129RaceUpdate(dt);
 
+ if(typeof V130B57_ENDING!=="undefined"&&V130B57_ENDING.active){
+   v130b57EndingUpdate(dt);hud();updateTaskProgress();return;
+ }
+
 v125MeetingUrgentWatch();
  v125ManagerServerRoutine(dt);
  v122SpecialCalls();
  v117Trace('update-start');
  v117RuntimeWatchdog(dt);
- v116AmazonStorySafety();
+
  v117Trace('v114UiLockWatchdog');v118SafeCall('v114UiLockWatchdog',()=>v114UiLockWatchdog());
  v117Trace('v114LunchRecoveryWatch');v118SafeCall('v114LunchRecoveryWatch',()=>v114LunchRecoveryWatch());
  v113CapoProximitySafety();
@@ -4970,7 +5648,13 @@ v125MeetingUrgentWatch();
  
   /* 1.0.13 CAPO proximity encounter removed */
 
-if(shiftStarted&&!isLunch()&&spawnTimer>difficultyConfig[difficulty].spawnSeconds){spawnTimer=0;newTicket();maybeCritical()}
+if(
+ shiftStarted&&!isLunch() &&
+ !v130b561MainActivityBusy() &&
+ spawnTimer>difficultyConfig[difficulty].spawnSeconds
+){
+ spawnTimer=0;newTicket();maybeCritical();
+}
  const phase=dayPhase();
  const anomalyEvery=phase==="MORNING"?26:phase==="LUNCH"?14:phase==="AFTERNOON"?21:10;
  if(anomTimer>anomalyEvery){anomTimer=0 /* V5: no supernatural anomaly system */}
@@ -5424,17 +6108,7 @@ function v111DrawPhysicalPoints(){
 
 let v117DiagVisible=false;
 document.addEventListener("keydown",e=>{
- if(e.code==="KeyG"&&v125TryMagazzinoDeposit()){e.preventDefault();return}
-
- const _carry120=v120CarryState();
- if(e.code==="KeyF"&&_carry120&&!_carry120.carrying){
-   if(typeof v12c45Pickup==="function"&&v12c45Pickup())return;
-   if(typeof v12c462PhysicalPickupNearby==="function"&&v12c462PhysicalPickupNearby())return;
- }
- if(e.code==="KeyG"&&_carry120&&_carry120.carrying){
-   if(typeof v12c45Deliver==="function"&&v12c45Deliver())return;
- }
-
+ // B5.6: F/G are handled ONLY by v12c451PhysicalKeys.
  if(e.code==="F3"){
    e.preventDefault();
    v117DiagVisible=!v117DiagVisible;
@@ -5982,6 +6656,78 @@ function v130a1DrawPrincipalSprite(obj,kind){
  p(3,17+legA,2,1,pal.shoe);p(7,17+legB,2,1,pal.shoe);
 }
 
+
+
+/* 1.0.30B5.7 — GENERIC GAME BOY NPC SPRITE */
+function v130b57DrawGbcNpcSprite(obj,kind="ambient",carrying=false){
+ if(!obj)return;
+ const motion=v130aMotion("b57:"+String(obj.id||obj.name||kind),obj);
+ const dir=motion.dir,walk=motion.step,S=2,x=v130aSnap(obj.x),y=v130aSnap(obj.y);
+ const name=String(obj.name||kind||"").toUpperCase();
+ let pal={skin:obj.skin||"#c89e7d",hair:obj.hair||"#2c2823",shirt:obj.shirt||"#5d6d65",shirt2:"#465850",pants:"#303a37",shoe:"#172018"};
+ if(name.includes("CAPO"))pal={skin:"#c89d78",hair:"#67665d",shirt:"#4b514f",shirt2:"#747b72",pants:"#2d3532",shoe:"#171b18"};
+ if(kind==="courier")pal={skin:"#9b7156",hair:"#33261f",shirt:"#61736a",shirt2:"#829087",pants:"#34413b",shoe:"#171b18"};
+ const p=(ix,iy,iw,ih,c)=>v130aRect(x+(ix-6)*S,y+(iy-15)*S,iw*S,ih*S,c);
+ v130aRect(x-11,y+10,22,5,"rgba(0,0,0,.30)");
+ if(dir==="up"){p(2,0,8,3,pal.hair);p(1,2,10,6,pal.hair)}
+ else if(dir==="left"||dir==="right"){
+   const fr=dir==="right";p(2,0,8,3,pal.hair);p(1,2,10,7,pal.skin);
+   p(fr?1:8,2,3,7,pal.hair);p(fr?9:1,6,1,1,pal.skin);
+ }else{
+   p(2,0,8,3,pal.hair);p(1,2,10,7,pal.skin);p(1,2,2,5,pal.hair);p(9,2,2,5,pal.hair);
+   p(3,5,2,1,"#211b18");p(7,5,2,1,"#211b18");
+ }
+ p(2,9,8,3,pal.shirt);p(2,12,8,3,pal.shirt2);p(1,10,2,3,pal.skin);p(9,10,2,3,pal.skin);
+ const a=walk?0:1,b=walk?1:0;
+ p(3,15,2,2+a,pal.pants);p(7,15,2,2+b,pal.pants);p(3,17+a,2,1,pal.shoe);p(7,17+b,2,1,pal.shoe);
+ if(carrying){
+   v130aRect(x+9,y-2,15,13,V130A_PAL.ink);v130aRect(x+11,y,11,9,V130A1_PAL.box);v130aRect(x+16,y,2,9,V130A1_PAL.boxLight);
+ }
+}
+
+function v130b52DrawSpecialNpcSprite(obj,kind){
+ if(!obj)return;
+ const motion=v130aMotion("special52:"+String(obj.id||kind),obj);
+ const dir=motion.dir,walk=motion.step,S=2;
+ const x=v130aSnap(obj.x),y=v130aSnap(obj.y);
+
+ const pal=kind==="pao"
+   ?{skin:"#c39b79",hair:"#443126",shirt:"#536f8b",shirt2:"#405a74",pants:"#303b3a",shoe:"#172018"}
+   :{skin:"#8b5a3c",hair:"#17120f",shirt:"#566a51",shirt2:"#71856b",pants:"#303936",shoe:"#171b18"};
+
+ function p(ix,iy,iw,ih,c){v130aRect(x+(ix-6)*S,y+(iy-15)*S,iw*S,ih*S,c)}
+ v130aRect(x-11,y+10,22,5,"rgba(0,0,0,.30)");
+
+ if(dir==="up"){
+   p(2,0,8,3,pal.hair);p(1,2,10,7,pal.hair);
+ }else if(dir==="left"||dir==="right"){
+   const faceRight=dir==="right",backHairX=faceRight?1:8;
+   p(2,0,8,3,pal.hair);p(1,2,9,7,pal.skin);p(backHairX,2,3,7,pal.hair);
+   p(faceRight?9:1,6,1,1,pal.skin);
+ }else{
+   p(2,0,8,3,pal.hair);p(1,2,10,7,pal.skin);
+   p(1,2,2,6,pal.hair);p(9,2,2,6,pal.hair);
+   p(3,5,2,1,"#211b18");p(7,5,2,1,"#211b18");
+ }
+
+ // PAO: visibly taller and slimmer. DON: normal body with two-tone shirt.
+ if(kind==="pao"){
+   p(3,9,6,7,pal.shirt);
+   p(4,11,4,2,pal.shirt2);
+   p(2,10,1,4,pal.skin);p(9,10,1,4,pal.skin);
+   const a=walk?0:1,b=walk?1:0;
+   p(4,16,1,3+a,pal.pants);p(7,16,1,3+b,pal.pants);
+   p(3,19+a,2,1,pal.shoe);p(7,19+b,2,1,pal.shoe);
+ }else{
+   p(2,9,8,3,pal.shirt);
+   p(2,12,8,3,pal.shirt2);
+   p(1,10,2,3,pal.skin);p(9,10,2,3,pal.skin);
+   const a=walk?0:1,b=walk?1:0;
+   p(3,15,2,2+a,pal.pants);p(7,15,2,2+b,pal.pants);
+   p(3,17+a,2,1,pal.shoe);p(7,17+b,2,1,pal.shoe);
+ }
+}
+
 /* ---------- Visitor / courier visual event ---------- */
 const V130A1_DELIVERY={
  active:false,
@@ -6003,34 +6749,18 @@ function v130a1Ease(t){
 function v130a1Lerp(a,b,t){return a+(b-a)*t}
 
 function v130a1DrawTruck(x,y){
- // Compact pixel-art delivery van.
- v130aRect(x,y-28,104,29,V130A_PAL.ink);
- v130aRect(x+4,y-24,96,21,V130A1_PAL.roadVan);
- v130aRect(x+68,y-21,26,13,V130A1_PAL.window);
- v130aRect(x+8,y-19,49,4,V130A1_PAL.roadVanDark);
- v130aRect(x+8,y-11,35,4,V130A1_PAL.roadVanDark);
- v130aRect(x+47,y-19,10,12,V130A1_PAL.boxLight);
- v130aRect(x+16,y-2,18,8,V130A_PAL.ink);
- v130aRect(x+73,y-2,18,8,V130A_PAL.ink);
- v130aRect(x+20,y,10,5,V130A_PAL.metal);
- v130aRect(x+77,y,10,5,V130A_PAL.metal);
+ // B5.7 neutral Game Boy delivery van, no branding.
+ v130aRect(x,y-30,108,31,V130A_PAL.ink);v130aRect(x+4,y-26,100,23,V130A1_PAL.roadVan);
+ v130aRect(x+68,y-23,29,14,V130A_PAL.ink);v130aRect(x+71,y-20,23,9,V130A1_PAL.window);
+ v130aRect(x+9,y-21,48,14,V130A1_PAL.roadVanDark);v130aRect(x+13,y-18,40,8,V130A1_PAL.roadVan);
+ v130aRect(x+28,y-17,8,6,V130A1_PAL.boxLight);v130aRect(x+6,y-5,96,5,V130A_PAL.ink);
+ v130aRect(x+15,y-3,21,9,V130A_PAL.ink);v130aRect(x+72,y-3,21,9,V130A_PAL.ink);
+ v130aRect(x+20,y,11,5,V130A_PAL.metal);v130aRect(x+77,y,11,5,V130A_PAL.metal);
 }
 
 function v130a1DrawCourier(x,y,carrying){
- const S=2;
- function p(ix,iy,iw,ih,c){v130aRect(x+(ix-6)*S,y+(iy-15)*S,iw*S,ih*S,c)}
- v130aRect(x-10,y+10,20,4,"rgba(0,0,0,.30)");
- p(2,0,8,3,"#33261f");
- p(1,2,10,7,"#9b7156");
- p(2,9,8,5,V130A1_PAL.visitorShirt);
- p(1,10,2,3,"#9b7156");p(9,10,2,3,"#9b7156");
- p(3,14,2,3,"#34413b");p(7,14,2,3,"#34413b");
- p(3,17,2,1,V130A_PAL.ink);p(7,17,2,1,V130A_PAL.ink);
- if(carrying){
-   v130aRect(x+10,y-2,14,12,V130A_PAL.ink);
-   v130aRect(x+12,y,10,8,V130A1_PAL.box);
-   v130aRect(x+16,y,2,8,V130A1_PAL.boxLight);
- }
+ const proxy={id:"courier",name:"CORRIERE",x,y,skin:"#9b7156",hair:"#33261f",shirt:"#61736a"};
+ v130b57DrawGbcNpcSprite(proxy,"courier",!!carrying);
 }
 
 function v130a1DrawVisitorDelivery(){
@@ -6836,13 +7566,15 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
    });
  }
  [...npcs,...(mokasa?[mokasa]:[])].forEach(n=>{
-   const specialPixel=V130A_PIXEL_FOUNDATION&&["manager","hr","zia"].includes(n.id);
+   const specialPixel=V130A_PIXEL_FOUNDATION&&["manager","hr","zia","pao","don","mokasa"].includes(n.id);
    if(V130A_PIXEL_FOUNDATION&&n.id==="manager")v130aDrawHeroSprite(n,"manager");
    else if(V130A_PIXEL_FOUNDATION&&n.id==="hr")v130a1DrawPrincipalSprite(n,"betty");
    else if(V130A_PIXEL_FOUNDATION&&n.id==="zia")v130a1DrawPrincipalSprite(n,"zia");
+   else if(V130A_PIXEL_FOUNDATION&&n.id==="pao")v130b52DrawSpecialNpcSprite(n,"pao");
+   else if(V130A_PIXEL_FOUNDATION&&n.id==="don")v130b52DrawSpecialNpcSprite(n,"don");
+   else if(V130A_PIXEL_FOUNDATION)v130b57DrawGbcNpcSprite(n,n.id==="mokasa"?"capo":"ambient");
    else drawPixelPerson(n.x,n.y,n.shirt,n.skin||"#d0a887",n.hair||(n.tone==="bad"?"#3a1717":"#202522"));
 
-   // Pokemon-like: no giant permanent nameplate on the principal prototype sprites.
    if(!specialPixel){
      g.fillStyle="#050706";g.fillRect(px(n.x)-30,px(n.y)-39,60,13);
      g.fillStyle=n.tone==="bad"?"#ff6262":n.tone==="good"?"#62e568":"#ffd447";
@@ -6852,7 +7584,8 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  // V2.7.2.1 — Living Office visible layer
  // NPC ambientali
  ambientNPCs.forEach(n=>{
-   drawPixelPerson(n.x,n.y,n.shirt,"#c89e7d","#202522");
+   if(V130A_PIXEL_FOUNDATION)v130b57DrawGbcNpcSprite(n,"ambient");
+   else drawPixelPerson(n.x,n.y,n.shirt,"#c89e7d","#202522");
    if(n.state!=="work"){g.fillStyle="#d8e1dc";g.font="bold 7px monospace";g.fillText(n.name,px(n.x)-9,px(n.y)-26)}
  });
 
@@ -6878,6 +7611,23 @@ rooms.forEach(floor);rooms.forEach(pixelFloorOverlay);
  g.fillStyle="#373d38";g.fillRect(V12C_EXTERIOR.ROAD.x,V12C_EXTERIOR.ROAD.y,V12C_EXTERIOR.ROAD.w,V12C_EXTERIOR.ROAD.h);
  v130a3DrawExterior();
  v130a1DrawVisitorDelivery();
+
+ // B5.4.1: the exterior floor is drawn after the normal NPC layer.
+ // Re-render the Manager here during the arrival cinematic so the sidewalk
+ // does not paint over his sprite.
+ if(typeof V129_INTRO!=="undefined"&&V129_INTRO.phase==="managerArrival"){
+   const introManager=npcs.find(n=>n&&n.id==="manager");
+   if(introManager){
+     if(V130A_PIXEL_FOUNDATION)v130aDrawHeroSprite(introManager,"manager");
+     else drawPixelPerson(
+       introManager.x,introManager.y,
+       introManager.shirt||"#53665c",
+       introManager.skin||"#d0a887",
+       introManager.hair||"#ddd7c7"
+     );
+   }
+ }
+
 
  // Marker missione inventario
  if(carryMission){
@@ -7232,25 +7982,6 @@ if(actBtn){
 }
 
 
-// V9 accessibility: home e setup utilizzabili anche senza mouse.
-window.addEventListener("keydown",e=>{
- if(e.key!=="Enter"&&e.key.toLowerCase()!=="e")return;
- const boot=document.querySelector("#boot.active"),lore=document.querySelector("#lore.active");
- const el=document.activeElement;
- const tag=String(el?.tagName||"").toUpperCase();
- const typing=tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||el?.isContentEditable;
-
- // While typing a character name, E and Enter are text/input keys, never game shortcuts.
- if(lore&&typing)return;
-
- if(boot){
-   e.preventDefault();
-   document.querySelector("#toLore")?.click();
- }else if(lore){
-   e.preventDefault();
-   document.querySelector("#start")?.click();
- }
-});
 
 
 
@@ -7282,14 +8013,6 @@ updateRealDateLine();
 v911StartupSelfTest();
 
 
-window.addEventListener("keydown",e=>{
- const boot=document.getElementById("boot");
- if(!boot||!boot.classList.contains("active"))return;
- if(e.key==="Enter"||e.key==="e"||e.key==="E"){
-   e.preventDefault();
-   document.getElementById("toLore")?.click();
- }
-});
 
 document.getElementById("toLore")?.addEventListener("click",()=>{
  document.querySelector(".v91Home")?.classList.add("leaving");
@@ -7317,16 +8040,25 @@ document.addEventListener("keydown",function v12c451PhysicalKeys(e){
  const ae=document.activeElement;
  if(ae && ["INPUT","TEXTAREA","SELECT"].includes(ae.tagName))return;
 
- // Do not steal F/G on boot/lore screens.
  const boot=document.getElementById("boot");
  const lore=document.getElementById("lore");
  if((boot&&boot.classList.contains("active"))||(lore&&lore.classList.contains("active")))return;
 
+ if(state?.phase!=="shift")return;
+
  e.preventDefault();
  e.stopImmediatePropagation();
 
- if(k==="f")v12c45Pickup();
- else v12c45Deliver();
+ if(k==="f"){
+   v12c45Pickup();
+   return;
+ }
+
+ // Old carry missions can use the dedicated Magazzino deposit.
+ if(v125TryMagazzinoDeposit())return;
+
+ // Studio events (including PACCHI) and normal carry missions use this.
+ v12c45Deliver();
 },true);
 
 
@@ -7431,8 +8163,15 @@ document.addEventListener("keydown",function v124DialogInputGuard(e){
 
 document.addEventListener("keydown",function v129CinematicInputGuard(e){
  if(typeof V129_INTRO==="undefined"||!V129_INTRO.locked)return;
+
+ // Story portrait owns E / ENTER while it is visible.
+ if(typeof V130B43_STORY!=="undefined"&&V130B43_STORY.active){
+   const storyKeys=["KeyE","Enter","Space"];
+   if(storyKeys.includes(e.code))return;
+ }
+
  const blocked=["KeyW","KeyA","KeyS","KeyD","ArrowUp","ArrowDown","ArrowLeft","ArrowRight",
-                "KeyE","Enter","KeyF","KeyG","Tab","KeyM","Digit1","Digit2","Digit3","Digit4",
+                "KeyE","Enter","Space","KeyF","KeyG","Tab","KeyM","Digit1","Digit2","Digit3","Digit4",
                 "Digit5","Digit6","Digit7","Digit8","Digit9"];
  if(blocked.includes(e.code)){
    e.preventDefault();
@@ -8027,21 +8766,6 @@ function v130b13LayoutAudit(){
 
 
 
-/* 1.0.30B3.1 — CHARACTER NAME INPUT GUARD
-   Prevent global/game shortcuts from stealing letters while typing. */
-window.addEventListener("keydown",e=>{
- const lore=document.querySelector("#lore.active");
- if(!lore)return;
-
- const el=document.activeElement;
- const tag=String(el?.tagName||"").toUpperCase();
- const typing=tag==="INPUT"||tag==="TEXTAREA"||el?.isContentEditable;
- if(!typing)return;
-
- // Let the focused form control receive the keystroke normally,
- // but block all lower-priority game/menu listeners.
- e.stopImmediatePropagation();
-},true);
 
 
 const V130B4_LOG=[];
@@ -8152,12 +8876,20 @@ const V130B43_STORY={
 
 function v130b43PortraitPalette(name){
  const n=String(name||"").toUpperCase();
+ const playerName=typeof v130b2PlayerName==="function"?v130b2PlayerName():"";
+ if(playerName&&n===playerName){
+   const female=typeof V130B2_PROFILE!=="undefined"&&V130B2_PROFILE.gender==="female";
+   return female
+     ?{skin:"#c89e79",hair:"#33221f",shirt:"#69526b",glass:"#26342d",beard:null,stripe:"#d2c58b"}
+     :{skin:"#c89e79",hair:"#2b211c",shirt:"#355544",glass:"#26342d",beard:"#3b2921"};
+ }
  if(n.includes("ZIA"))return {skin:"#d2a27f",hair:"#d7c382",shirt:"#765d78",glass:null,beard:null};
  if(n.includes("MANAGER"))return {skin:"#caa17e",hair:"#d6d5bd",shirt:"#5b6870",glass:"#26342d",beard:null};
  if(n.includes("CAPO"))return {skin:"#c89d78",hair:"#67665d",shirt:"#4b514f",glass:null,beard:"#5b4c43"};
  if(n.includes("BETTY"))return {skin:"#c89d78",hair:"#342822",shirt:"#536b59",glass:null,beard:null,stripe:"#d9c887"};
  if(n==="DON")return {skin:"#96684f",hair:"#251e1a",shirt:"#4f6959",glass:null,beard:null};
  if(n==="PAO")return {skin:"#c49b78",hair:"#4a3529",shirt:"#506676",glass:null,beard:null};
+ if(n.includes("CORRIERE"))return {skin:"#9b7156",hair:"#33261f",shirt:"#61736a",glass:null,beard:null};
  return {skin:"#c89e79",hair:"#2b211c",shirt:"#355544",glass:"#26342d",beard:"#3b2921"};
 }
 
@@ -8499,6 +9231,21 @@ function v130b5SoftMiss(text){
  hud();
 }
 
+
+function v130b55ObjectiveForCase(key){
+ const map={
+   CENT_CTB:"Scegli il file CTB che corrisponde allo STANDARD mostrato, inseriscilo nello slot e prova l'anteprima.",
+   CENT_XREF:"Scegli il percorso coerente con la struttura cartelle mostrata e premi RICOLLEGA XREF.",
+   CENT_NETWORK:"Ripara il tratto rosso della rete, poi premi RENEW DHCP.",
+   BIM_LANGUAGE:"Seleziona/installa ITALIANO e poi premi AVVIA REVIT.",
+   BIM_ADDIN:"Spegni il plugin indicato dal log come nuovo/sospetto e prova AVVIA REVIT.",
+   BIM_CONNECTOR:"Riporta AUTODESK ID online e poi premi SYNC PROJECTS.",
+   CENT_LICENSE:"Porta a verde TOKEN e LICENSING SERVICE, poi avvia AutoCAD.",
+   BIM_PASSWORD:"Seleziona l'account con stato LOCKED e premi RESET PASSWORD + SBLOCCA."
+ };
+ return map[key]||"Interagisci con il pannello e verifica il risultato.";
+}
+
 function v130b5RenderDeptCase(i){
  const t=tickets[i],c=v130b5CaseForTicket(t);if(!t||!c)return;
  const body=document.getElementById("modalBody");
@@ -8510,22 +9257,31 @@ function v130b5RenderDeptCase(i){
    body.innerHTML=miniHeader(t,`${c.tag} // ${c.title}`,"Risolvi il problema sulla postazione.")+
    `<div class="v130b51-puzzle">
       <div class="v130b51-symptom">${v130b4Esc(c.symptom)}</div>
+      <div class="v130b55-objective">
+        <b>OBIETTIVO</b>
+        <span>${v130b4Esc(v130b55ObjectiveForCase(c.key))}</span>
+      </div>
       ${inner}
-      ${help?`<div class="v130b51-help">${v130b4Esc(help)}</div>`:""}
-      <div id="v130b51Feedback" class="v130b51-feedback">Osserva la postazione e prova.</div>
+      ${help?`<div class="v130b51-help"><b>INDIZIO</b> // ${v130b4Esc(help)}</div>`:""}
+      <div id="v130b51Feedback" class="v130b51-feedback">Interagisci con il pannello e osserva cosa cambia.</div>
     </div><div id="miniError"></div>`;
  };
  const feedback=(txt,good=false)=>{
    const el=document.getElementById("v130b51Feedback");if(!el)return;
-   el.className="v130b51-feedback"+(good?" good":"");el.textContent=txt;
+   el.className="v130b51-feedback"+(good?" good":" bad");el.textContent=txt;
  };
- const miss=(txt)=>{state.stress=Math.min(100,state.stress+1);feedback(txt,false);hud()};
+ const miss=(txt)=>{
+   if(!activeMiniGame)return;
+   miniMistake(txt);
+   const n=activeMiniGame?.errors||0;
+   feedback(`✕ ${txt} // ERRORE ${n}/3`,false);
+ };
  const success=(txt)=>{feedback(txt,true);setTimeout(()=>miniSuccess(i,txt,true),520)};
 
  if(c.key==="CENT_CTB"){
    s.slot=s.slot||null;
    shell(`<div class="v130b51-panel">
-      <div class="v130b51-panelhead"><span>AUTOCAD // PLOT STYLE</span><span>LAYOUT A1</span></div>
+      <div class="v130b51-panelhead"><span>AUTOCAD // PLOT STYLE</span><span>STANDARD // UFFICIO_ARCH</span></div>
       <div class="v130b51-grid3">
         <div class="v130b51-file" draggable="true" data-ctb="MONO">MONOCHROME.CTB</div>
         <div class="v130b51-file" draggable="true" data-ctb="UFFICIO">UFFICIO_ARCH.CTB</div>
@@ -8534,7 +9290,7 @@ function v130b5RenderDeptCase(i){
       <div id="v130b51CtbSlot" class="v130b51-slot ${s.slot==="UFFICIO"?"good":""}">${s.slot?`${s.slot}.CTB`:"TRASCINA QUI IL PLOT STYLE"}</div>
       <button id="v130b51Print" class="v130b51-sync">ANTEPRIMA DI STAMPA</button>
       <div id="v130b51Preview" class="v130b51-preview">LINEE // 0.10 · 0.18 · 0.35</div>
-    </div>`,"Il disegno è corretto: lavora sullo stile di stampa.");
+    </div>`,"Il pannello indica lo STANDARD richiesto. Abbina quel nome al file CTB.");
    const slot=body.querySelector("#v130b51CtbSlot");
    body.querySelectorAll("[data-ctb]").forEach(f=>{
      f.ondragstart=e=>{e.dataTransfer.setData("text/plain",f.dataset.ctb);f.classList.add("dragging")};
@@ -8552,7 +9308,7 @@ function v130b5RenderDeptCase(i){
 
  if(c.key==="CENT_XREF"){
    shell(`<div class="v130b51-panel">
-     <div class="v130b51-panelhead"><span>XREF MANAGER</span><span>BASE_ARCH.DWG // NOT FOUND</span></div>
+     <div class="v130b51-panelhead"><span>XREF MANAGER</span><span>PROGETTO / 01_DWG / FILE CORRENTE</span></div>
      <div class="v130b51-xref"><div class="v130b51-node on">PROGETTO.DWG</div><div class="v130b51-arrow">→</div><div class="v130b51-node off">BASE_ARCH.DWG<br>?</div></div>
      <div class="v130b51-grid3">
        <button class="v130b51-path" data-path="../00_BASI/BASE_ARCH.DWG">../00_BASI/<br>BASE_ARCH.DWG</button>
@@ -8560,7 +9316,7 @@ function v130b5RenderDeptCase(i){
        <button class="v130b51-path" data-path="../EXPORT/BASE_ARCH.DWG">../EXPORT/<br>BASE_ARCH.DWG</button>
      </div>
      <button id="v130b51Relink" class="v130b51-sync" disabled>RICOLLEGA XREF</button>
-   </div>`,"Ricostruisci il collegamento alla base del progetto.");
+   </div>`,"La base è nella cartella sorella 00_BASI: dal DWG corrente devi risalire di un livello.");
    body.querySelectorAll("[data-path]").forEach(b=>b.onclick=()=>{
      s.path=b.dataset.path;body.querySelectorAll("[data-path]").forEach(x=>x.classList.toggle("selected",x===b));
      body.querySelector("#v130b51Relink").disabled=false;feedback(`PERCORSO // ${s.path}`);
@@ -8671,4 +9427,93 @@ function v130b5RenderDeptCase(i){
 
  shell(`<div class="v130b51-panel"><div class="v130b51-preview">PUZZLE NON CONFIGURATO // ${v130b4Esc(c.key)}</div></div>`);
 }
+
+
+
+
+/* ============================================================
+   1.0.30B5.6.3 — ESC BACK NAVIGATION
+   ESC closes the top-most ordinary UI layer.
+   Story Portraits / cinematic dialogue intentionally keep E/ENTER.
+   ============================================================ */
+function v130b563EscBack(){
+ // Do not cancel narrative scenes or the locked intro with ESC.
+ if(typeof V130B43_STORY!=="undefined"&&V130B43_STORY.active)return false;
+ if(typeof V129_INTRO!=="undefined"&&V129_INTRO.locked)return false;
+
+ // Proof/debug menu.
+ if(typeof V130B0_PROOF!=="undefined"&&V130B0_PROOF.open){
+   if(typeof v130b0Close==="function")v130b0Close();
+   return true;
+ }
+
+ // Tablet.
+ const pda=document.getElementById("pda");
+ if(pda&&!pda.classList.contains("hidden")){
+   if(typeof togglePDA==="function")togglePDA(false);
+   else pda.classList.add("hidden");
+   return true;
+ }
+
+ // Full map view.
+ if(typeof fullMap!=="undefined"&&fullMap){
+   fullMap=false;
+   if(typeof toast==="function")toast("MAPPA CHIUSA");
+   return true;
+ }
+
+ // Reward/result overlay.
+ const reward=document.getElementById("rewardOverlay");
+ if(reward&&!reward.classList.contains("hidden")){
+   reward.classList.add("hidden");
+   if(window.__rewardTimer)clearTimeout(window.__rewardTimer);
+   if(typeof flushDeferredDialog==="function")setTimeout(flushDeferredDialog,80);
+   return true;
+ }
+
+ // Ordinary task / puzzle modal.
+ const modal=document.getElementById("modal");
+ if(modal&&!modal.classList.contains("hidden")){
+   modal.classList.add("hidden");
+
+   // ESC is a cancel/back action, not a wrong answer.
+   // The ticket remains open and can be reopened from the workstation.
+   activeMiniGame=null;
+   storyOpen=false;
+   uiMessageBusy=false;
+   dialogPause=false;
+
+   document.body?.classList?.remove("modal-open","locked","paused");
+   if(typeof hud==="function")hud();
+   if(typeof updateTaskProgress==="function")updateTaskProgress();
+   return true;
+ }
+
+ // Normal legacy dialogue shell: ESC may close only non-Story ordinary menus/cards.
+ const auto=document.getElementById("v130b42AutoDialogue");
+ if(auto&&!auto.classList.contains("hidden")){
+   if(typeof v130b42HideAutoDialogue==="function")v130b42HideAutoDialogue();
+   return true;
+ }
+
+ return false;
+}
+
+document.addEventListener("keydown",function v130b563EscInput(e){
+ if(e.key!=="Escape")return;
+
+ const ae=document.activeElement;
+ const tag=String(ae?.tagName||"").toUpperCase();
+ if(["INPUT","TEXTAREA","SELECT"].includes(tag)){
+   ae.blur();
+   e.preventDefault();
+   e.stopImmediatePropagation();
+   return;
+ }
+
+ if(v130b563EscBack()){
+   e.preventDefault();
+   e.stopImmediatePropagation();
+ }
+},true);
 

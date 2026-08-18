@@ -1,0 +1,23 @@
+{
+  "build": "1.0.30B5.6.1 PACING + PUZZLE FEEDBACK FIX",
+  "base": "1.0.30B5.6 INPUT + PACKAGE + LEGACY CLEANUP",
+  "main_activity_lock": {
+    "blocks_new_tickets": true,
+    "blocks_story_events": true,
+    "blocks_random_studio_events": true,
+    "blocks_carry_missions": true,
+    "blocks_meetings": true,
+    "grace_ms_after_activity": 5000
+  },
+  "meeting_story_order": "start succeeds before banner/progression",
+  "puzzle_wrong_attempt": {
+    "visible_error": true,
+    "increments_strikes": true,
+    "uses_miniMistake": true,
+    "max_errors_per_intervention": 3
+  },
+  "self_contained_clues": true,
+  "package_fix_retained": true,
+  "legacy_input_cleanup_retained": true,
+  "autosave_retained": true
+}

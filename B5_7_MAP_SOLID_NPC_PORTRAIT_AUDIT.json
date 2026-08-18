@@ -1,0 +1,34 @@
+{
+  "build": "1.0.30B5.7 MAP SOLID + NPC PORTRAIT PASS",
+  "base": "1.0.30B5.6.3",
+  "map": {
+    "studio_bottom": 927,
+    "road_reentry_blocked": true
+  },
+  "npc": {
+    "betty": "HR",
+    "zia": "SEGRETERIA",
+    "pao": "BIM-biased",
+    "don": "roaming"
+  },
+  "gbc": [
+    "ambient NPC",
+    "Capo",
+    "courier",
+    "neutral van"
+  ],
+  "portrait_interactions": [
+    "PAO",
+    "DON",
+    "BETTY",
+    "ZIA ALE",
+    "IT MANAGER",
+    "CAPO"
+  ],
+  "ending": {
+    "auto_walk": true,
+    "crowd": true,
+    "capo_portrait": true,
+    "boss": "placeholder existing"
+  }
+}

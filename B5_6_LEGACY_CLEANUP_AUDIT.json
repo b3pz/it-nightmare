@@ -1,0 +1,29 @@
+{
+  "build": "1.0.30B5.6 INPUT + PACKAGE + LEGACY CLEANUP",
+  "removed_or_consolidated": [
+    "V9 legacy boot/lore E/ENTER handler",
+    "second legacy boot-only E/ENTER handler",
+    "B3.1 character-name capture guard (superseded by canonical menu router)",
+    "legacy F/G branches inside v117 diagnostic key handler",
+    "v12c462PhysicalPickupNearby if no longer referenced",
+    "v116AmazonStorySafety old blocking-dialog workaround",
+    "dead if(false) meeting warning branch"
+  ],
+  "canonical_handlers": {
+    "menu_keyboard": "v130b541StartKeyboard",
+    "physical_FG": "v12c451PhysicalKeys"
+  },
+  "package_fix": {
+    "pickup_F_calls_v12c45Pickup_without_carryMission_dependency": true,
+    "delivery_G_calls_v12c45Deliver_for_studioEvent": true,
+    "neutral_player_facing_branding": true
+  },
+  "duplicate_named_functions_after_cleanup": {},
+  "preserved_intentionally": [
+    "collision/pathfinding v1292*",
+    "B5.4 Manager cinematic/render fix",
+    "Story Portrait system B4.3",
+    "B5.1 interactive puzzles",
+    "B5.5 autosave/resume"
+  ]
+}

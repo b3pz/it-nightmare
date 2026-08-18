@@ -1,0 +1,16 @@
+{
+  "build": "1.0.30B5.4.2 START INPUT GATE FIX",
+  "base": "1.0.30B5.4.1",
+  "bug": "same physical key press could open setup and immediately trigger start",
+  "fix": {
+    "keydown_capture": true,
+    "stopImmediatePropagation_on_title_transition": true,
+    "gate_until_keyup": true,
+    "blur_safety_release": true,
+    "fresh_press_required_to_start": true
+  },
+  "mouse_behavior_changed": false,
+  "intro_changed": false,
+  "manager_changed": false,
+  "puzzles_changed": false
+}

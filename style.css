@@ -1634,3 +1634,85 @@ linear-gradient(90deg,rgba(37,52,40,.055) 1px,transparent 1px),#d7dba9;backgroun
 .v130b51-sync{width:100%;padding:10px;border:4px solid #233129;background:#a9ca8b;color:#233129;font:900 10px monospace;cursor:pointer;box-shadow:4px 4px 0 #000}
 .v130b51-sync:disabled{opacity:.35;cursor:default}
 @media(max-width:750px){.v130b51-grid2,.v130b51-grid3,.v130b51-launcher,.v130b51-admin{grid-template-columns:1fr}.v130b51-netline{grid-template-columns:1fr}.v130b51-link{width:6px;height:22px;margin:auto}.v130b51-xref{grid-template-columns:1fr}.v130b51-arrow{transform:rotate(90deg)}}
+
+/* B5.2 — cinematic arrival is intentionally UI-light. */
+body:has(#gameScreen.active) #v130b43StoryScene:not(.hidden) + #v130b42AutoDialogue{
+ display:none!important;
+}
+
+
+/* ============================================================
+   1.0.30B5.5 — PUZZLE CLARITY + CONTINUE
+   ============================================================ */
+.v130b55-objective{
+ display:grid;
+ grid-template-columns:110px 1fr;
+ gap:12px;
+ align-items:center;
+ padding:10px 12px;
+ background:#21372c;
+ border:3px solid #73906f;
+ color:#e8f0ce;
+ box-shadow:3px 3px 0 #000;
+}
+.v130b55-objective b{
+ color:#d9c75d;
+ font:900 9px monospace;
+ letter-spacing:2px;
+}
+.v130b55-objective span{
+ font:900 10px/1.4 monospace;
+}
+.v130b51-file,.v130b51-path,.v130b51-lang,.v130b51-plugin,
+.v130b51-button,.v130b51-account,.v130b51-sync,.v130b51-link{
+ transition:transform .08s linear,border-color .08s linear,filter .08s linear;
+}
+.v130b51-file:hover,.v130b51-path:hover,.v130b51-lang:hover,.v130b51-plugin:hover,
+.v130b51-button:hover,.v130b51-account:hover,.v130b51-sync:hover{
+ transform:translateY(-2px);
+ filter:brightness(1.08);
+}
+.v130b51-link.off{
+ animation:v130b55FaultPulse .75s steps(2,end) infinite;
+}
+@keyframes v130b55FaultPulse{
+ 50%{filter:brightness(1.6)}
+}
+.v130b55-continue{
+ margin-bottom:10px;
+ border-color:#9fc980!important;
+}
+.v130b55-continue small{
+ display:block;
+ margin-left:12px;
+ opacity:.72;
+ font:800 8px monospace;
+}
+@media(max-width:700px){
+ .v130b55-objective{grid-template-columns:1fr}
+}
+
+
+/* 1.0.30B5.6.1 — explicit puzzle mistakes */
+.v130b51-feedback.bad{
+ border-left-color:#d7665b!important;
+ color:#f2b6a7!important;
+ background:#2a1715!important;
+}
+#miniError.on{
+ display:block!important;
+ margin-top:8px;
+ padding:8px 10px;
+ border:3px solid #a94f47;
+ background:#2b1715;
+ color:#f3b3a8;
+ font:900 9px monospace;
+}
+
+#v130b43StoryWho{letter-spacing:2px;}
+
+
+/* 1.0.30B5.7.1 — meeting event readability */
+#missionBanner:not(.hidden){
+ pointer-events:none;
+}

@@ -1,0 +1,29 @@
+{
+  "build": "1.0.30B5.3 INTRO TUTORIAL CINEMATIC",
+  "base": "1.0.30B5.2",
+  "manual_control_before_race": false,
+  "story_advance_keys": [
+    "E",
+    "ENTER",
+    "SPACE"
+  ],
+  "movement_tutorial_in_zia_dialogue": [
+    "WASD",
+    "ARROWS",
+    "E at workstation"
+  ],
+  "automatic_player_entry": true,
+  "manager_start": [
+    1040,
+    985
+  ],
+  "manager_finish": [
+    705,
+    895
+  ],
+  "manager_arrival_speed": 145,
+  "cinematic_camera_manager_arrival": true,
+  "controls_unlock_at": "VIA / v129StartRace",
+  "gameplay_puzzles_changed": false,
+  "map_changed": false
+}

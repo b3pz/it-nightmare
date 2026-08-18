@@ -1,0 +1,17 @@
+{
+  "build": "1.0.30B5.6.2 MANAGER RACE SPEED FIX",
+  "base": "1.0.30B5.6.1",
+  "race": {
+    "player_speed_approx": 205,
+    "manager_speed_before": 78,
+    "manager_speed_after": 168,
+    "manager_delay_before_ms": 700,
+    "manager_delay_after_ms": 280,
+    "manager_player_speed_ratio": 0.82
+  },
+  "arrival_cinematic_changed": false,
+  "pacing_changed": false,
+  "puzzles_changed": false,
+  "packages_changed": false,
+  "autosave_changed": false
+}

@@ -1,0 +1,30 @@
+{
+  "build": "1.0.30B5.4.1 START KEYS + MANAGER SPRITE FIX",
+  "base": "1.0.30B5.4",
+  "keyboard_start": {
+    "boot": [
+      "ENTER",
+      "E",
+      "SPACE"
+    ],
+    "setup_typing": [
+      "ENTER"
+    ],
+    "setup_not_typing": [
+      "ENTER",
+      "E",
+      "SPACE"
+    ],
+    "typing_e_safe": true,
+    "typing_space_safe": true
+  },
+  "manager_sprite_fix": {
+    "root_cause": "exterior sidewalk rendered after normal NPC layer",
+    "fix": "re-render IT Manager after exterior layer during managerArrival",
+    "route_changed": false,
+    "camera_changed": false
+  },
+  "puzzles_changed": false,
+  "map_changed": false,
+  "pathfinding_changed": false
+}
