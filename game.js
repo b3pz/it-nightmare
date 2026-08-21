@@ -11135,13 +11135,33 @@ let joyX=0,joyY=0,joyActive=false;
 function joySet(x,y){
  joyX=Math.max(-1,Math.min(1,x));
  joyY=Math.max(-1,Math.min(1,y));
- joyActive=Math.abs(joyX)>.03||Math.abs(joyY)>.03;
- if(stick){
-   const px=joyX*34,py=joyY*34;
+ joyActive=Math.hypot(joyX,joyY)>.015;
+ if(stick&&joy){
+   const r=joy.getBoundingClientRect();
+   const knob=stick.getBoundingClientRect();
+   const travel=Math.max(18,(Math.min(r.width,r.height)-Math.max(knob.width,knob.height))/2-5);
+   const px=joyX*travel,py=joyY*travel;
    stick.style.transform=`translate3d(${px}px,${py}px,0)`;
  }
 }
 function joyStop(){joySet(0,0)}
+
+// PUBLIC.2 MOBILE CONTROLS FIX
+// Larger joystick + progressive response: precise around the centre, full speed near the edge.
+function joyVectorFromPoint(clientX,clientY){
+ const r=joy.getBoundingClientRect();
+ let x=(clientX-(r.left+r.width/2))/(r.width*.48);
+ let y=(clientY-(r.top+r.height/2))/(r.height*.48);
+ let len=Math.hypot(x,y);
+ if(!len)return {x:0,y:0};
+ const nx=x/len,ny=y/len;
+ len=Math.min(1,len);
+ const dead=.075;
+ if(len<=dead)return {x:0,y:0};
+ let strength=(len-dead)/(1-dead);
+ strength=Math.pow(strength,1.28);
+ return {x:nx*strength,y:ny*strength};
+}
 
 if(joy){
  joy.style.touchAction="none";
@@ -11149,12 +11169,8 @@ if(joy){
  const moveFromTouch=e=>{
    const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0]);
    if(!t)return;
-   const r=joy.getBoundingClientRect();
-   let x=(t.clientX-(r.left+r.width/2))/(r.width*.32);
-   let y=(t.clientY-(r.top+r.height/2))/(r.height*.32);
-   const l=Math.hypot(x,y);
-   if(l>1){x/=l;y/=l}
-   joySet(x,y);
+   const v=joyVectorFromPoint(t.clientX,t.clientY);
+   joySet(v.x,v.y);
    e.preventDefault();
  };
 
@@ -11164,19 +11180,13 @@ if(joy){
  joy.addEventListener("touchcancel",e=>{joyStop();e.preventDefault()},{passive:false});
 
  joy.addEventListener("pointerdown",e=>{
-   const r=joy.getBoundingClientRect();
-   let x=(e.clientX-(r.left+r.width/2))/(r.width*.32);
-   let y=(e.clientY-(r.top+r.height/2))/(r.height*.32);
-   const l=Math.hypot(x,y);if(l>1){x/=l;y/=l}
-   joySet(x,y);e.preventDefault();
+   const v=joyVectorFromPoint(e.clientX,e.clientY);
+   joySet(v.x,v.y);e.preventDefault();
  },{passive:false});
  joy.addEventListener("pointermove",e=>{
    if(!(e.buttons||e.pointerType==="touch"))return;
-   const r=joy.getBoundingClientRect();
-   let x=(e.clientX-(r.left+r.width/2))/(r.width*.32);
-   let y=(e.clientY-(r.top+r.height/2))/(r.height*.32);
-   const l=Math.hypot(x,y);if(l>1){x/=l;y/=l}
-   joySet(x,y);e.preventDefault();
+   const v=joyVectorFromPoint(e.clientX,e.clientY);
+   joySet(v.x,v.y);e.preventDefault();
  },{passive:false});
  joy.addEventListener("pointerup",e=>{joyStop();e.preventDefault()},{passive:false});
  joy.addEventListener("pointercancel",e=>{joyStop();e.preventDefault()},{passive:false});
@@ -11264,6 +11274,12 @@ v10BindMobileButton("#act",v10MobilePrimaryAction);
 v10BindMobileButton("#mTake",()=>v10MobilePhysicalAction("f"));
 v10BindMobileButton("#mUse",()=>v10MobilePhysicalAction("g"));
 v10BindMobileButton("#mTablet",()=>togglePDA());
+
+// The mobile TAB button sits below the tablet layer, so the tablet carries its
+// own always-reachable close controls. They also work on desktop.
+v10BindMobileButton("#pdaClose",()=>togglePDA(false));
+v10BindMobileButton("#pdaCloseFoot",()=>togglePDA(false));
+
 v10BindMobileButton("#mMap",()=>{
  fullMap=!fullMap;
  toast(fullMap?"MAPPA COMPLETA":"CAMERA PLAYER");

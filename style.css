@@ -2446,3 +2446,101 @@ body:has(#gameScreen.active) #v130b43StoryScene:not(.hidden) + #v130b42AutoDialo
    transform:translateX(-50%) translateY(2px)!important;
  }
 }
+
+
+/* ============================================================
+   PUBLIC.2 MOBILE CONTROLS FIX
+   - Tablet has its own close controls above the mobile HUD.
+   - Joystick is larger and its JS response is progressive.
+   ============================================================ */
+.pdaHead{
+ gap:10px!important;
+}
+.pdaClose{
+ margin-left:auto;
+ min-width:86px;
+ height:30px;
+ padding:4px 9px;
+ border:2px solid #20302a;
+ background:#20302a;
+ color:#dceab6;
+ font:900 9px monospace;
+ cursor:pointer;
+ touch-action:manipulation;
+}
+.pdaCloseFoot{
+ display:block;
+ width:100%;
+ border:0;
+ border-top:4px solid #20302a;
+ cursor:pointer;
+ touch-action:manipulation;
+ text-align:center;
+}
+.pdaClose:active,.pdaCloseFoot:active{
+ transform:translateY(1px);
+}
+
+@media (hover:none),(pointer:coarse){
+ #joy{
+   width:132px!important;
+   height:132px!important;
+   left:max(12px,env(safe-area-inset-left))!important;
+   bottom:max(12px,env(safe-area-inset-bottom))!important;
+   opacity:.86!important;
+   border-width:3px!important;
+ }
+ #joy i{
+   left:43px!important;
+   top:43px!important;
+   width:42px!important;
+   height:42px!important;
+ }
+ .pdaClose{
+   min-width:92px;
+   height:34px;
+   font-size:10px;
+ }
+ .pdaCloseFoot{
+   min-height:36px;
+   padding:8px 10px!important;
+   font-size:9px!important;
+ }
+}
+
+@media (hover:none),(pointer:coarse) and (orientation:landscape) and (max-height:460px){
+ #joy{
+   width:116px!important;
+   height:116px!important;
+   left:8px!important;
+   bottom:7px!important;
+ }
+ #joy i{
+   left:38px!important;
+   top:38px!important;
+   width:36px!important;
+   height:36px!important;
+ }
+ #pda{
+   height:88dvh!important;
+   max-height:88dvh!important;
+ }
+}
+
+@media (hover:none),(pointer:coarse) and (orientation:portrait){
+ #joy{
+   width:126px!important;
+   height:126px!important;
+   left:8px!important;
+   bottom:8px!important;
+ }
+ #joy i{
+   left:41px!important;
+   top:41px!important;
+   width:40px!important;
+   height:40px!important;
+ }
+ #mobileTop{
+   bottom:142px!important;
+ }
+}
