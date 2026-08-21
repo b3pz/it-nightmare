@@ -1555,3 +1555,427 @@ L'evento non ha una deadline nascosta: deve poter essere completato sempre,
 purché il turno sia ancora attivo.
 
 Tutto B5.7 resta invariato.
+
+
+## 1.0.30B5.8 — STUDIO LIFE + REPAIR PASS
+
+BASE
+Questa build parte da B5.7.1 MEETING EVENT PLAYABLE FIX.
+Integra anche persistence/pacing dei mission banner:
+- banner ~7 sec;
+- banner = slot attività occupato;
+- niente nuove attività sovrapposte.
+
+POST PRANZO
+- rimossa la teletrasportazione di DON in Cucina;
+- PAO torna in BIM;
+- DON torna nel corridoio e riprende a girare;
+- se il path diretto dalla tavola fallisce: uscita Cucina -> ricalcolo;
+- se anche il recovery fallisce, safety return alla postazione;
+- stati lunchSeated/lunchTravel/postLunchWait rimasti orfani vengono recuperati.
+Nessun NPC dovrebbe restare seduto fino a sera.
+
+FINALE
+- pubblico/colleghi vengono posizionati nella Sala Meet Capo PRIMA che il player entri;
+- quando il player arriva, 1.5 sec di inquadratura pulita;
+- solo dopo compare il portrait del Capo;
+- boss fight esistente preservata.
+
+RIPARAZIONI PC
+Nuovo evento fisico:
+1. IT Manager segnala workstation guasta;
+2. F -> prendi PC dal reparto;
+3. portalo al Banco Riparazioni Server/Magazzino IT;
+4. G -> diagnostica hardware;
+5. LED RAM / PSU / SSD indicano il componente guasto;
+6. intervento tattile sul componente;
+7. TEST BOOT;
+8. riporta il PC all'utente con G;
+9. +280 XP e rapporto +5.
+Il vecchio exploit "prendi RICAMBI = +160 XP istantanei" è stato rimosso.
+
+MANUTENTORI
+- fino a 3 visite ambientali/giornata;
+- ingresso -> reparto -> lavoro -> uscita;
+- possibili interventi: Stampanti, Stampa 3D, Rifugio Digitale, Server, Sala Meet;
+- non sono task del player;
+- E vicino al manutentore apre Story Portrait.
+
+MAPPA
+- aggiunto dark architectural backing interno al posto del nero assoluto;
+- aggiunti corridor stitches nei principali buchi della rete corridoi;
+- collisioni/porte v1292 restano autoritative.
+
+
+## 1.0.30B5.9 — VISUAL COHESION + STUDIO LIFE
+
+Include il pass B5.8.1:
+- pranzo in due turni 13:00–13:30 / 13:30–14:00;
+- 15 posti unici, niente coordinate duplicate;
+- arrivi scaglionati;
+- PAO usa yield e reroute anticipato.
+
+NPC:
+- 25 nomi stabili e unici associati alle postazioni;
+- ruolo/reparto visibile nel Tablet PERSONE.
+
+MANUTENTORI:
+- tre visite leggibili circa 10:30 / 13:20 / 16:25;
+- MIRKO / ENZO / TEO;
+- sprite Game Boy dedicato + cassetta attrezzi;
+- furgone SERVICE;
+- permanenza più lunga;
+- E -> Story Portrait.
+
+VISUAL:
+- nuovo furgone consegne GBC;
+- auto esterna GBC;
+- furgone manutenzione GBC;
+- pacchi + carrello pacchi;
+- PC/extender coerenti con il nuovo linguaggio.
+
+FINALE:
+- eliminato definitivamente il vecchio popup
+  "MESSAGGIO // CAPO / Già che ci sei...";
+- dopo la boss fight resta il riepilogo giornata coerente.
+
+Preservati B5.8: riparazione PC, meeting fix, finale cinematico,
+banner/pacing, autosave, collisioni e ESC.
+Department Expansion e Stress esteso restano ai pass successivi.
+
+
+## 1.0.30B5.9.1 — PAO + MAINT TRANSIT FIX
+
+Problema osservato in F2:
+PAO e manutentore arrivavano davanti a porte/nodi ma in alcuni casi
+non riuscivano ad attraversare.
+
+CAUSE CORRETTE:
+- PAO aveva un target BIM a y=670 dentro la hitbox della scrivania inferiore;
+- la vecchia `v12c44PaoExitRoute` poteva saltare un segmento fallito ma
+  continuare a costruire la route dal waypoint successivo;
+- nelle soglie strette il sistema NPC-NPC poteva creare un deadlock:
+  PAO/manutentore vedevano il passaggio geometricamente valido ma occupato;
+- manutentore non aveva un recovery specifico se rimaneva fermo sulla route.
+
+FIX:
+- target PAO BIM spostato su area libera;
+- nuova uscita BIM con due corsie reali e validazione `v1292RouteSafe`;
+- priorità di attraversamento porta:
+  manutentore > PAO > NPC ordinari;
+- recovery temporaneo ignora SOLO collisione NPC-NPC, mai pareti/porte;
+- manutentore ricostruisce la route se resta realmente fermo;
+- fallback manutentore tramite asse centrale dei corridoi.
+
+CLEANUP:
+- rimosso "In una prossima versione qui riparerai PC e componenti";
+- rimosso riferimento a "missioni future" dal Magazzino;
+- Banco Riparazioni ora dichiara correttamente il sistema PC_REPAIR già attivo;
+- durante PC_REPAIR l'handler legacy non intercetta più E.
+
+Tutto B5.9 resta invariato.
+
+
+## 1.0.30B5.9.2 — OUT OF BOUNDS + ENDING RECOVERY
+
+Bug riprodotto concettualmente:
+- player già entrato nello studio;
+- coordinate finiscono sul marciapiede / fuori dal perimetro interno;
+- `playerCanMove()` impedisce correttamente di continuare fuori,
+  ma la vecchia cinematica finale poteva tentare una route da coordinate
+  non appartenenti al grafo;
+- fallback `[target]` cercava poi di trascinare il player direttamente
+  attraverso muri e poteva restare bloccato per sempre.
+
+FIX NORMALE:
+- dopo l'intro, posizione player valida = walkable + dentro perimetro studio;
+- se una falla di mappa/debug/save porta fuori bounds:
+  recovery alla posizione valida precedente;
+- se anche la posizione precedente è invalida:
+  recovery all'ingresso interno x690/y900;
+- il turno continua: nessun freeze.
+
+FIX 19:00:
+- prima della cinematica controlla posizione e nav area;
+- se il player è fuori, lo riporta sul nodo sicuro interno;
+- ricalcola una vera route verso Sala Meet Capo;
+- rimosso il fallback pericoloso `route=[target]`;
+- se il percorso resta fermo >1.2 sec: recovery + reroute;
+- se il grafo fallisce comunque: taglio cinematico nella Sala Meet Capo
+  invece di softlock.
+
+INTRO:
+- il controllo bounds NON interviene quando il protagonista deve ancora
+  entrare nello studio, quindi la scena iniziale sul marciapiede resta valida.
+
+B5.9.1 PAO/manutentori, B5.9 visual, riparazioni PC, meeting,
+banner, autosave, boss e finale restano invariati.
+
+
+## 1.0.30B5.10 — DEPARTMENT EXPANSION + OBJECTIVE MAP
+
+Base: B5.9.2.
+
+MINOR FIX INCLUSI
+- Objective Map: ★ su minimappa, Tablet MAPPA e mappa completa;
+- marker dinamico per cambio postazione, riparazione PC, pacchi,
+  meeting urgente e carry mission;
+- Lunch Traffic Polish: 13:27–13:30 finestra di cambio turno,
+  uscita primo gruppo prima dell'ingresso del secondo, arrivi più scaglionati.
+
+NUOVI MICRO-PUZZLE
+- HR: PDF/spooler, scanner;
+- Editoria/Mac: font InDesign, SMB, Photoshop scratch disk;
+- Interior: relink materiali, PDF;
+- Renderisti: GPU/Vantage, texture, Chaos/licensing;
+- Rifugio Digitale: PIXERA mapping/player;
+- Sala Meet: input display e audio Teams;
+- Spazio A: USB-C/adattatore/input;
+- Stampanti: coda/spooler e formato plotter;
+- Stampa 3D: resume job e temperatura PLA.
+
+BIM/Centrale restano con i puzzle B5 già validati.
+Server/IT conservano i minigame tecnici esistenti.
+
+I nuovi casi sono operativi: sequenze, configurazioni, selezione e test.
+Quando possibile il ticket usa il nome del collega della postazione.
+HR01 ora è realmente una postazione HR e può generare casi di Betty.
+
+Stress System completo resta per B5.11.
+
+
+## 1.0.30B5.10.1 — DUAL PUZZLE LAYOUT FIX
+
+Bug:
+alcuni nuovi puzzle B5.10 con due parametri mostravano solo il primo
+gruppo in certe combinazioni di Windows scaling / browser zoom / viewport.
+Esempi osservati:
+- Sala Meet / Teams: OUTPUT visibile, INPUT apparentemente assente;
+- Stampa 3D: MATERIALE visibile, NOZZLE apparentemente assente.
+
+Fix generale per TUTTI i casi `mode:"dual"`:
+- i due parametri sono ora righe compatte numerate 01 / 02;
+- entrambi restano nello stesso pannello;
+- layout indipendente dal vecchio breakpoint a 760px;
+- opzioni responsive e testo sempre leggibile;
+- APPLICA + TEST ha stile dedicato e label esplicita;
+- selezionare un'opzione NON ricostruisce più tutta la finestra;
+- niente scroll jump dopo ogni click;
+- prima del test viene indicato chiaramente quale parametro manca.
+
+Copre:
+HR scanner, Editoria SMB, Interior PDF, Render Vantage,
+PIXERA player, Sala Meet audio, Spazio A USB-C,
+Plotter, Stampa 3D temperatura e ogni altro dual B5.10.
+
+Tutto il resto della B5.10 è preservato.
+
+
+## 1.0.30B5.10.2 — OBJECTIVE MARKER + ENDSHIFT GRACE
+
+OBJECTIVE MARKER
+- il vecchio marker era troppo piccolo sulla minimappa;
+- ora la stanza obiettivo viene evidenziata in giallo;
+- il punto esatto ha un mirino/rombo pulsante più grande;
+- marker world più evidente con freccia e label;
+- DESK_SETUP usa esplicitamente stage pickup -> destinazione;
+- supporto invariato per pacchi, PC repair, meeting e carry.
+
+END SHIFT GRACE
+Problema:
+un ticket irrisolto poteva scadere alle 18:5x e dare lo strike 5/5
+pochi secondi prima della chiamata finale del Capo.
+
+Nuova regola 18:45–19:00:
+- non vengono generati nuovi ticket normali;
+- i ticket già aperti NON possono dare uno strike per timeout;
+- una scadenza in questa finestra aggiunge solo poca pressione/incident;
+- alle 19:00 i ticket ancora aperti vengono rimandati a domani;
+- applicano una penalità leggera a stress/incident/reputazione;
+- non possono causare game over;
+- la cinematica del Capo e la boss fight partono sempre.
+
+Gli errori reali commessi dal player continuano invece a poter causare
+game over: la grace protegge solo i timeout di fine giornata.
+
+Fix latente:
+`checkEarlyEnd(dt=0)` non può più generare ReferenceError quando
+lo stress raggiunge il limite.
+
+
+## 1.0.30B5.10.3 — PHYSICAL MISSION MARKER FIX
+
+Correzione importante:
+i marker dei ticket normali funzionavano, ma alcune missioni fisiche
+non usavano la stessa destinazione del sistema F/G.
+
+CASI CORRETTI:
+- CAMBIO POSTAZIONE;
+- PACCHI IT;
+- CHIAVETTA USB;
+- MOUSE USB;
+- CUFFIE;
+- TASTIERA USB;
+- TONER;
+- CAVO ETHERNET;
+- ALIMENTATORE;
+- ADATTATORE USB-C / HDMI;
+- meeting extender;
+- PC repair.
+
+FIX:
+- le carry mission usano ora direttamente `carryTarget()` per il marker;
+- quindi marker e punto di consegna F/G sono la stessa coordinata;
+- per le consegne a NPC viene usata la postazione HOME, non la posizione
+  corrente dell'NPC mentre gira nello studio;
+- la stanza viene risolta dalle coordinate reali con `roomAt()`;
+- alias come REPARTO IT / POSTAZIONE / SERVER non possono più rompere
+  l'evidenziazione stanza;
+- marker minimappa ingrandito;
+- pacchi: pickup finché non ne porti uno, poi marker sul Magazzino IT;
+- cambio postazione: pickup Reparto IT -> installazione alla postazione;
+- HUD carry mostra anche la destinazione dopo F.
+
+B5.10.2 Endshift Grace, B5.10.1 dual fix e tutto il resto sono preservati.
+
+
+## 1.0.30B5.11_12 — STRESS + NPC LORE + CALL SYSTEM
+
+Build unificata B5.11/B5.12.
+
+- Stress non più decorativo: pressione di fondo + ticket + deadline + incident + fascia oraria.
+- Floor di fatica leggero: una run non resta a 0% fino al pomeriggio semplicemente aspettando.
+- Soglie CONTROLLO / PRESSIONE / SOVRACCARICO / CRITICO.
+- Chiamate NPC leggibili e programmate, con marker ★ e stato TI CERCA nel Tablet.
+- Bonus di recupero errore e copertura prossimo errore.
+- Popup pranzo 13:00 + secondo turno 13:30, accodati se il player è in puzzle/storia/banner.
+- 14 NPC canonici con personalità e dialoghi.
+- RIC. COMI: running gag ex-IT.
+- RIC. COMI ed ELENA: ABA.
+- PATRI ed ESTER aggiunte come presenze fisse nei loro reparti.
+- Rimosso il fail state IMPOSTORE.
+- B5.10.3 marker fisici + B5.10.2 endshift grace preservati.
+
+NOTA: controlli automatici = sintassi/statica + integrità ZIP.
+La validazione runtime completa resta la run manuale in browser.
+
+
+## 1.0.30B5.11_12.1 — IT MANAGER RUN FIX
+
+Hotfix mirato:
+- ridotta solo la velocità della corsa iniziale dell'IT Manager;
+- `raceSpeed` da 118 a 78;
+- velocità normale del Manager invariata;
+- nessuna modifica a stress, NPC calls, lore, marker, ticket, lunch, finale o bilanciamento.
+
+Obiettivo:
+evitare che il Manager completi la corsa/login in circa 4 secondi e rendere la scena più leggibile.
+
+
+## 1.0.30B5.13 — STUDIO ALIVE + PORTRAIT FIX
+
+Base congelata: B5.11_12.1.
+Il fix IT Manager raceSpeed 78 è incluso e non è stato sovrascritto.
+
+PORTRAIT FIX
+- il protagonista viene usato SOLO quando il nome speaker coincide esattamente col nome player;
+- i 14 NPC lore hanno palette/feature proprie;
+- PATRI e LISA bionde;
+- PIERP calvo;
+- FULVIO capelli grigi;
+- RIC. COMI silhouette più larga;
+- Lorenzo biondo;
+- minor NPC senza profilo ricevono un portrait NPC deterministico, mai il player;
+- anche manutentori usano il proprio nome/portrait.
+
+STUDIO ALIVE
+- 2 arrivi clienti durante il giorno;
+- un architetto reale lascia la postazione e accompagna il meeting;
+- 2 flussi visitatori al Rifugio Digitale;
+- ESTER avvisa quando entra un gruppo;
+- PATRI avvisa quando arrivano clienti;
+- 5 ambient worker (GIADA, TOM, VALE, MARTI, NICO) sono più attivi nello studio;
+- 5 tecnici nel roster esterno:
+  LORENZO, ENZO, TEO, DIEGO, SAMU;
+- MIRKO non viene più duplicato come manutentore: resta il MIRKO canonico di INTERIOR.
+
+LORENZO — EVENTO STORIA
+- circa 15:10, quando non c'è un'altra attività principale;
+- diagnosi nel SERVER;
+- l'IT Manager riconosce un problema di alimentazione non risolvibile con un riavvio;
+- viene chiamato Lorenzo, elettricista biondo e amico del protagonista;
+- Lorenzo entra realmente dallo studio e raggiunge il SERVER;
+- intervento combinato: il player mette in sicurezza/verifica i servizi IT,
+  Lorenzo gestisce la parte elettrica;
+- ricompensa XP +350, stress -8, reputazione +1;
+- dialogo finale dedicato.
+
+I client/visitatori sono background life: non aprono automaticamente cinque task
+e non violano il pacing "una attività importante alla volta".
+
+
+## 1.0.30B5.13.1 — LORENZO ARRIVAL FIX
+
+Hotfix della B5.13 dopo run completa.
+
+Problema osservato:
+- ANOMALIA ALIMENTAZIONE poteva restare attiva fino a fine giornata;
+- Lorenzo poteva non diventare visibile/arrivare;
+- durante l'attesa il pannello non spiegava chiaramente a che punto fosse l'evento.
+
+Fix:
+- Lorenzo viene creato IMMEDIATAMENTE quando il player completa la diagnosi G;
+- lo spawn non dipende più dalla chiusura del portrait dell'IT Manager;
+- marker ★ segue Lorenzo durante l'arrivo;
+- stato HUD/alert specifico per ogni fase;
+- watchdog di percorso: reroute se bloccato;
+- recovery assoluto dopo 12–14 secondi reali, così la storia non può rimanere appesa;
+- reminder IT Manager se la diagnosi iniziale viene ignorata;
+- fasi esplicite:
+  DIAGNOSI -> LORENZO IN ARRIVO -> SICUREZZA IT -> LORENZO AL LAVORO -> VERIFICA.
+
+Tutto il resto della B5.13 è preservato.
+
+
+## 1.0.30B5.13.2 — LORENZO PRIORITY + INVENTORY FIX
+
+Problemi osservati nella run:
+- alle 16:34 un PC DA RIPARARE poteva ancora occupare `studioEvent`;
+- l'evento Lorenzo, previsto dopo le 15:10, aspettava indefinitamente che quella task terminasse;
+- oggetti fisici di missioni precedenti potevano rimanere nell'inventario (es. vecchio PACCO IT / PC / EXTENDER).
+
+Fix:
+- dalle 15:10 Lorenzo viene messo in CODA PRIORITARIA anche se una task è attiva;
+- da quel momento non possono nascere nuovi studioEvent casuali prima di Lorenzo;
+- la task già in corso ha tempo fino alle 15:45 per essere completata;
+- alle 15:45, se è ancora aperta e il player non è dentro un puzzle/dialogo, viene rinviata senza strike;
+- eventuale materiale della task rinviata viene restituito automaticamente;
+- Lorenzo parte nel primo slot libero subito dopo;
+- inventario ripulito automaticamente da PACCHI IT / PC missione / EXTENDER appartenenti a missioni non più vive;
+- gli oggetti liberi di magazzino non vengono cancellati dal cleanup.
+
+Preservati:
+B5.13.1 arrival watchdog, portrait fix, clienti, visitatori, stress, NPC calls,
+pranzo, physical markers, IT Manager race fix, finale e autosave.
+
+
+## 1.0.30B5.13.3 — LORENZO FINAL TRIGGER FIX
+
+Problema osservato:
+dopo l'intervento elettrico di Lorenzo la progressione finale non era sufficientemente
+chiara e l'interazione E poteva limitarsi al dialogo, mentre il gioco aspettava G.
+
+Fix:
+- Lorenzo dice esplicitamente cosa fare quando termina l'intervento;
+- banner: E / G // VERIFICA FINALE;
+- HUD: SERVER // E / G VICINO A LORENZO;
+- marker finale segue Lorenzo;
+- E e G sono entrambi validi per completare la verifica;
+- area trigger aumentata: funziona vicino a Lorenzo oppure al punto SERVER;
+- reminder ogni 3 minuti di gioco finché la verifica non viene completata;
+- parlare con Lorenzo durante la fase VERIFICA fa avanzare direttamente l'evento;
+- parlare con Lorenzo mentre sta ancora lavorando chiarisce che bisogna attendere.
+
+Preservata tutta la B5.13.2:
+priorità Lorenzo, inventory cleanup, arrival watchdog, portrait fix, clienti,
+visitatori, stress, calls, pranzo, IT Manager run fix, finale e autosave.

@@ -1,0 +1,51 @@
+{
+  "build": "1.0.30B5.9 VISUAL COHESION + STUDIO LIFE",
+  "base": "1.0.30B5.8",
+  "lunch": {
+    "waves": 2,
+    "unique_seats": 15,
+    "arrival_stagger": true
+  },
+  "pao": {
+    "yield": true,
+    "gap": 20,
+    "reroute_seconds": 0.38
+  },
+  "npc_identity": {
+    "stable_unique_names": 25,
+    "department_roles": true
+  },
+  "maintenance": {
+    "times": [
+      630,
+      800,
+      985
+    ],
+    "names": [
+      "MIRKO",
+      "ENZO",
+      "TEO"
+    ],
+    "dedicated_sprite": true,
+    "service_van": true
+  },
+  "visual": {
+    "delivery_van": true,
+    "compact_car": true,
+    "packages": true,
+    "package_cart": true,
+    "hardware_icons": true
+  },
+  "ending": {
+    "legacy_cap_message_removed": true,
+    "summary_after_boss": true
+  },
+  "preserved": [
+    "PC repair",
+    "meeting event",
+    "banner pacing",
+    "map solid",
+    "autosave",
+    "ESC"
+  ]
+}

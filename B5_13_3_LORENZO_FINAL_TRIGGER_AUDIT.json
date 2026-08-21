@@ -1,0 +1,30 @@
+{
+  "build": "1.0.30B5.13.3 LORENZO FINAL TRIGGER FIX",
+  "base": "1.0.30B5.13.2",
+  "fixes": {
+    "verify_with_E": true,
+    "verify_with_G": true,
+    "near_lorenzo_trigger_radius": 85,
+    "near_server_trigger_radius": 115,
+    "explicit_final_banner": true,
+    "explicit_lorenzo_instruction": true,
+    "verify_marker_tracks_lorenzo": true,
+    "verify_reminder_every_ingame_minutes": 3
+  },
+  "preserved": {
+    "lorenzo_priority": true,
+    "inventory_cleanup": true,
+    "arrival_watchdog": true,
+    "manager_raceSpeed_78": true,
+    "portrait_fix": true,
+    "clients": true,
+    "refuge_visitors": true,
+    "stress": true,
+    "npc_calls": true,
+    "lunch": true,
+    "physical_markers": true,
+    "endshift_grace": true,
+    "finale": true,
+    "autosave": true
+  }
+}

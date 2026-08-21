@@ -1,0 +1,29 @@
+{
+  "build": "1.0.30B5.13.4 MAINTENANCE GHOST FIX",
+  "base": "1.0.30B5.13.3",
+  "maintenance_fix": {
+    "active_requires_real_tech": true,
+    "active_requires_valid_route": true,
+    "reroute_on_stall_seconds": 2.0,
+    "hard_visible_recovery_seconds": 10.0,
+    "stagnant_recovery_seconds": 6.5,
+    "exit_watchdog_seconds": 10.0,
+    "unknown_phase_auto_close": true,
+    "truthful_alerts": true
+  },
+  "preserved": {
+    "lorenzo_priority": true,
+    "lorenzo_arrival_watchdog": true,
+    "lorenzo_E_G_final_trigger": true,
+    "inventory_cleanup": true,
+    "manager_raceSpeed_78": true,
+    "portrait_fix": true,
+    "clients": true,
+    "refuge_visitors": true,
+    "stress": true,
+    "npc_calls": true,
+    "lunch": true,
+    "finale": true,
+    "autosave": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "build": "1.0.30B5.13.2 LORENZO PRIORITY + INVENTORY FIX",
+  "base": "1.0.30B5.13.1",
+  "lorenzo": {
+    "queue_time": "15:10",
+    "blocks_new_random_studio_events": true,
+    "ordinary_work_grace_until": "15:45",
+    "stale_work_deferred_without_strike": true,
+    "starts_next_free_slot": true,
+    "arrival_watchdog_retained": true
+  },
+  "inventory": {
+    "orphan_package_cleanup": true,
+    "orphan_pc_cleanup": true,
+    "orphan_extender_cleanup": true,
+    "preserve_live_mission_items": true,
+    "preserve_free_supply_items": true
+  },
+  "preserved": {
+    "manager_raceSpeed_78": true,
+    "portrait_fix": true,
+    "clients": true,
+    "refuge_visitors": true,
+    "stress": true,
+    "npc_calls": true,
+    "lunch": true,
+    "physical_markers": true,
+    "endshift_grace": true,
+    "finale": true,
+    "autosave": true
+  }
+}

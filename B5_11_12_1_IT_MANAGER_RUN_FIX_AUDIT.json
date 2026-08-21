@@ -1,0 +1,20 @@
+{
+  "build": "1.0.30B5.11_12.1 IT MANAGER RUN FIX",
+  "base": "1.0.30B5.11_12",
+  "changed_only": {
+    "it_manager_raceSpeed": {
+      "from": 118,
+      "to": 78
+    }
+  },
+  "preserved": [
+    "stress system",
+    "npc lore",
+    "npc calls",
+    "lunch notices",
+    "physical mission markers",
+    "endshift grace",
+    "finale",
+    "autosave"
+  ]
+}

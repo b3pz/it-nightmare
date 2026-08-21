@@ -1,0 +1,29 @@
+{
+  "build": "1.0.30B5.10.2 OBJECTIVE MARKER + ENDSHIFT GRACE",
+  "base": "1.0.30B5.10.1",
+  "objective_marker": {
+    "room_highlight": true,
+    "large_target_crosshair": true,
+    "world_arrow": true,
+    "desk_setup_stage_aware": true
+  },
+  "end_shift": {
+    "grace_start": "18:45",
+    "new_tickets_blocked": true,
+    "timeout_strikes_blocked": true,
+    "open_tickets_deferred_at_19": true,
+    "light_penalty_only": true,
+    "finale_always_continues": true
+  },
+  "preserved": {
+    "dual_puzzle_fix": true,
+    "department_expansion": true,
+    "lunch_polish": true,
+    "pc_repair": true,
+    "maintenance": true,
+    "pao_transit": true,
+    "bounds_recovery": true,
+    "ending": true,
+    "autosave": true
+  }
+}

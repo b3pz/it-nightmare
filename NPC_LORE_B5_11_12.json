@@ -1,0 +1,139 @@
+{
+  "version": "1.0.30B5.11_12",
+  "canonical_npcs": {
+    "PATRI": {
+      "department": "SEGRETERIA",
+      "appearance": "BIONDA",
+      "summary": "Ansiosa per le spedizioni; chiacchiera con chiunque.",
+      "tech": "BASSA",
+      "helper": false,
+      "talks": []
+    },
+    "LISA": {
+      "department": "BIM",
+      "appearance": "BIONDA",
+      "summary": "Precisa, simpatica e collaborativa; aiuta il player.",
+      "tech": "ALTA",
+      "helper": true,
+      "talks": []
+    },
+    "FRONJACK": {
+      "department": "RENDERISTI",
+      "appearance": null,
+      "summary": "Bravissimo nei render e appassionato di videogame.",
+      "tech": "MOLTO ALTA",
+      "helper": true,
+      "talks": []
+    },
+    "MIRKO": {
+      "department": "INTERIOR",
+      "appearance": null,
+      "summary": "Simpatico nerd da freddure.",
+      "tech": "MEDIA",
+      "helper": false,
+      "talks": []
+    },
+    "ALV": {
+      "department": "CENTRALE",
+      "appearance": null,
+      "summary": "Architetto gentile, collaborativo, aiuta il player.",
+      "tech": "MEDIA",
+      "helper": true,
+      "talks": []
+    },
+    "GIOVA": {
+      "department": "CENTRALE",
+      "appearance": null,
+      "summary": "Amichevole, nerd, interista.",
+      "tech": "MEDIA",
+      "helper": false,
+      "talks": []
+    },
+    "MARINO": {
+      "department": "CENTRALE",
+      "appearance": null,
+      "summary": "Catanese, simpatico, si lamenta sempre di AutoCAD.",
+      "tech": "MEDIA",
+      "helper": false,
+      "talks": []
+    },
+    "ALICE": {
+      "department": "CENTRALE",
+      "appearance": null,
+      "summary": "Ha spesso problemi con i render.",
+      "tech": "MEDIA",
+      "helper": false,
+      "talks": []
+    },
+    "PIERP": {
+      "department": "CENTRALE",
+      "appearance": "CALVO",
+      "summary": "Calmo ma deciso.",
+      "tech": "MEDIA",
+      "helper": false,
+      "talks": []
+    },
+    "FULVIO": {
+      "department": "EDITORIA",
+      "appearance": null,
+      "summary": "Anziano saggio; racconta l'evoluzione della carta e della stampa.",
+      "tech": "MEDIA",
+      "helper": true,
+      "talks": []
+    },
+    "VITO": {
+      "department": "EDITORIA",
+      "appearance": null,
+      "summary": "Produce i video destinati a PIXERA nel Rifugio Digitale.",
+      "tech": "ALTA",
+      "helper": false,
+      "talks": []
+    },
+    "ESTER": {
+      "department": "RIFUGIO DIGITALE",
+      "appearance": null,
+      "summary": "Accoglie i visitatori e chiama IT per monitor/PIXERA.",
+      "tech": "MEDIA",
+      "helper": false,
+      "talks": []
+    },
+    "RIC. COMI": {
+      "department": "ABA",
+      "appearance": null,
+      "summary": "Simpatico ex-IT; running gag sul vecchio lavoro IT.",
+      "tech": "ALTA",
+      "helper": true,
+      "talks": []
+    },
+    "ELENA": {
+      "department": "ABA",
+      "appearance": null,
+      "summary": "Gestisce freneticamente moltissimi progetti.",
+      "tech": "MEDIA",
+      "helper": false,
+      "talks": []
+    }
+  },
+  "existing_specials": [
+    "IT MANAGER",
+    "ZIA ALE",
+    "DON",
+    "PAO",
+    "BETTY",
+    "CAPO"
+  ],
+  "b513_reserved": {
+    "active_studio_workers": 5,
+    "external_maintenance": 5,
+    "lorenzo": {
+      "role": "ELETTRICISTA",
+      "appearance": "BIONDO",
+      "relationship": "MIGLIORE AMICO DEL PROTAGONISTA",
+      "story_event": "Guasto tecnico/elettrico con intervento combinato IT + elettricista"
+    },
+    "visitors": [
+      "CLIENTI MEETING",
+      "VISITATORI RIFUGIO DIGITALE"
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "build": "1.0.30B5.13 STUDIO ALIVE + PORTRAIT FIX",
+  "base": "1.0.30B5.11_12.1",
+  "manager_run_fix": {
+    "raceSpeed": 78,
+    "preserved": true
+  },
+  "portrait_fix": {
+    "player_only_exact_name": true,
+    "canonical_lore_portraits": 14,
+    "minor_deterministic_fallback": true,
+    "maintenance_portraits": true,
+    "lorenzo_blonde": true
+  },
+  "studio_alive": {
+    "client_meetings": 2,
+    "real_architect_host": true,
+    "refuge_visitor_groups": 2,
+    "visitor_count_per_group": 5,
+    "active_workers": [
+      "GIADA",
+      "TOM",
+      "VALE",
+      "MARTI",
+      "NICO"
+    ],
+    "maintenance_roster": [
+      "LORENZO",
+      "ENZO",
+      "TEO",
+      "DIEGO",
+      "SAMU"
+    ],
+    "lorenzo_story_event": true
+  },
+  "preserved": {
+    "stress": true,
+    "npc_calls": true,
+    "lunch": true,
+    "physical_markers": true,
+    "endshift_grace": true,
+    "dual_puzzles": true,
+    "pc_repair": true,
+    "bounds_recovery": true,
+    "finale": true,
+    "autosave": true
+  }
+}

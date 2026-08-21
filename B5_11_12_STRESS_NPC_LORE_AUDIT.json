@@ -1,0 +1,49 @@
+{
+  "build": "1.0.30B5.11_12 STRESS + NPC LORE + CALL SYSTEM",
+  "base": "1.0.30B5.10.3",
+  "systems": {
+    "stress_floor_and_pressure": true,
+    "stress_bands": [
+      "CONTROLLO",
+      "PRESSIONE",
+      "SOVRACCARICO",
+      "CRITICO"
+    ],
+    "npc_call_slots": [
+      "10:45",
+      "12:15",
+      "14:25",
+      "15:50",
+      "17:15"
+    ],
+    "npc_call_minimap_marker": true,
+    "tablet_ti_cerca": true,
+    "recover_error_bonus": true,
+    "next_error_shield": true,
+    "lunch_popup_1300": true,
+    "lunch_second_wave_popup_1330": true,
+    "queued_when_ui_busy": true,
+    "impostore_removed": true
+  },
+  "canon_lore_count": 14,
+  "specials_retained": [
+    "IT MANAGER",
+    "ZIA ALE",
+    "DON",
+    "PAO",
+    "BETTY",
+    "CAPO"
+  ],
+  "preserved": {
+    "physical_mission_markers": true,
+    "endshift_grace": true,
+    "dual_puzzle_layout": true,
+    "department_puzzles": true,
+    "pc_repair": true,
+    "maintenance": true,
+    "pao_transit": true,
+    "bounds_recovery": true,
+    "finale": true,
+    "autosave": true
+  }
+}

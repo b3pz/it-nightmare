@@ -1,0 +1,32 @@
+{
+  "build": "1.0.30B5.10.1 DUAL PUZZLE LAYOUT FIX",
+  "base": "1.0.30B5.10",
+  "dual_cases_checked": [
+    "HR_SCANNER",
+    "ED_SMB",
+    "INT_PDF",
+    "REN_VANTAGE",
+    "PIX_PLAYER",
+    "MEET_AUDIO",
+    "SPACE_USB",
+    "PRN_FORMAT",
+    "P3D_TEMP"
+  ],
+  "fix": {
+    "compact_rows": true,
+    "both_parameters_visible": true,
+    "no_rerender_on_selection": true,
+    "missing_parameter_feedback": true,
+    "dedicated_apply_test_style": true
+  },
+  "preserved": {
+    "department_expansion": true,
+    "objective_map": true,
+    "lunch_polish": true,
+    "pc_repair": true,
+    "maintenance": true,
+    "pao_transit": true,
+    "bounds_recovery": true,
+    "ending": true
+  }
+}

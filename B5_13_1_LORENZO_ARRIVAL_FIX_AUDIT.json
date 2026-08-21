@@ -1,0 +1,28 @@
+{
+  "build": "1.0.30B5.13.1 LORENZO ARRIVAL FIX",
+  "base": "1.0.30B5.13",
+  "fixes": {
+    "spawn_immediately_after_diagnosis": true,
+    "spawn_not_dependent_on_story_callback": true,
+    "arrival_marker": true,
+    "path_reroute_watchdog": true,
+    "hard_arrival_recovery_seconds": 12,
+    "wait_stage_recovery_seconds": 14,
+    "diagnosis_reminder": true,
+    "stage_specific_alerts": true
+  },
+  "preserved": {
+    "manager_raceSpeed_78": true,
+    "portrait_fix": true,
+    "client_meetings": true,
+    "refuge_visitors": true,
+    "active_workers": true,
+    "stress": true,
+    "npc_calls": true,
+    "lunch": true,
+    "physical_markers": true,
+    "endshift_grace": true,
+    "finale": true,
+    "autosave": true
+  }
+}

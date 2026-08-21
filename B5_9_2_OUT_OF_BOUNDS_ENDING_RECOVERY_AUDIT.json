@@ -1,0 +1,28 @@
+{
+  "build": "1.0.30B5.9.2 OUT OF BOUNDS + ENDING RECOVERY",
+  "base": "1.0.30B5.9.1",
+  "runtime": {
+    "post_intro_bounds_watch": true,
+    "recover_last_safe": true,
+    "safe_entry": {
+      "x": 690,
+      "y": 900
+    },
+    "intro_exterior_untouched": true
+  },
+  "ending": {
+    "pre_route_bounds_recovery": true,
+    "direct_target_route_fallback_removed": true,
+    "stall_reroute_seconds": 1.2,
+    "absolute_fail_safe_seconds": 2.4,
+    "cinematic_cut_instead_of_softlock": true
+  },
+  "preserved": {
+    "pao_maint_transit_fix": true,
+    "pc_repair": true,
+    "meeting": true,
+    "banner_pacing": true,
+    "autosave": true,
+    "boss": true
+  }
+}

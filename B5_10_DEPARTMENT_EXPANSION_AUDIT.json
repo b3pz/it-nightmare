@@ -1,0 +1,41 @@
+{
+  "build": "1.0.30B5.10 DEPARTMENT EXPANSION + OBJECTIVE MAP",
+  "base": "1.0.30B5.9.2",
+  "objective_map": [
+    "carry",
+    "desk_setup",
+    "pc_repair",
+    "packages",
+    "meeting_rush"
+  ],
+  "lunch": {
+    "first_wave_until": "13:27",
+    "changeover": "13:27-13:30",
+    "second_wave": "13:30",
+    "personal_gap": 18
+  },
+  "cases": {
+    "HR": 2,
+    "EDITORIA": 3,
+    "INTERIOR": 2,
+    "RENDERISTI": 3,
+    "RIFUGIO DIGITALE": 2,
+    "SALA MEET": 2,
+    "SPAZIO A": 1,
+    "STAMPANTI": 2,
+    "STAMPA 3D": 2
+  },
+  "preserved": [
+    "BIM",
+    "CENTRALE",
+    "PC repair",
+    "maintenance",
+    "PAO transit",
+    "bounds recovery",
+    "ending",
+    "banner pacing",
+    "autosave",
+    "ESC"
+  ],
+  "stress_b511": false
+}

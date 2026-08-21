@@ -1,0 +1,35 @@
+{
+  "build": "1.0.30B5.8 STUDIO LIFE + REPAIR PASS",
+  "base": "1.0.30B5.7.1 MEETING EVENT PLAYABLE FIX",
+  "banner": {
+    "persistent": true,
+    "blocks_other_main_activities": true
+  },
+  "lunch": {
+    "stale_seat_recovery": true,
+    "don_no_longer_home_kitchen": true,
+    "pao_returns_bim": true
+  },
+  "ending": {
+    "crowd_before_player_entry": true,
+    "settle_ms": 1500,
+    "existing_boss_preserved": true
+  },
+  "pc_repair": {
+    "physical_pickup": true,
+    "repair_bench": true,
+    "tactile_led_diagnostic": true,
+    "return_to_user": true,
+    "xp": 280
+  },
+  "maintenance_visits": {
+    "max_per_day": 3,
+    "ambient": true,
+    "portrait_on_interact": true
+  },
+  "map": {
+    "dark_backing": true,
+    "corridor_stitches": 4,
+    "v1292_preserved": true
+  }
+}

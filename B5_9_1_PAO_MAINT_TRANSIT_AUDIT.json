@@ -1,0 +1,23 @@
+{
+  "build": "1.0.30B5.9.1 PAO + MAINT TRANSIT FIX",
+  "base": "1.0.30B5.9",
+  "pao": {
+    "invalid_bim_target_removed": true,
+    "validated_exit_lanes": true,
+    "door_priority": 2
+  },
+  "maintenance": {
+    "door_priority": 3,
+    "stationary_route_rebuild_seconds": 1.5,
+    "central_spine_fallback": true
+  },
+  "collision": {
+    "npc_only_temporary_bypass": true,
+    "v1292_wall_door_collision_preserved": true
+  },
+  "cleanup": {
+    "future_repair_text_removed": true,
+    "future_mission_text_removed": true,
+    "active_pc_repair_not_intercepted": true
+  }
+}

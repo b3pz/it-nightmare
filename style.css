@@ -1716,3 +1716,201 @@ body:has(#gameScreen.active) #v130b43StoryScene:not(.hidden) + #v130b42AutoDialo
 #missionBanner:not(.hidden){
  pointer-events:none;
 }
+
+
+/* 1.0.30B5.8 — PC REPAIR BENCH */
+.v130b58-repair{display:grid;gap:12px}
+.v130b58-diag{
+ display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+}
+.v130b58-diag>div{
+ border:3px solid #50675a;background:#17231d;padding:10px;
+ font:900 10px monospace;color:#dce8ca;
+}
+.v130b58-diag b,.v130b58-diag span{display:block}
+.v130b58-diag span{margin-top:7px;font-size:8px}
+.v130b58-diag .ok{border-color:#83b978}
+.v130b58-diag .fault{
+ border-color:#c45b52;
+ background:#321a18;
+ animation:v130b58DiagPulse .75s steps(2,end) infinite;
+}
+@keyframes v130b58DiagPulse{50%{filter:brightness(1.45)}}
+.v130b58-board{
+ display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+ padding:12px;border:4px solid #50675a;background:#22332b;
+}
+.v130b58-board button,.v130b58-test{
+ min-height:68px;border:4px solid #7f957e;background:#dce8ca;color:#26342d;
+ box-shadow:4px 4px 0 #0a0d0b;font:900 13px monospace;cursor:pointer;
+}
+.v130b58-board button:hover,.v130b58-test:hover{transform:translateY(-2px)}
+.v130b58-board button.fixed{background:#9bc58e;border-color:#d7e7ba}
+.v130b58-board small{font-size:8px}
+.v130b58-test{min-height:48px;background:#b8d39b}
+#v130b58RepairFeedback.bad{background:#321a18;color:#efb1a8;border-left-color:#c45b52}
+
+.v130b59-ending{display:grid;gap:14px;text-align:center;padding:10px}
+.v130b59-ending h2{font-size:52px;margin:8px 0}
+.v130b59-endtag{font:900 10px monospace;letter-spacing:2px;color:#9ebb8e}
+.v130b59-endline,.v130b59-endquote{font:900 11px/1.6 monospace}
+.v130b59-endstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}
+.v130b59-endstats div{border:3px solid #50675a;background:#17231d;padding:12px 8px}
+.v130b59-endstats span,.v130b59-endstats b{display:block}
+.v130b59-endstats span{font:900 8px monospace;color:#95a98e}
+.v130b59-endstats b{font:900 18px monospace;color:#dbe8c9;margin-top:5px}
+@media(max-width:760px){.v130b59-endstats{grid-template-columns:repeat(2,1fr)}}
+
+/* 1.0.30B5.10 — department operational puzzles */
+.v130b10-seqstate{border:3px solid #70836e;background:#17231d;color:#dce8ca;padding:9px 11px;font:900 10px monospace;margin-bottom:10px}
+.v130b10-action,.v130b10-choice,.v130b10-group button{border:3px solid #71816e;background:#dce8ca;color:#25342c;min-height:50px;padding:8px;font:900 9px monospace;cursor:pointer;box-shadow:3px 3px 0 #0b100d}
+.v130b10-action:hover,.v130b10-choice:hover,.v130b10-group button:hover{transform:translateY(-1px)}
+.v130b10-action.fixed,.v130b10-choice.selected,.v130b10-group button.selected{background:#9fc48c;border-color:#d9e9bb}
+.v130b10-dual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.v130b10-group{border:3px solid #50675a;background:#18251f;padding:10px}
+.v130b10-group>b{display:block;font:900 9px monospace;color:#cfdda9;margin-bottom:8px}
+.v130b10-group>div{display:grid;gap:7px}
+@media(max-width:760px){.v130b10-dual{grid-template-columns:1fr}}
+
+
+/* ============================================================
+   1.0.30B5.10.1 — DUAL PUZZLE LAYOUT FIX
+   ============================================================ */
+.v130b101-dual{
+ display:grid;
+ gap:9px;
+ margin:10px 0 4px;
+ width:100%;
+ min-width:0;
+}
+.v130b101-dualhead{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:10px;
+ border:3px solid #526a5b;
+ background:#111c17;
+ padding:8px 10px;
+ color:#dce8ca;
+ font:900 8px monospace;
+}
+.v130b101-dualhead span{color:#d7c85e}
+.v130b101-param{
+ display:grid;
+ grid-template-columns:minmax(125px,170px) minmax(0,1fr);
+ gap:10px;
+ align-items:stretch;
+ border:3px solid #50675a;
+ background:#18251f;
+ padding:8px;
+ min-width:0;
+}
+.v130b101-paramname{
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ gap:7px;
+ border-right:2px solid #50675a;
+ padding:5px 10px 5px 4px;
+ min-width:0;
+}
+.v130b101-paramname b{
+ color:#d4dfac;
+ font:900 8px/1.35 monospace;
+ overflow-wrap:anywhere;
+}
+.v130b101-paramname span{
+ color:#8fa892;
+ font:900 7px/1.3 monospace;
+ overflow-wrap:anywhere;
+}
+.v130b101-options{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(115px,1fr));
+ gap:7px;
+ min-width:0;
+}
+.v130b101-options button{
+ min-width:0;
+ min-height:40px;
+ border:3px solid #71816e;
+ background:#dce8ca;
+ color:#25342c !important;
+ padding:7px 5px;
+ font:900 8px/1.25 monospace;
+ cursor:pointer;
+ box-shadow:3px 3px 0 #0b100d;
+ white-space:normal;
+ overflow-wrap:anywhere;
+}
+.v130b101-options button.selected{
+ background:#9fc48c;
+ border-color:#e1efbd;
+ box-shadow:inset 0 0 0 2px #4d664d,3px 3px 0 #0b100d;
+}
+.v130b101-test{
+ width:100%;
+ min-height:46px;
+ border:4px solid #273a2e;
+ background:#a9ca8b;
+ color:#17231d !important;
+ font:900 11px monospace;
+ letter-spacing:1px;
+ cursor:pointer;
+ box-shadow:4px 4px 0 #000;
+}
+.v130b101-test:hover{filter:brightness(1.08)}
+@media(max-width:680px){
+ .v130b101-param{grid-template-columns:1fr}
+ .v130b101-paramname{border-right:0;border-bottom:2px solid #50675a;padding:4px 4px 8px}
+ .v130b101-options{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}
+}
+
+/* 1.0.30B5.10.2 */
+.v130b5102-deferred{
+ border:3px solid #7f8153;
+ background:#242616;
+ color:#e9df77;
+ padding:9px;
+ font:900 9px monospace;
+}
+
+
+/* ============================================================
+   1.0.30B5.11_12 — STRESS / NPC CALL / LUNCH UI
+   ============================================================ */
+#stress[data-band="CONTROLLO"]{color:#b7ff7a}
+#stress[data-band="PRESSIONE"]{color:#f0d96b}
+#stress[data-band="SOVRACCARICO"]{color:#ef9b5b}
+#stress[data-band="CRITICO"]{color:#ff6666;text-shadow:0 0 8px rgba(255,80,80,.35)}
+
+#missionBanner[data-kind="PRANZO"]{
+  border-color:#72c7c0!important;
+  background:#0a1719f2!important;
+  box-shadow:7px 7px #07100f!important;
+}
+#missionBanner[data-kind="PRANZO"] small{color:#8fe0d8!important}
+#missionBanner[data-kind="PRANZO"] b{color:#fff1a4!important}
+#missionBanner[data-kind="PRANZO"] em{color:#a8e9cf!important}
+
+.v130b5112-calling{
+  border-color:#e5d65b!important;
+  box-shadow:inset 5px 0 #e5d65b;
+}
+.v130b5112-calling em{
+  color:#fff06a!important;
+  animation:v130b5112CallPulse .7s steps(2) infinite;
+}
+@keyframes v130b5112CallPulse{50%{opacity:.45}}
+.v130b4-sys small{
+  display:block;
+  margin-top:5px;
+  font:800 7px monospace;
+  opacity:.78;
+}
+
+/* 1.0.30B5.13 — Studio Alive */
+#missionBanner[data-kind="EVENTO STORIA"]{
+ border-color:#d8c35f!important;
+ background:#17180cf2!important;
+}

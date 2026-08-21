@@ -1,0 +1,35 @@
+{
+  "build": "1.0.30B5.10.3 PHYSICAL MISSION MARKER FIX",
+  "base": "1.0.30B5.10.2",
+  "physical_marker": {
+    "carry_uses_carryTarget": true,
+    "recipient_home_station": true,
+    "coordinate_room_resolution": true,
+    "larger_minimap_marker": true,
+    "desk_setup": true,
+    "packages": true,
+    "pc_repair": true,
+    "meeting_rush": true,
+    "generic_items": [
+      "CHIAVETTA USB",
+      "MOUSE USB",
+      "CUFFIE",
+      "TASTIERA USB",
+      "TONER",
+      "CAVO ETHERNET",
+      "ALIMENTATORE",
+      "ADATTATORE USB-C / HDMI"
+    ]
+  },
+  "preserved": {
+    "endshift_grace": true,
+    "dual_puzzle_fix": true,
+    "department_expansion": true,
+    "lunch_polish": true,
+    "maintenance": true,
+    "pao_transit": true,
+    "bounds_recovery": true,
+    "ending": true,
+    "autosave": true
+  }
+}
