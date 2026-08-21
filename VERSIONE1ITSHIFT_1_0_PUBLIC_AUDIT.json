@@ -1,0 +1,20 @@
+{
+  "build": "VERSIONE1ITSHIFT 1.0 PUBLIC",
+  "base": "VERSIONE1ITSHIFT 1.0 FINAL",
+  "changes": {
+    "mobile_landscape_release_layer": true,
+    "touch_joystick_preserved": true,
+    "touch_E_F_G": true,
+    "touch_tablet_map": true,
+    "tap_to_advance_story": true,
+    "portrait_rotation_notice": true,
+    "mobile_hud_compaction": true,
+    "touch_modal_scaling": true,
+    "narrative_ending": true,
+    "run_title": true,
+    "epilogue_cap_manager_lorenzo": true
+  },
+  "gameplay_changes": false,
+  "balance_changes": false,
+  "note": "Static validation only; phone/browser runtime should be tested on at least one iPhone/Safari and one Android/Chrome if available."
+}

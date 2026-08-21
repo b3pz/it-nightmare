@@ -1469,32 +1469,9 @@ function v130b513UpdateRefuge(dt){
 }
 
 function v130b513StartLorenzoEvent(){
- const l=V130B513_LIFE.lorenzo;
- if(l.started||l.completed||studioEvent||carryMission)return false;
- l.started=true;
- l.pending=false;
- v130b5132InventorySanity(true);
- const target={x:700,y:235,room:"SERVER"};
- studioEvent={
-   id:`lorenzo-${++eventSerial}`,type:"LORENZO_SERVER",
-   title:"ANOMALIA ALIMENTAZIONE",stage:"diagnose",
-   target,pickup:target,to:target,item:"DIAGNOSI SERVER",
-   started:state.min,stageMin:state.min,
-   stageStartedAt:performance.now(),
-   lastReminderMin:state.min,
-   carried:false,completed:false
- };
- phoneMessage("IT MANAGER","Il SERVER sta segnalando alimentazione instabile. Vai al marker SERVER e premi G per la diagnosi.");
- if(typeof v130b1SetAlert==="function")
-   v130b1SetAlert("ANOMALIA ALIMENTAZIONE","SERVER // G DIAGNOSI ALIMENTAZIONE");
- showMissionBanner(
-   "ANOMALIA ALIMENTAZIONE",
-   "Vai nel SERVER / MAGAZZINO IT e controlla UPS e apparati. Sul marker premi G.",
-   "G // DIAGNOSI IT",
-   "EVENTO STORIA"
- );
- showStudioEventHud("ANOMALIA SERVER","SERVER // G DIAGNOSI ALIMENTAZIONE");
- return true;
+ // Compatibility wrapper retained for old callers / saves.
+ if(studioEvent?.type==="LORENZO_SERVER")return true;
+ return v130b5135CreateStoryEventNow();
 }
 
 function v130b513SpawnLorenzo(){
@@ -1528,20 +1505,33 @@ function v130b513LorenzoInteract(){
  if(studioEvent?.type!=="LORENZO_SERVER")return false;
  const e=studioEvent,t=e.target||{x:700,y:235};
  const lt=V130B513_LIFE.lorenzo?.tech;
- const nearServer=Math.hypot(player.x-t.x,player.y-t.y)<=115;
- const nearLorenzo=!!(lt&&Math.hypot(player.x-lt.x,player.y-lt.y)<=85);
+ if(!v130b5138PlayerCanOperateLorenzo())return false;
 
- if(!nearServer&&!nearLorenzo)return false;
+ if(e.stage==="wait_lorenzo"&&v130b5137LorenzoAtServer()){
+   e.stage="secure_it";
+   e.stageMin=state.min;
+   e.stageStartedAt=performance.now();
+ }
+
+ if(e.stage==="diagnose"&&v130b5137LorenzoAtServer()){
+   e.stage="secure_it";
+   e.stageMin=state.min;
+   e.stageStartedAt=performance.now();
+ }
 
  if(e.stage==="diagnose"){
    e.stage="wait_lorenzo";
    e.stageMin=state.min;
    e.stageStartedAt=performance.now();
 
-   v130b513SpawnLorenzo();
+   const _lor=v130b513SpawnLorenzo();
+
+   if(_lor){
+     _lor._b513TravelStarted=performance.now();
+   }
 
    if(typeof v130b1SetAlert==="function")
-     v130b1SetAlert("LORENZO","IN ARRIVO // SEGUI ★ SULLA MAPPA");
+     v130b1SetAlert("LORENZO CHIAMATO","ARRIVO GARANTITO // ★ SEGUILO SULLA MAPPA");
    showStudioEventHud("ANOMALIA SERVER","DIAGNOSI COMPLETA // LORENZO IN ARRIVO");
 
    v130b43StorySay("IT MANAGER",[
@@ -1584,6 +1574,7 @@ function v130b513LorenzoInteract(){
    ],"success");
 
    V130B513_LIFE.lorenzo.completed=true;
+   V130B5136_ENDGATE.warned=false;
    const tech=V130B513_LIFE.lorenzo.tech;
 
    setTimeout(()=>{
@@ -1607,11 +1598,14 @@ function v130b513LorenzoInteract(){
    return true;
  }
 
+ if(e.stage==="wait_lorenzo"){
+   sideMessage("IT MANAGER","Lorenzo è in arrivo. Resta in zona SERVER: appena entra, il prossimo passo comparirà qui a destra.");
+   return true;
+ }
  if(e.stage==="lorenzo_work"){
    sideMessage("LORENZO","Sto ancora lavorando. Appena finisco ti chiamo per il test finale.");
    return true;
  }
-
  return true;
 }
 
@@ -1695,12 +1689,9 @@ function v130b513UpdateLorenzo(dt){
  }
 
  if(e?.type==="LORENZO_SERVER"&&e.stage==="wait_lorenzo"){
-   // If any edge case still keeps the travel state alive too long, force
-   // the next update through the arrival branch.
    const waitMs=performance.now()-Number(e.stageStartedAt||performance.now());
-   if(waitMs>14000&&l.tech){
-     l.tech.x=700;l.tech.y=235;l.tech.route=null;l.tech.routeIndex=0;
-   }
+   const limit=14000;
+   if(waitMs>limit&&l.tech){l.tech.x=700;l.tech.y=235;l.tech.route=null;l.tech.routeIndex=0;l.tech.state="lorenzoTravel"}
  }
 
  if(e?.type==="LORENZO_SERVER"&&e.stage==="verify"){
@@ -1739,24 +1730,42 @@ function v130b513UpdateLorenzo(dt){
 
 function v130b513LorenzoTalk(){
  const n=V130B513_LIFE.lorenzo?.tech;if(!n)return false;
- if(Math.hypot(player.x-n.x,player.y-n.y)>70)return false;
+ if(Math.hypot(player.x-n.x,player.y-n.y)>75)return false;
 
- const stage=studioEvent?.type==="LORENZO_SERVER"?studioEvent.stage:"";
+ // Repair missing/corrupt mission state before deciding what E does.
+ v130b5137RepairLorenzoStoryState();
 
- // B5.13.3: E is a valid progression input in the combined intervention.
- if(stage==="secure_it"){
+ const e=studioEvent?.type==="LORENZO_SERVER"?studioEvent:null;
+ const stage=e?.stage||"";
+
+ if(stage==="diagnose"||stage==="wait_lorenzo"||stage==="secure_it"||stage==="verify"){
+   // E now ALWAYS advances an actionable phase.
    return v130b513LorenzoInteract();
  }
- if(stage==="verify"){
-   return v130b513LorenzoInteract();
+
+ if(stage==="lorenzo_work"){
+   v130b43StorySay("LORENZO",[
+     "Sto lavorando sulla parte elettrica.",
+     "Appena ho finito compare VERIFICA FINALE. A quel punto premi E o G vicino a me."
+   ]);
+   return true;
  }
 
- const line=stage==="wait_lorenzo"
-   ?"Eccomi. Dammi un secondo e ci mettiamo sul SERVER."
-   :stage==="lorenzo_work"
-   ?"Sto finendo la parte elettrica. Appena ho chiuso, facciamo insieme il test finale."
-   :"Sono qui. Se c'è corrente di mezzo, almeno stavolta hai chiamato la persona giusta.";
- v130b43StorySay("LORENZO",line);
+ if(stage==="completed"){
+   sideMessage("LORENZO","Intervento chiuso. Tutto stabile.");
+   return true;
+ }
+
+ // If Lorenzo exists in the Server but the stage is unknown,
+ // never show the generic line in a loop: restore the mission.
+ if(v130b5137LorenzoAtServer()){
+   v130b5137RepairLorenzoStoryState();
+   if(studioEvent?.type==="LORENZO_SERVER"){
+     return v130b513LorenzoInteract();
+   }
+ }
+
+ v130b43StorySay("LORENZO","Sto raggiungendo il SERVER. Ci vediamo lì.");
  return true;
 }
 
@@ -1918,6 +1927,446 @@ function v130b5132LorenzoPriorityDue(){
 }
 
 
+
+/* ============================================================
+   1.0.30B5.13.5 — LORENZO HARD TRIGGER
+   Lorenzo is now a deterministic story beat, not a random event.
+   ============================================================ */
+const V130B5135_LORENZO = {
+ armed:false,
+ forced:false,
+ startReal:0,
+ lastForceReal:0
+};
+
+function v130b5135Reset(){
+ V130B5135_LORENZO.armed=false;
+ V130B5135_LORENZO.forced=false;
+ V130B5135_LORENZO.startReal=0;
+ V130B5135_LORENZO.lastForceReal=0;
+}
+
+function v130b5135CloseAmbientMaintenanceForStory(){
+ const m=V130B58_MAINT;
+ if(!m||!m.active)return;
+ // Lorenzo's story event has priority over background maintenance.
+ // This is ambient only: no strike, no player penalty.
+ Object.assign(m,{
+   active:false,phase:"idle",tech:null,target:null,route:null,
+   workLeft:0,startedAt:0,lastProgressAt:0
+ });
+}
+
+function v130b5135ForceClearOrdinaryPhysical(){
+ // Do not interrupt an open puzzle/dialog mid-input. The hard trigger will
+ // retry on the next frame as soon as the UI is free.
+ if(activeMiniGame||storyOpen||dialogPause)return false;
+ if(typeof v130b561ModalBusy==="function"&&v130b561ModalBusy())return false;
+
+ if(typeof v130b5132DeferOrdinaryWorkForLorenzo==="function"){
+   v130b5132DeferOrdinaryWorkForLorenzo();
+ }else{
+   studioEvent=null;
+   carryMission=null;
+   if(typeof hideStudioEventHud==="function")hideStudioEventHud();
+ }
+
+ if(typeof v130b5132InventorySanity==="function")v130b5132InventorySanity(false);
+ return !studioEvent&&!carryMission;
+}
+
+function v130b5135CreateStoryEventNow(){
+ const l=V130B513_LIFE?.lorenzo;
+ if(!l||l.completed)return false;
+ if(studioEvent?.type==="LORENZO_SERVER"){
+   l.started=true;
+   l.pending=false;
+   return true;
+ }
+
+ if(!v130b5135ForceClearOrdinaryPhysical())return false;
+
+ // Create the story event directly here; do NOT depend on maybeStartStudioEvent.
+ l.started=true;
+ l.pending=false;
+ l.pendingAnnounced=true;
+
+ const target={x:700,y:235,room:"SERVER"};
+ studioEvent={
+   id:`lorenzo-hard-${++eventSerial}`,
+   type:"LORENZO_SERVER",
+   title:"ANOMALIA ALIMENTAZIONE",
+   text:"SERVER // ENTRA NEL MAGAZZINO IT // PREMI E O G",
+   stage:"diagnose",
+   target,pickup:target,to:target,item:"DIAGNOSI SERVER",
+   started:state.min,
+   stageMin:state.min,
+   stageStartedAt:performance.now(),
+   lastReminderMin:state.min,
+   carried:false,
+   completed:false,
+   hardTriggered:true
+ };
+
+ if(typeof v130b1SetAlert==="function")
+   v130b1SetAlert("EVENTO STORIA","SERVER // E / G DIAGNOSI ALIMENTAZIONE");
+
+ showStudioEventHud("ANOMALIA ALIMENTAZIONE","SERVER // E / G DIAGNOSI");
+ showMissionBanner(
+   "GUASTO SERVER",
+   "Priorità assoluta. Vai nel SERVER / MAGAZZINO IT e premi E oppure G.",
+   "E / G // DIAGNOSI ALIMENTAZIONE",
+   "EVENTO STORIA"
+ );
+ phoneMessage("IT MANAGER","Lascia perdere il resto: vieni al SERVER. Dobbiamo capire se il problema è IT o elettrico.");
+ return true;
+}
+
+
+/* ============================================================
+   1.0.30B5.13.6 — FINALE STORY GATE
+   ============================================================ */
+const V130B5136_ENDGATE={
+ warned:false,
+ lastReminderMin:-999,
+ blockedSince:0
+};
+
+function v130b5136Reset(){
+ V130B5136_ENDGATE.warned=false;
+ V130B5136_ENDGATE.lastReminderMin=-999;
+ V130B5136_ENDGATE.blockedSince=0;
+}
+
+
+/* ============================================================
+   1.0.30B5.13.7 — LORENZO STATE RECOVERY
+   Prevents dialogue-loop / missing-stage failures.
+   ============================================================ */
+
+
+/* ============================================================
+   1.0 FINAL RC — LORENZO ACTIONABLE STATE
+   ============================================================ */
+function v130b5138PlayerCanOperateLorenzo(){
+ if(!player)return false;
+ const e=studioEvent?.type==="LORENZO_SERVER"?studioEvent:null;
+ const t=e?.target||{x:700,y:235};
+ const l=V130B513_LIFE?.lorenzo?.tech;
+ const nearServer=Math.hypot(player.x-t.x,player.y-t.y)<=190;
+ const nearLorenzo=!!(l&&Math.hypot(player.x-l.x,player.y-l.y)<=115);
+ let room="";try{const r=roomAt(player.x,player.y);room=String(r?.name||r||"").toUpperCase()}catch(_){}
+ let nav="";try{nav=String(navAreaAt(player.x,player.y)||"").toUpperCase()}catch(_){}
+ return nearServer||nearLorenzo||room.includes("SERVER")||nav.includes("SERVER");
+}
+function v130b5138SyncMissionText(){
+ const e=studioEvent;if(!e||e.type!=="LORENZO_SERVER")return;
+ const map={
+  diagnose:"SERVER // ENTRA NEL MAGAZZINO IT // PREMI E O G",
+  wait_lorenzo:"LORENZO IN ARRIVO // ATTENDI VICINO AL SERVER",
+  secure_it:"LORENZO AL SERVER // PREMI E O G PER METTERE IN SICUREZZA I SERVIZI",
+  lorenzo_work:"LORENZO STA LAVORANDO // ATTENDI QUALCHE SECONDO",
+  verify:"VERIFICA FINALE // VICINO A LORENZO PREMI E O G",
+  completed:"INTERVENTO COMPLETATO"
+ };
+ e.text=map[e.stage]||"SERVER // SEGUI IL MARKER";e.desc=e.text;e.description=e.text;
+}
+function v130b5138GuaranteeActor(){
+ const e=studioEvent,l=V130B513_LIFE?.lorenzo;
+ if(!e||e.type!=="LORENZO_SERVER"||!l||l.completed)return;
+ if(["wait_lorenzo","secure_it","lorenzo_work","verify"].includes(e.stage)&&!l.tech)v130b513SpawnLorenzo();
+ if(["secure_it","lorenzo_work","verify"].includes(e.stage)&&l.tech){
+  l.tech.x=700;l.tech.y=235;l.tech.route=null;l.tech.routeIndex=0;l.tech.state="lorenzoServer";
+ }
+}
+
+
+/* F10 quick-test handler removed in FINAL */
+
+
+
+function v130b5137LorenzoAtServer(){
+ const l=V130B513_LIFE?.lorenzo;
+ const n=l?.tech;
+ if(!n)return false;
+ return Math.hypot(n.x-700,n.y-235)<90 || roomAt(n.x,n.y)?.name==="SERVER";
+}
+
+function v130b5137RepairLorenzoStoryState(){
+ const l=V130B513_LIFE?.lorenzo;
+ if(!l||l.completed)return false;
+
+ // If Lorenzo physically exists at the Server but studioEvent was lost/corrupted,
+ // recreate the story directly at the operational phase.
+ if(l.tech && v130b5137LorenzoAtServer()){
+   if(!studioEvent || studioEvent.type!=="LORENZO_SERVER"){
+     const target={x:700,y:235,room:"SERVER"};
+     studioEvent={
+       id:`lorenzo-recover-${++eventSerial}`,
+       type:"LORENZO_SERVER",
+       title:"ANOMALIA ALIMENTAZIONE",
+       stage:"secure_it",
+       target,pickup:target,to:target,item:"DIAGNOSI SERVER",
+       started:state.min,
+       stageMin:state.min,
+       stageStartedAt:performance.now(),
+       lastReminderMin:state.min,
+       carried:false,completed:false,
+       hardTriggered:true,recovered:true
+     };
+     l.started=true;
+     l.pending=false;
+     if(typeof v130b1SetAlert==="function")
+       v130b1SetAlert("INTERVENTO COMBINATO","SERVER // E / G AVVIA MESSA IN SICUREZZA");
+     showStudioEventHud("INTERVENTO COMBINATO","E / G // METTI IN SICUREZZA I SERVIZI");
+     return true;
+   }
+
+   // If the event exists but is stuck in an impossible arrival state,
+   // arriving at the Server always means the next real phase is secure_it.
+   if(["wait_lorenzo","diagnose"].includes(studioEvent.stage)){
+     studioEvent.stage="secure_it";
+     studioEvent.stageMin=state.min;
+     studioEvent.stageStartedAt=performance.now();
+     l.started=true;
+     l.pending=false;
+     if(typeof v130b1SetAlert==="function")
+       v130b1SetAlert("INTERVENTO COMBINATO","SERVER // E / G METTI IN SICUREZZA I SERVIZI");
+     showStudioEventHud("INTERVENTO COMBINATO","E / G // METTI IN SICUREZZA I SERVIZI");
+     return true;
+   }
+ }
+ return false;
+}
+
+function v130b5137OperationalWatch(){
+ const l=V130B513_LIFE?.lorenzo;if(!l||l.completed)return;
+ v130b5137RepairLorenzoStoryState();v130b5138GuaranteeActor();v130b5138SyncMissionText();
+ const e=studioEvent;if(!e||e.type!=="LORENZO_SERVER")return;
+ if(e.stage==="diagnose"&&typeof v130b1SetAlert==="function")v130b1SetAlert("ANOMALIA ALIMENTAZIONE","SERVER // E / G DIAGNOSI");
+ if(e.stage==="wait_lorenzo"&&typeof v130b1SetAlert==="function")v130b1SetAlert("LORENZO CHIAMATO","IN ARRIVO // ATTENDI VICINO AL SERVER");
+ if(e.stage==="secure_it"&&typeof v130b1SetAlert==="function")v130b1SetAlert("LORENZO AL SERVER","E / G // METTI IN SICUREZZA I SERVIZI");
+ if(e.stage==="lorenzo_work"&&typeof v130b1SetAlert==="function")v130b1SetAlert("LORENZO AL LAVORO","ATTENDI // POI E / G VERIFICA FINALE");
+ if(e.stage==="verify"&&typeof v130b1SetAlert==="function")v130b1SetAlert("VERIFICA FINALE","E / G // VICINO A LORENZO");
+}
+
+
+function v130b5136LorenzoStoryOpen(){
+ return !!(
+   studioEvent &&
+   studioEvent.type==="LORENZO_SERVER" &&
+   !studioEvent.completed &&
+   studioEvent.stage!=="completed"
+ );
+}
+
+function v130b5136FinaleBlocked(){
+ return v130b5136LorenzoStoryOpen();
+}
+
+function v130b5136LateStoryReminder(){
+ if(!state||!v130b5136LorenzoStoryOpen())return;
+ if(state.min<1125)return; // 18:45
+
+ if(!V130B5136_ENDGATE.warned){
+   V130B5136_ENDGATE.warned=true;
+   V130B5136_ENDGATE.blockedSince=performance.now();
+
+   showMissionBanner(
+     "PRIMA DI CHIUDERE",
+     "L'intervento con Lorenzo è ancora aperto. Completa la verifica SERVER prima della riunione finale.",
+     "E / G // SEGUI IL MARKER",
+     "CHIUSURA TURNO"
+   );
+   phoneMessage(
+     "IT MANAGER",
+     "La riunione finale aspetta. Chiudi prima l'intervento SERVER con Lorenzo."
+   );
+   if(typeof v130b1SetAlert==="function")
+     v130b1SetAlert("CHIUSURA BLOCCATA","LORENZO / SERVER // COMPLETA INTERVENTO");
+ }
+
+ if(state.min-Number(V130B5136_ENDGATE.lastReminderMin||-999)>=2){
+   V130B5136_ENDGATE.lastReminderMin=state.min;
+   if(typeof v130b1SetAlert==="function")
+     v130b1SetAlert("PRIMA IL SERVER","E / G // COMPLETA LORENZO");
+ }
+}
+
+
+
+/* ============================================================
+   1.0 FINAL — LORENZO ANTISOFTLOCK
+   Wrong keys cannot cancel or consume the story trigger.
+   ============================================================ */
+const V130RC2_LORENZO={
+ lastEnsure:0,
+ lastHint:0
+};
+
+function v130rc2EnsureLorenzoState(){
+ if(typeof V130B513_LIFE==="undefined"||!V130B513_LIFE)return null;
+ if(!V130B513_LIFE.lorenzo){
+   V130B513_LIFE.lorenzo={
+     started:false,completed:false,tech:null,workLeft:0,arrivalSaid:false,
+     pending:false,pendingAnnounced:false
+   };
+ }
+ return V130B513_LIFE.lorenzo;
+}
+
+function v130rc2VisibleBlockingUi(){
+ if(activeMiniGame||storyOpen||dialogPause)return true;
+
+ const modal=document.getElementById("modal");
+ if(modal && !modal.classList.contains("hidden"))return true;
+
+ const tablet=document.getElementById("tablet");
+ if(tablet && !tablet.classList.contains("hidden"))return true;
+
+ return false;
+}
+
+function v130rc2ClearOrdinaryWork(){
+ // Story event has absolute priority after 15:10.
+ if(studioEvent && studioEvent.type!=="LORENZO_SERVER"){
+   studioEvent=null;
+   if(typeof hideStudioEventHud==="function")hideStudioEventHud();
+ }
+ if(carryMission){
+   carryMission=null;
+ }
+ if(typeof v130b5132InventorySanity==="function"){
+   v130b5132InventorySanity(false);
+ }
+}
+
+function v130rc2CreateLorenzoDirect(){
+ const l=v130rc2EnsureLorenzoState();
+ if(!l)return false;
+ if(l.completed)return false;
+ if(studioEvent?.type==="LORENZO_SERVER")return true;
+ if(v130rc2VisibleBlockingUi())return false;
+
+ v130b5135CloseAmbientMaintenanceForStory();
+ v130rc2ClearOrdinaryWork();
+
+ const target={x:700,y:235,room:"SERVER"};
+ studioEvent={
+   id:`lorenzo-rc2-${++eventSerial}`,
+   type:"LORENZO_SERVER",
+   title:"ANOMALIA ALIMENTAZIONE",
+   text:"SERVER // PREMI E O G PER LA DIAGNOSI",
+   stage:"diagnose",
+   target,pickup:target,to:target,item:"DIAGNOSI SERVER",
+   started:state.min,
+   stageMin:state.min,
+   stageStartedAt:performance.now(),
+   lastReminderMin:state.min,
+   carried:false,
+   completed:false,
+   hardTriggered:true,
+   rc2Forced:true
+ };
+
+ l.started=true;
+ l.pending=false;
+ l.pendingAnnounced=true;
+
+ V130B5135_LORENZO.armed=true;
+ V130B5135_LORENZO.forced=true;
+ V130B5135_LORENZO.startReal=performance.now();
+ V130B5135_LORENZO.lastForceReal=performance.now();
+
+ if(typeof v130b1SetAlert==="function")
+   v130b1SetAlert("EVENTO STORIA","SERVER // E / G DIAGNOSI");
+ showStudioEventHud("ANOMALIA ALIMENTAZIONE","SERVER // E / G DIAGNOSI");
+ showMissionBanner(
+   "GUASTO SERVER",
+   "Evento storia prioritario. Vai al SERVER / MAGAZZINO IT e premi E oppure G.",
+   "E / G // DIAGNOSI",
+   "EVENTO STORIA"
+ );
+ phoneMessage("IT MANAGER","SERVER. Priorità assoluta: vieni qui per la diagnosi.");
+ return true;
+}
+
+function v130rc2LorenzoAntisoftlockWatch(){
+ if(!state||state.phase!=="shift"||!shiftStarted||introStage!=="done")return;
+ if(state.min<910)return;
+ if(typeof V130B57_ENDING!=="undefined"&&V130B57_ENDING.active)return;
+
+ const l=v130rc2EnsureLorenzoState();
+ if(!l||l.completed)return;
+
+ // If the correct event exists, just keep it healthy.
+ if(studioEvent?.type==="LORENZO_SERVER"){
+   v130b5137OperationalWatch();
+   return;
+ }
+
+ // At/after 15:10, no ordinary event is allowed to permanently occupy
+ // Lorenzo's story slot. A wrong key cannot change this.
+ const now=performance.now();
+ if(now-V130RC2_LORENZO.lastEnsure<750)return;
+ V130RC2_LORENZO.lastEnsure=now;
+
+ if(!v130rc2VisibleBlockingUi()){
+   v130rc2CreateLorenzoDirect();
+ }else if(now-V130RC2_LORENZO.lastHint>4000){
+   V130RC2_LORENZO.lastHint=now;
+   if(typeof v130b1SetAlert==="function")
+     v130b1SetAlert("EVENTO LORENZO IN CODA","CHIUDI LA FINESTRA APERTA // POI PARTE DA SOLO");
+ }
+}
+
+
+function v130b5135HardWatch(){
+ if(!state||state.phase!=="shift"||!shiftStarted||introStage!=="done")return;
+ if(typeof V130B57_ENDING!=="undefined"&&V130B57_ENDING.active)return;
+
+ const l=v130rc2EnsureLorenzoState();
+ if(!l||l.completed)return;
+
+ if(state.min>=910){
+   V130B5135_LORENZO.armed=true;
+   v130rc2LorenzoAntisoftlockWatch();
+ }
+
+ if(studioEvent?.type!=="LORENZO_SERVER")return;
+
+ l.started=true;
+
+ if(studioEvent.stage==="wait_lorenzo"&&!l.tech){
+   v130b513SpawnLorenzo();
+ }
+
+ if(studioEvent.stage==="wait_lorenzo"){
+   const waited=performance.now()-Number(studioEvent.stageStartedAt||performance.now());
+   if(waited>8000){
+     if(!l.tech)v130b513SpawnLorenzo();
+     if(l.tech){
+       l.tech.x=700;l.tech.y=235;
+       l.tech.route=null;l.tech.routeIndex=0;
+       l.tech.state="lorenzoServer";
+     }
+     studioEvent.stage="secure_it";
+     studioEvent.stageMin=state.min;
+     studioEvent.stageStartedAt=performance.now();
+
+     if(!l.arrivalSaid){
+       l.arrivalSaid=true;
+       phoneMessage("LORENZO","Sono al SERVER. Vieni qui: facciamo l'intervento insieme.");
+     }
+
+     if(typeof v130b1SetAlert==="function")
+       v130b1SetAlert("LORENZO AL SERVER","E / G // METTI IN SICUREZZA I SERVIZI");
+     showStudioEventHud("INTERVENTO COMBINATO","SERVER // E / G METTI IN SICUREZZA I SERVIZI");
+   }
+ }
+}
+
+
 function v130b513WorldLifeUpdate(dt){
  if(!state||state.phase!=="shift"||!shiftStarted||introStage!=="done")return;
  if(typeof V130B57_ENDING!=="undefined"&&V130B57_ENDING.active)return;
@@ -1947,38 +2396,7 @@ function v130b513WorldLifeUpdate(dt){
  v130b5132InventorySanity(false);
 
  const l=V130B513_LIFE.lorenzo;
-
- // 15:10: Lorenzo becomes a queued STORY priority even if another task is active.
- if(!l.started&&!l.completed&&state.min>=910&&state.min<BOSS-25){
-   l.pending=true;
-
-   if(!l.pendingAnnounced){
-     l.pendingAnnounced=true;
-     phoneMessage(
-       "IT MANAGER",
-       "Quando chiudi l'intervento corrente, passa al SERVER: dobbiamo controllare un'anomalia di alimentazione."
-     );
-     if(typeof v130b1SetAlert==="function")
-       v130b1SetAlert("PRIORITÀ IN CODA","ANOMALIA SERVER // DOPO TASK CORRENTE");
-   }
-
-   // At 15:45 an ordinary task started before the story event has had
-   // ample time. It is deferred cleanly instead of blocking Lorenzo all day.
-   if(state.min>=945&&(studioEvent||carryMission)){
-     v130b5132DeferOrdinaryWorkForLorenzo();
-   }
-
-   if(
-     l.pending &&
-     !studioEvent && !carryMission &&
-     !activeMiniGame && !storyOpen && !dialogPause &&
-     !(typeof v130b561ModalBusy==="function"&&v130b561ModalBusy()) &&
-     !(typeof v130b58MissionBannerBusy==="function"&&v130b58MissionBannerBusy())
-   ){
-     l.pending=false;
-     v130b513StartLorenzoEvent();
-   }
- }
+ // B5.13.5: Lorenzo story start is handled exclusively by v130b5135HardWatch().
 }
 
 function v130b513DrawWorldLife(){
@@ -3185,6 +3603,8 @@ function startDeskSetupEvent(){
 }
 function maybeStartStudioEvent(){
  if(!workstationOnline||!managerRaceDone||introStage!=="done")return;
+ const _lor=v130rc2EnsureLorenzoState();
+ if(state?.min>=910&&_lor&&!_lor.completed&&studioEvent?.type!=="LORENZO_SERVER")return;
  // B5.13.2: from 15:10 the Lorenzo story event owns the next free main-activity slot.
  if(typeof v130b5132LorenzoPriorityDue==="function"&&v130b5132LorenzoPriorityDue())return;
  if(v130b561MainActivityBusy())return;
@@ -3222,8 +3642,8 @@ function studioEventPrompt(){
  }
  if(!t||Math.hypot(player.x-t.x,player.y-t.y)>92)return null;
  if(studioEvent.type==="LORENZO_SERVER"){
-   if(studioEvent.stage==="diagnose")return "G — DIAGNOSI ALIMENTAZIONE";
-   if(studioEvent.stage==="secure_it")return "G — METTI IN SICUREZZA SERVIZI";
+   if(studioEvent.stage==="diagnose")return "E / G — DIAGNOSI ALIMENTAZIONE";
+   if(studioEvent.stage==="secure_it")return "E / G — METTI IN SICUREZZA SERVIZI";
    if(studioEvent.stage==="verify")return "E / G — VERIFICA FINALE";
    return null;
  }
@@ -3257,7 +3677,7 @@ function drawStudioEventObjects(){
      g.save();g.strokeStyle="#f0d66e";g.lineWidth=3;
      g.strokeRect(t.x-20-pulse/2,t.y-16-pulse/2,40+pulse,32+pulse);
      g.fillStyle="#f0d66e";g.font="bold 8px monospace";g.textAlign="center";
-     const lab=e.stage==="diagnose"?"G // DIAGNOSI":e.stage==="secure_it"?"G // SICUREZZA IT":"G // VERIFICA";
+     const lab=e.stage==="diagnose"?"E/G // DIAGNOSI":e.stage==="secure_it"?"E/G // SICUREZZA IT":"E/G // VERIFICA";
      g.fillText(lab,t.x,t.y-25);g.restore();
    }
  }
@@ -4699,14 +5119,14 @@ function v130b10ObjectivePoint(){
  const e=studioEvent;
 
  if(e.type==="LORENZO_SERVER"){
-   if(e.stage==="diagnose")return pack(e.target,"G // DIAGNOSI SERVER","STORY");
+   if(e.stage==="diagnose")return pack(e.target,"E / G // DIAGNOSI SERVER","STORY");
    if(e.stage==="wait_lorenzo"){
      const lt=V130B513_LIFE?.lorenzo?.tech;
      return lt
        ?pack({x:lt.x,y:lt.y,room:roomAt(lt.x,lt.y)?.name},"LORENZO IN ARRIVO","NPC_CALL")
        :pack({x:690,y:900,room:"INGRESSO / SEGRETERIA"},"LORENZO IN ARRIVO","NPC_CALL");
    }
-   if(e.stage==="secure_it")return pack(e.target,"G // METTI IN SICUREZZA SERVIZI","STORY");
+   if(e.stage==="secure_it")return pack(e.target,"E / G // METTI IN SICUREZZA SERVIZI","STORY");
    if(e.stage==="lorenzo_work"){
      const lt=V130B513_LIFE?.lorenzo?.tech;
      return lt?pack({x:lt.x,y:lt.y,room:"SERVER"},"LORENZO AL LAVORO","STORY"):pack(e.target,"LORENZO AL LAVORO","STORY");
@@ -5526,6 +5946,8 @@ function reset(){
  v12c42MeetingState="IDLE";v12c42MeetingLateWarned=false;v12c42MeetingQueued=false;v12c42MeetingDeferredStart=false;
  if(typeof v130b58ResetMaintenance==="function")v130b58ResetMaintenance();
  if(typeof v130b513ResetWorldLife==="function")v130b513ResetWorldLife();
+ if(typeof v130b5135Reset==="function")v130b5135Reset();
+ if(typeof v130b5136Reset==="function")v130b5136Reset();
  if(!state)state={phase:"boot",stress:0,strikes:0,maxStrikes:5,xp:0,incident:0,rep:0,solved:0,min:538};
  managerRaceDone=false;
  v12cDoorbellRung=false;v12cDoorOpened=false;v12cStoryMission=0;
@@ -6327,6 +6749,7 @@ function v125TryMagazzinoDeposit(){
 }
 
 function interact(){
+ if(studioEvent?.type==="LORENZO_SERVER"&&v130b5138PlayerCanOperateLorenzo()){if(v130b513LorenzoInteract())return true}
  if(v123ServerWorkshopInteract())return true;
  const _c120=v120CarryState();
  if(_c120){
@@ -6346,7 +6769,7 @@ function interact(){
    return true;
  }
 
- if(studioEvent?.type==="LORENZO_SERVER"&&["secure_it","verify"].includes(studioEvent.stage)){
+ if(studioEvent?.type==="LORENZO_SERVER"&&["diagnose","wait_lorenzo","secure_it","verify"].includes(studioEvent.stage)){
    const _lt=V130B513_LIFE?.lorenzo?.tech;
    const _nearServer=Math.hypot(player.x-(studioEvent.target?.x||700),player.y-(studioEvent.target?.y||235))<=115;
    const _nearLorenzo=!!(_lt&&Math.hypot(player.x-_lt.x,player.y-_lt.y)<=85);
@@ -6731,12 +7154,23 @@ document.addEventListener("keydown",function v130b57EndingInputGuard(e){
 },true);
 
 function v109ArmEndShift(){
+ if(typeof v130b5136FinaleBlocked==="function"&&v130b5136FinaleBlocked()){
+   if(state)state.min=Math.min(state.min,BOSS-.02);
+   v130b5136LateStoryReminder();
+   return false;
+ }
+
  v1293ClearGhostPhysicalMission();if(v109EndShiftReady)return;
  v109EndShiftReady=true;state.min=BOSS;v130b57StartEndingCinematic();hud();
 }
 function v109TryStartFinale(){return false;}
 
 function startBoss(){
+ if(typeof v130b5136FinaleBlocked==="function"&&v130b5136FinaleBlocked()){
+   v130b5136LateStoryReminder();
+   return false;
+ }
+
  state.phase="boss";state.min=BOSS;tickets=[];renderTickets();state.bossPhase=1;bossModal();
 }
 function bossModal(){
@@ -6760,25 +7194,79 @@ function bossAnswer(ok){
  state.xp+=500;
  if(state.bossPhase<3){state.bossPhase++;bossModal()}else ending("WIN","GIORNATA COMPLETATA",true);
 }
+
+/* ============================================================
+   1.0 PUBLIC — ENDING / RUN IDENTITY
+   ============================================================ */
+function v10PublicRunTitle(){
+ const strikes=Number(state?.strikes)||0;
+ const incident=Number(state?.incident)||0;
+ const solved=Number(state?.solved)||0;
+ const stress=Number(state?.stress)||0;
+
+ if(strikes===0&&incident<=5&&solved>=15)return "TURNO IMPECCABILE";
+ if(strikes===0&&incident<=12)return "TECNICO AFFIDABILE";
+ if(strikes<=1&&incident<=20)return "SANGUE FREDDO";
+ if(stress>=70)return "SOTTO PRESSIONE";
+ if(strikes>=3)return "GIORNATA DI TRINCEA";
+ return "TURNO PORTATO A CASA";
+}
+
+function v10PublicEndingLines(){
+ const strikes=Number(state?.strikes)||0;
+ const incident=Math.round(Number(state?.incident)||0);
+ const solved=Number(state?.solved)||0;
+
+ let capo="Giornata chiusa. Domani ripartiamo da qui.";
+ if(strikes===0&&incident<=8)capo="Pulito, preciso e senza drammi. È così che mi piace chiudere lo studio.";
+ else if(strikes<=1)capo="Qualche momento complicato, ma hai tenuto insieme la giornata.";
+ else if(strikes>=3)capo="Non è stata elegante, ma sei arrivato fino in fondo. Domani si riparte.";
+
+ let manager="I servizi sono stabili. Per oggi puoi staccare.";
+ if(solved>=16)manager="Hai retto parecchio carico oggi. Log chiusi, servizi stabili.";
+ if(incident>=35)manager="Domani la prima cosa che facciamo è riguardare i log. Per stasera basta così.";
+
+ const lorenzo=V130B513_LIFE?.lorenzo?.completed
+   ?"Te l'avevo detto: ogni tanto chiamare l'elettricista è davvero la soluzione."
+   :"Oh, almeno lo studio è ancora in piedi.";
+
+ return {capo,manager,lorenzo};
+}
+
+
 function ending(type,text,win=false){
  state.phase="ended";state.min=END;clamp();
  const body=$("#modalBody");$("#modal").classList.remove("hidden");
 
  if(win){
    const name=typeof v130b2PlayerName==="function"?v130b2PlayerName():"IT";
+   const runTitle=v10PublicRunTitle();
+   const lines=v10PublicEndingLines();
    body.innerHTML=`
-    <div id="winPanel" class="v130b59-ending">
+    <div id="winPanel" class="v130b59-ending v10PublicEnding">
       <div class="v130b59-endtag">19:00 // TURNO CHIUSO</div>
+      <div class="v10PublicChapter">IT SHIFT // GIORNO 1 COMPLETATO</div>
       <h2 class="low">GIORNATA COMPLETATA</h2>
+      <div class="v10PublicRunTitle">${v130b4Esc(runTitle)}</div>
       <p class="v130b59-endline">${v130b4Esc(name)}, la riunione è finita. Lo studio può chiudere.</p>
+
       <div class="v130b59-endstats">
         <div><span>XP</span><b>${state.xp}</b></div>
         <div><span>ERRORI</span><b>${state.strikes}/${state.maxStrikes}</b></div>
         <div><span>INTERVENTI</span><b>${state.solved}</b></div>
         <div><span>INCIDENT</span><b>${Math.round(state.incident)}%</b></div>
       </div>
+
       ${state.endShiftDeferred?`<p class="v130b5102-deferred">TICKET RIMANDATI A DOMANI // ${state.endShiftDeferred}</p>`:""}
-      <p class="v130b59-endquote">DOMANI LO STUDIO RIAPRE ALLE 09:00.</p>
+
+      <div class="v10PublicEpilogue">
+       <p><b>CAPO</b><span>${v130b4Esc(lines.capo)}</span></p>
+       <p><b>IT MANAGER</b><span>${v130b4Esc(lines.manager)}</span></p>
+       <p><b>LORENZO</b><span>${v130b4Esc(lines.lorenzo)}</span></p>
+      </div>
+
+      <p class="v130b59-endquote">DOMANI ALLE 09:00 SI RICOMINCIA.</p>
+      <div class="v10PublicCredits">IT SHIFT // A DAY IN IT SUPPORT<br><small>VERSIONE 2D // 1.0</small></div>
       <button id="v130b59BackMenu" class="choice">TORNA AL MENU</button>
     </div>`;
    document.getElementById("v130b59BackMenu").onclick=()=>location.reload();
@@ -7723,6 +8211,10 @@ function v1293ClearGhostPhysicalMission(){
 }
 
 function v1293EndShiftCleanupWatch(){
+ if(typeof v130b5136FinaleBlocked==="function"&&v130b5136FinaleBlocked()){
+   return;
+ }
+
  if(!state)return;
  if(state.min>=BOSS || state.phase==="boss" || state.phase==="end"){
    v1293ClearGhostPhysicalMission();
@@ -7965,6 +8457,8 @@ function v130b58MaybeStartMaintenance(){
  const m=V130B58_MAINT;
  if(m.active||!state||state.phase!=="shift"||introStage!=="done")return;
  if(typeof V130B57_ENDING!=="undefined"&&V130B57_ENDING.active)return;
+ if(typeof V130B5135_LORENZO!=="undefined"&&
+    (V130B5135_LORENZO.armed||state.min>=910))return;
 
  const schedule=[630,800,985]; // 10:30 / 13:20 / 16:25
  const idx=Number(m.scheduleIndex||0);
@@ -8220,6 +8714,9 @@ v125MeetingUrgentWatch();
  v107PersistentCarryHud();
  v106NpcSafetyPass();
  v117Trace('v106SpecialRoamUpdate');v118SafeCall('v106SpecialRoamUpdate',()=>v106SpecialRoamUpdate(dt));
+ v130b5135HardWatch();
+ v130b5136LateStoryReminder();
+ v130b5137OperationalWatch();
  v130b58MaybeStartMaintenance();
  v130b58UpdateMaintenance(dt);
  v130b513WorldLifeUpdate(dt);
@@ -8248,7 +8745,16 @@ v125MeetingUrgentWatch();
   // V5.1.1.1: the shift starts only after the player physically crosses the exterior door.
  /* 1.0.29 old managerTrigger removed */
   
-  if(shiftStarted&&!v109EndShiftReady)state.min=Math.min(BOSS,state.min+dt*difficultyConfig[difficulty].timeSpeed); if(state.min>=BOSS&&!v109EndShiftReady)v109ArmEndShift();
+  if(shiftStarted&&!v109EndShiftReady){
+   const _finalBlocked=typeof v130b5136FinaleBlocked==="function"&&v130b5136FinaleBlocked();
+   const _clockCap=_finalBlocked?BOSS-.02:BOSS;
+   state.min=Math.min(_clockCap,state.min+dt*difficultyConfig[difficulty].timeSpeed);
+ }
+ if(state.min>=BOSS&&!v109EndShiftReady){
+   if(!(typeof v130b5136FinaleBlocked==="function"&&v130b5136FinaleBlocked())){
+     v109ArmEndShift();
+   }
+ }
   spawnTimer+=dt;anomTimer+=dt;
  updateLunchMigration(dt);
  v1294TrafficUpdate(dt);
@@ -10676,20 +11182,97 @@ function bindDir(id,key){
 }
 bindDir("#mUp","up");bindDir("#mDown","down");bindDir("#mLeft","left");bindDir("#mRight","right");
 
-const actBtn=$("#act");
-if(actBtn){
- let lastAct=0;
+function v10MobilePrimaryAction(){
+ if(typeof V130B43_STORY!=="undefined"&&V130B43_STORY.active){
+   v130b43StoryAdvance();return;
+ }
+ if(typeof V122_DIALOG!=="undefined"&&V122_DIALOG.active){
+   v122Advance();return;
+ }
+ if(window.__entranceDialogReady){
+   window.__entranceDialogReady=false;
+   beginEntranceWalk();
+   return;
+ }
+ if(storyOpen){
+   closeStory();return;
+ }
+
+ const modal=document.getElementById("modal");
+ if(modal&&!modal.classList.contains("hidden")){
+   // Minigames and boss choices already have native touch buttons.
+   return;
+ }
+ interact();
+}
+
+function v10MobilePhysicalAction(key){
+ if(state?.phase!=="shift")return;
+
+ if(key==="f"){
+   if(studioEvent?.type==="LORENZO_SERVER"){
+     toast("EVENTO LORENZO // USA E O G");
+     return;
+   }
+   v12c45Pickup();
+   return;
+ }
+
+ if(key==="g"){
+   if(studioEvent?.type==="LORENZO_SERVER"&&v130b5138PlayerCanOperateLorenzo()){
+     if(v130b513LorenzoInteract())return;
+   }
+   if(v125TryMagazzinoDeposit())return;
+   v12c45Deliver();
+ }
+}
+
+function v10BindMobileButton(selector,fn){
+ const el=$(selector);if(!el)return;
+ let lastFire=0;
  const fire=e=>{
    const now=performance.now();
-   if(now-lastAct<250)return;
-   lastAct=now;
-   if(e)e.preventDefault();
-   interact();
+   if(now-lastFire<220)return;
+   lastFire=now;
+   if(e){
+     e.preventDefault();
+     e.stopPropagation();
+   }
+   fn();
  };
- actBtn.addEventListener("touchstart",fire,{passive:false});
- actBtn.addEventListener("pointerdown",fire,{passive:false});
- actBtn.addEventListener("click",fire);
+ el.addEventListener("touchstart",fire,{passive:false});
+ el.addEventListener("pointerdown",fire,{passive:false});
+ el.addEventListener("click",fire);
 }
+
+v10BindMobileButton("#act",v10MobilePrimaryAction);
+v10BindMobileButton("#mTake",()=>v10MobilePhysicalAction("f"));
+v10BindMobileButton("#mUse",()=>v10MobilePhysicalAction("g"));
+v10BindMobileButton("#mTablet",()=>togglePDA());
+v10BindMobileButton("#mMap",()=>{
+ fullMap=!fullMap;
+ toast(fullMap?"MAPPA COMPLETA":"CAMERA PLAYER");
+});
+
+// On touch screens, tapping narrative dialogue is equivalent to E.
+document.getElementById("v130b43StoryScene")?.addEventListener("pointerdown",e=>{
+ if(typeof V130B43_STORY!=="undefined"&&V130B43_STORY.active){
+   e.preventDefault();
+   v130b43StoryAdvance();
+ }
+});
+document.getElementById("v122Dialogue")?.addEventListener("pointerdown",e=>{
+ if(typeof V122_DIALOG!=="undefined"&&V122_DIALOG.active){
+   e.preventDefault();
+   v122Advance();
+ }
+});
+document.getElementById("storyDialog")?.addEventListener("pointerdown",e=>{
+ if(storyOpen){
+   e.preventDefault();
+   closeStory();
+ }
+});
 
 
 
@@ -10760,8 +11343,17 @@ document.addEventListener("keydown",function v12c451PhysicalKeys(e){
  e.stopImmediatePropagation();
 
  if(k==="f"){
+   if(studioEvent?.type==="LORENZO_SERVER"){
+     toast("EVENTO LORENZO // USA E O G");
+     return;
+   }
    v12c45Pickup();
    return;
+ }
+
+ // Lorenzo story always owns G inside the Server operating area.
+ if(k==="g"&&studioEvent?.type==="LORENZO_SERVER"&&v130b5138PlayerCanOperateLorenzo()){
+   if(v130b513LorenzoInteract())return;
  }
 
  // Old carry missions can use the dedicated Magazzino deposit.

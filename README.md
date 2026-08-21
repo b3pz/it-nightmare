@@ -1979,3 +1979,201 @@ Fix:
 Preservata tutta la B5.13.2:
 priorità Lorenzo, inventory cleanup, arrival watchdog, portrait fix, clienti,
 visitatori, stress, calls, pranzo, IT Manager run fix, finale e autosave.
+
+
+## 1.0.30B5.13.4 — MAINTENANCE GHOST FIX
+
+Problema:
+la UI poteva mostrare "manutenzione in corso" mentre nessun tecnico era
+realmente visibile o al lavoro.
+
+Fix:
+- una manutenzione diventa ACTIVE solo se esiste una route valida;
+- ACTIVE senza tech/target viene chiusa immediatamente;
+- tecnico bloccato: reroute automatico;
+- dopo 6.5–10 secondi senza progresso il tecnico viene recuperato fisicamente
+  sul vero punto di lavoro;
+- fase di uscita con watchdog;
+- fasi sconosciute/rotte vengono chiuse invece di restare appese;
+- label in mondo: IN ARRIVO / AL LAVORO / USCITA;
+- alert manutenzione mostra nome tecnico + lavoro + stanza;
+- nessun testo "manutenzione in corso" può restare se il tecnico non esiste.
+
+Preservata tutta la B5.13.3, incluso il trigger finale E/G di Lorenzo.
+
+
+## 1.0.30B5.13.5 — LORENZO HARD TRIGGER FIX
+
+Cambio strutturale mirato:
+Lorenzo non usa più la normale coda degli studioEvent per apparire.
+
+Regole definitive:
+- alle 15:10 si arma un trigger storia DETERMINISTICO;
+- la manutenzione ambientale viene chiusa e non può più partire prima di Lorenzo;
+- le task fisiche ordinarie vengono rinviate/pulite appena l'UI è libera;
+- l'evento ANOMALIA ALIMENTAZIONE viene creato direttamente dal trigger,
+  senza passare da maybeStartStudioEvent;
+- il trigger riprova ogni 2 secondi reali finché l'evento esiste;
+- diagnosi iniziale accetta E oppure G;
+- dopo la diagnosi Lorenzo viene creato sincronicamente;
+- se dopo 8 secondi reali non è fisicamente al SERVER, viene posizionato lì
+  e l'evento avanza a INTERVENTO COMBINATO;
+- nessun sistema manutenzione/background può più sostituire Lorenzo o lasciare
+  un falso stato "manutenzione in corso".
+
+B5.13.4 maintenance watchdog e B5.13.3 final E/G trigger sono preservati.
+
+
+## 1.0.30B5.13.6 — FINALE STORY GATE FIX
+
+- Il finale non può partire se LORENZO_SERVER è ancora aperto.
+- Dalle 18:45 compare PRIMA DI CHIUDERE.
+- L'orologio si ferma appena prima delle 19:00 finché Lorenzo non è completato.
+- v109ArmEndShift viene bloccato durante la missione.
+- Il cleanup di fine turno non cancella Lorenzo.
+- Appena l'evento viene completato, la normale sequenza finale torna disponibile.
+
+
+## 1.0.30B5.13.7 — LORENZO STATE RECOVERY FIX
+
+Bug osservato:
+Lorenzo era fisicamente nel SERVER ma premendo E ripeteva:
+"Sono qui. Se c'è corrente di mezzo..."
+senza far avanzare la missione.
+
+Causa:
+lo sprite di Lorenzo e lo stato interno LORENZO_SERVER potevano desincronizzarsi.
+Il gioco vedeva Lorenzo, ma non riconosceva più una fase actionable valida.
+
+Fix definitivo:
+- se Lorenzo è fisicamente nel SERVER, lo stato missione viene verificato ogni frame;
+- se studioEvent è sparito, viene ricreato direttamente in secure_it;
+- se resta in diagnose/wait_lorenzo pur essendo già arrivato, passa automaticamente a secure_it;
+- E su Lorenzo non può più ripetere il dialogo generico durante la missione;
+- E/G in secure_it avviano immediatamente la messa in sicurezza;
+- durante l'intervento elettrico Lorenzo spiega che bisogna attendere;
+- dopo il lavoro compare VERIFICA FINALE e E/G chiudono l'evento;
+- alert sempre esplicito con la prossima azione.
+
+Preservati:
+hard trigger 15:10, finale story gate, maintenance ghost fix,
+inventory cleanup, portrait fix, clienti, visitatori e finale.
+
+
+## 1.0.30B5.13.8 — LORENZO QUICK TEST FIX
+
+F10 durante il turno avvia immediatamente un test completo di Lorenzo, senza aspettare le 15:10. Nel test: arrivo <1 secondo e lavoro ~2 secondi. Il gameplay normale mantiene il trigger delle 15:10 ma ora il pannello mostra sempre la prossima azione, E ha priorità sulle interazioni generiche del Server e la zona operativa è più larga.
+
+
+# VERSIONE1ITSHIFT 1.0 FINAL RC
+
+Release Candidate della versione 2D.
+
+La B5.13.8, confermata funzionante nel test Lorenzo, è stata integrata nel
+gameplay normale. Il comando F10 usato soltanto per accelerare il collaudo
+è stato rimosso.
+
+Restano attivi:
+- trigger deterministico Lorenzo;
+- recupero automatico dello stato missione;
+- arrivo garantito;
+- area SERVER più tollerante;
+- priorità E/G della missione sulle interazioni del banco;
+- istruzioni operative nel pannello;
+- blocco del finale finché Lorenzo non è completato;
+- fix manutenzione fantasma;
+- inventario, NPC, stress, clienti, visitatori, pranzo, autosave e finale.
+
+Da qui resta solo il collaudo completo della Release Candidate e
+l'eventuale correzione di microbug.
+
+
+# VERSIONE1ITSHIFT 1.0 FINAL RC2 — LORENZO ANTISOFTLOCK
+
+Fix mirato dopo test RC:
+- premere F o altri tasti non può più consumare/rompere Lorenzo;
+- dalle 15:10 il gioco verifica lo stato ogni 0,75 secondi;
+- se l'evento non esiste, viene creato direttamente;
+- task ordinarie/carry non possono tenere occupato lo slot storia;
+- G ha priorità su consegne/depositi durante Lorenzo;
+- F durante Lorenzo non prende oggetti: mostra USA E O G;
+- se una finestra reale è aperta, il gioco dice di chiuderla e poi parte da solo;
+- eventi casuali non possono partire davanti a Lorenzo dopo le 15:10.
+
+Questa RC2 mantiene tutti i fix della RC precedente.
+
+
+# VERSIONE1ITSHIFT 1.0 FINAL
+
+Release finale della versione 2D.
+
+## Stato
+Questa build deriva direttamente dalla RC2 completata con successo fino a
+GIORNATA COMPLETATA.
+
+Non sono stati aggiunti nuovi sistemi dopo la RC2. Il passaggio a FINAL
+comprende soltanto:
+- versione definitiva;
+- cache-busting definitivo;
+- pulizia dei vecchi file audit intermedi;
+- changelog finale;
+- audit statico conclusivo.
+
+## Sistemi consolidati
+- giornata completa 09:00–19:00;
+- collisioni, porte e pathfinding;
+- ticket e puzzle tecnici per reparto;
+- missioni fisiche;
+- PC repair;
+- inventario e cleanup anti-oggetti fantasma;
+- stress, reputazione, errori, XP e incident;
+- pranzo a due turni;
+- chiamate e lore NPC;
+- clienti e riunioni;
+- visitatori Rifugio Digitale;
+- manutentori esterni;
+- evento storia Lorenzo:
+  - trigger deterministico;
+  - priorità storia dalle 15:10;
+  - arrivo garantito;
+  - recupero automatico dello stato;
+  - E/G nelle fasi operative;
+  - protezione dai tasti fisici errati;
+  - finale bloccato finché l'intervento non è concluso;
+- autosave / continue;
+- sequenza finale e riepilogo giornata.
+
+## Nota sviluppo
+La versione 2D 1.0 è chiusa. Eventuali sviluppi successivi devono partire da
+questa build come nuovo ramo, senza modificare retroattivamente il checkpoint.
+
+
+# VERSIONE1ITSHIFT 1.0 PUBLIC
+
+Build pensata per essere condivisa con amici su desktop e telefono.
+
+## Mobile
+Consigliato: telefono in orizzontale.
+
+Controlli:
+- joystick sinistro: movimento;
+- E: interagisci / continua dialoghi;
+- F: prendi;
+- G: usa / consegna / installa;
+- TAB: Tablet IT;
+- M: mappa.
+
+I minigame usano direttamente i pulsanti a schermo.
+
+La build mostra un avviso quando il telefono è in verticale; non tenta di
+forzare programmaticamente la rotazione perché Safari/Chrome mobile possono
+bloccare l'Orientation API fuori dalla modalità fullscreen.
+
+## Finale pubblico
+La schermata finale ora include:
+- titolo della run;
+- valutazione legata a errori/incident/interventi;
+- breve epilogo di CAPO, IT MANAGER e LORENZO;
+- IT SHIFT // GIORNO 1 COMPLETATO.
+
+Il gameplay e il bilanciamento della 1.0 FINAL restano invariati.

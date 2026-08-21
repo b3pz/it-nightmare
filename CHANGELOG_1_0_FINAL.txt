@@ -1,0 +1,30 @@
+VERSIONE1ITSHIFT 1.0 FINAL
+============================
+
+CHECKPOINT DI PARTENZA
+- 1.0 FINAL RC2 — run completa confermata fino a GIORNATA COMPLETATA.
+
+ULTIMA FASE
+- Nessun nuovo sistema introdotto.
+- Nessun ritocco a difficoltà o bilanciamento.
+- Versione UI aggiornata a 1.0 FINAL.
+- Rimossi soltanto i vecchi file audit intermedi dal pacchetto.
+- Conservati tutti i fix runtime della RC2.
+
+FIX CONSOLIDATI NELLA 1.0
+- collision/path e recuperi anti-stuck;
+- layout puzzle dual;
+- marker missioni fisiche;
+- endshift grace;
+- stress/NPC lore/call system;
+- IT Manager race speed fix;
+- portrait NPC;
+- Studio Alive;
+- Lorenzo priority/inventory/arrival/final-trigger/state-recovery;
+- finale story gate;
+- maintenance ghost fix;
+- Lorenzo anti-softlock;
+- autosave e finale.
+
+STATO
+- VERSIONE 2D 1.0 CHIUSA.

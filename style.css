@@ -1914,3 +1914,330 @@ body:has(#gameScreen.active) #v130b43StoryScene:not(.hidden) + #v130b42AutoDialo
  border-color:#d8c35f!important;
  background:#17180cf2!important;
 }
+
+
+/* ============================================================
+   IT SHIFT 1.0 PUBLIC — MOBILE / RELEASE UI
+   ============================================================ */
+#mobileRotate{display:none}
+#mobileTop,#mobileActions{display:none}
+#debugTouch{display:none!important}
+
+.v10PublicEnding{
+ max-width:760px;
+ margin:auto;
+}
+.v10PublicChapter{
+ color:#8fa790;
+ font:900 10px monospace;
+ letter-spacing:3px;
+}
+.v10PublicRunTitle{
+ display:inline-block;
+ margin:0 auto 4px;
+ padding:7px 14px;
+ border:2px solid #9bc978;
+ background:#142016;
+ color:#d9f2ad;
+ font:900 14px monospace;
+ letter-spacing:2px;
+}
+.v10PublicEpilogue{
+ display:grid;
+ gap:6px;
+ margin:4px 0;
+ text-align:left;
+}
+.v10PublicEpilogue p{
+ display:grid;
+ grid-template-columns:110px 1fr;
+ gap:12px;
+ margin:0;
+ padding:8px 10px;
+ background:#0c1510;
+ border-left:3px solid #607b63;
+ font-size:11px;
+}
+.v10PublicEpilogue b{color:#b7ff4a}
+.v10PublicEpilogue span{color:#d4dfd7}
+.v10PublicCredits{
+ padding-top:8px;
+ border-top:1px solid #34463c;
+ color:#9caf9f;
+ font:900 10px/1.6 monospace;
+ letter-spacing:2px;
+}
+.v10PublicCredits small{color:#6f8375}
+
+@media (hover:none),(pointer:coarse){
+ html,body{
+   width:100%;
+   height:100%;
+   min-height:100dvh;
+   overscroll-behavior:none;
+   -webkit-user-select:none;
+   user-select:none;
+   -webkit-touch-callout:none;
+ }
+ body{touch-action:manipulation}
+ #gameScreen{height:100dvh!important}
+ #gameScreen main{
+   height:calc(100dvh - 44px)!important;
+   padding:0!important;
+ }
+ #hud{
+   height:44px!important;
+   min-height:44px!important;
+   padding:3px 4px!important;
+   grid-template-columns:repeat(6,1fr)!important;
+ }
+ #hud div{
+   padding:1px 3px!important;
+   min-width:0!important;
+ }
+ #hud b{
+   font-size:11px!important;
+   overflow:hidden;
+   text-overflow:ellipsis;
+   white-space:nowrap;
+ }
+ #hud small{
+   font-size:6px!important;
+   letter-spacing:0!important;
+ }
+ footer{display:none!important}
+ #ticketPanel{display:none!important}
+
+ #mobile{
+   display:block!important;
+   position:absolute!important;
+   inset:0!important;
+   z-index:90!important;
+   pointer-events:none!important;
+ }
+ #joy{
+   left:max(14px,env(safe-area-inset-left))!important;
+   bottom:max(14px,env(safe-area-inset-bottom))!important;
+   width:104px!important;
+   height:104px!important;
+   opacity:.78;
+ }
+ #joy i{
+   left:31px!important;
+   top:31px!important;
+   width:40px!important;
+   height:40px!important;
+ }
+ #dpad{display:none!important}
+ #debugTouch{display:none!important}
+
+ #mobileTop{
+   display:flex!important;
+   position:absolute;
+   right:max(12px,env(safe-area-inset-right));
+   top:8px;
+   gap:7px;
+   pointer-events:auto;
+ }
+ .mobileUtility{
+   min-width:62px;
+   height:34px;
+   padding:3px 8px;
+   border:2px solid #536a59;
+   border-radius:7px;
+   background:rgba(5,12,8,.86);
+   color:#d6e4d8;
+   font:900 11px monospace;
+   touch-action:manipulation;
+ }
+ .mobileUtility span{
+   display:block;
+   color:#8da093;
+   font-size:6px;
+ }
+
+ #mobileActions{
+   display:grid!important;
+   position:absolute;
+   right:max(14px,env(safe-area-inset-right));
+   bottom:max(12px,env(safe-area-inset-bottom));
+   grid-template-columns:54px 78px 54px;
+   align-items:end;
+   gap:8px;
+   pointer-events:auto;
+ }
+ .mobileAction{
+   position:static!important;
+   pointer-events:auto!important;
+   touch-action:manipulation!important;
+   border-radius:50%!important;
+   margin:0!important;
+   padding:0!important;
+   box-shadow:3px 4px 0 rgba(0,0,0,.35);
+ }
+ .mobileAction.primary{
+   width:78px!important;
+   height:78px!important;
+   border:3px solid #ffc857!important;
+   background:rgba(29,19,5,.88)!important;
+   color:#ffc857!important;
+   font:900 25px monospace!important;
+ }
+ .mobileAction.secondary{
+   width:54px!important;
+   height:54px!important;
+   border:2px solid #8caa8c!important;
+   background:rgba(6,15,9,.88)!important;
+   color:#d7ebd7!important;
+   font:900 19px monospace!important;
+ }
+ .mobileAction span{
+   display:block!important;
+   margin-top:1px;
+   font-size:6px!important;
+   line-height:1.05;
+ }
+
+ #v130b1SideHud.v130b4-hud{
+   right:8px!important;
+   top:50px!important;
+   width:188px!important;
+   z-index:80!important;
+ }
+ #v130b1SideHud .v130b4-map,
+ #v130b1SideHud .v130b4-quickinv{
+   display:none!important;
+ }
+ #v130b1SideHud .v130b4-primary{
+   min-height:0!important;
+   padding:7px!important;
+ }
+ #v130b4TaskTitle{font-size:9px!important}
+ #v130b4TaskText{font-size:8px!important;line-height:1.25!important}
+
+ #modal{z-index:200!important}
+ #modal section{
+   width:94vw!important;
+   max-height:86dvh!important;
+   overflow:auto!important;
+   padding:12px!important;
+ }
+ .choice,.pixelAction,.bossStep,
+ #rewardContinue,
+ .v130b0-action{
+   min-height:44px!important;
+   touch-action:manipulation!important;
+ }
+
+ #pda{
+   z-index:210!important;
+   width:94vw!important;
+   height:78dvh!important;
+   max-height:78dvh!important;
+ }
+ #phoneNotification{z-index:190!important}
+
+ #storyDialog,#v122Dialogue,#v130b42AutoDialogue{
+   width:calc(100vw - 24px)!important;
+   max-width:none!important;
+ }
+ #v130b43StoryScene{touch-action:manipulation}
+
+ .v130b59-ending h2{font-size:clamp(30px,7vw,48px)!important}
+ .v10PublicEnding{gap:8px!important}
+ .v10PublicEpilogue p{
+   grid-template-columns:92px 1fr;
+   padding:6px 8px;
+   font-size:9px;
+ }
+}
+
+/* Phones must play landscape. We don't rely on Orientation API because
+   mobile browsers may block programmatic locking outside fullscreen. */
+@media (hover:none),(pointer:coarse) and (orientation:portrait){
+ #mobileRotate{
+   display:flex!important;
+   position:fixed;
+   inset:0;
+   z-index:30000;
+   align-items:center;
+   justify-content:center;
+   padding:24px;
+   background:#030604;
+   color:#dce5df;
+   text-align:center;
+ }
+ #mobileRotate>div{
+   width:min(360px,90vw);
+   padding:26px 18px;
+   border:3px solid #435848;
+   outline:2px solid #17251b;
+   background:#0a120d;
+ }
+ #mobileRotate b{
+   display:block;
+   margin-bottom:18px;
+   color:#89a08c;
+   font:900 10px monospace;
+   letter-spacing:2px;
+ }
+ #mobileRotate strong{
+   display:block;
+   margin-bottom:10px;
+   color:#b7ff4a;
+   font:900 22px monospace;
+ }
+ #mobileRotate span{
+   display:block;
+   font:700 11px/1.5 monospace;
+   color:#b8c4bb;
+ }
+}
+
+/* Very short landscape screens: common phone browser viewport. */
+@media (hover:none),(pointer:coarse) and (orientation:landscape) and (max-height:460px){
+ #hud{height:38px!important;min-height:38px!important}
+ #gameScreen main{height:calc(100dvh - 38px)!important}
+ #hud b{font-size:10px!important}
+ #hud small{font-size:5px!important}
+
+ #joy{
+   width:88px!important;height:88px!important;
+   bottom:8px!important;
+ }
+ #joy i{
+   left:27px!important;top:27px!important;
+   width:32px!important;height:32px!important;
+ }
+
+ #mobileActions{
+   grid-template-columns:48px 68px 48px;
+   gap:6px;
+   bottom:8px;
+ }
+ .mobileAction.primary{width:68px!important;height:68px!important;font-size:22px!important}
+ .mobileAction.secondary{width:48px!important;height:48px!important;font-size:17px!important}
+
+ #mobileTop{top:4px}
+ .mobileUtility{height:30px;min-width:56px;font-size:9px}
+
+ #v130b1SideHud.v130b4-hud{
+   top:43px!important;
+   width:174px!important;
+ }
+ #v130b43StoryScene .v130b43PortraitStage{
+   bottom:112px!important;
+   height:140px!important;
+   width:170px!important;
+ }
+ #v130b43StoryPortrait{width:170px!important;height:145px!important}
+ #v130b43StoryScene .v130b43StoryBox{
+   bottom:10px!important;
+   height:105px!important;
+   padding:20px 16px 14px!important;
+ }
+ #v130b43StoryScene .v130b43StoryText{
+   height:65px!important;
+   font-size:11px!important;
+ }
+}
