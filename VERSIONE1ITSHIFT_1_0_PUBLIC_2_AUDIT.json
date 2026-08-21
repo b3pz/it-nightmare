@@ -1,0 +1,12 @@
+{
+  "build": "VERSIONE1ITSHIFT 1.0 PUBLIC.2",
+  "base": "1.0 PUBLIC.1",
+  "fixes": {
+    "blocking_orientation_overlay_removed": true,
+    "portrait_gameplay_allowed": true,
+    "landscape_still_recommended": true,
+    "resize_orientation_safeguard": true,
+    "portrait_touch_layout": true
+  },
+  "gameplay_changes": false
+}

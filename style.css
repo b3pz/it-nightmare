@@ -2152,47 +2152,7 @@ body:has(#gameScreen.active) #v130b43StoryScene:not(.hidden) + #v130b42AutoDialo
  }
 }
 
-/* Phones must play landscape. We don't rely on Orientation API because
-   mobile browsers may block programmatic locking outside fullscreen. */
-@media (hover:none),(pointer:coarse) and (orientation:portrait){
- #mobileRotate{
-   display:flex!important;
-   position:fixed;
-   inset:0;
-   z-index:30000;
-   align-items:center;
-   justify-content:center;
-   padding:24px;
-   background:#030604;
-   color:#dce5df;
-   text-align:center;
- }
- #mobileRotate>div{
-   width:min(360px,90vw);
-   padding:26px 18px;
-   border:3px solid #435848;
-   outline:2px solid #17251b;
-   background:#0a120d;
- }
- #mobileRotate b{
-   display:block;
-   margin-bottom:18px;
-   color:#89a08c;
-   font:900 10px monospace;
-   letter-spacing:2px;
- }
- #mobileRotate strong{
-   display:block;
-   margin-bottom:10px;
-   color:#b7ff4a;
-   font:900 22px monospace;
- }
- #mobileRotate span{
-   display:block;
-   font:700 11px/1.5 monospace;
-   color:#b8c4bb;
- }
-}
+
 
 /* Very short landscape screens: common phone browser viewport. */
 @media (hover:none),(pointer:coarse) and (orientation:landscape) and (max-height:460px){
@@ -2240,4 +2200,228 @@ body:has(#gameScreen.active) #v130b43StoryScene:not(.hidden) + #v130b42AutoDialo
    height:65px!important;
    font-size:11px!important;
  }
+}
+
+
+/* ============================================================
+   IT SHIFT 1.0 PUBLIC.1 — ENDING LAYOUT FIX
+   The final card can be taller than short laptop/phone viewports.
+   Scroll the backdrop from the top instead of centering/clipping the title.
+   ============================================================ */
+#modal.v10PublicEndOpen{
+ display:block!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ padding:12px!important;
+ box-sizing:border-box!important;
+ align-items:initial!important;
+ justify-content:initial!important;
+}
+
+#modal.v10PublicEndOpen>section{
+ width:min(820px,calc(100vw - 24px))!important;
+ max-height:none!important;
+ min-height:0!important;
+ margin:0 auto!important;
+ padding:18px 20px!important;
+ overflow:visible!important;
+ box-sizing:border-box!important;
+}
+
+#modal.v10PublicEndOpen #x{
+ position:sticky!important;
+ float:right;
+ top:0!important;
+ z-index:4;
+}
+
+#modal.v10PublicEndOpen #winPanel{
+ padding:10px 8px 6px!important;
+ max-width:none!important;
+ margin:0 auto!important;
+}
+
+#modal.v10PublicEndOpen #winPanel h2{
+ margin:2px 0 8px!important;
+ font-size:clamp(38px,7vw,68px)!important;
+ line-height:.95!important;
+}
+
+#modal.v10PublicEndOpen .v10PublicChapter{
+ margin:2px 0 6px;
+}
+
+#modal.v10PublicEndOpen .v130b59-endstats{
+ margin:7px 0!important;
+}
+
+#modal.v10PublicEndOpen .v130b59-endstats div{
+ padding:9px 7px!important;
+}
+
+#modal.v10PublicEndOpen .v10PublicEpilogue{
+ gap:4px!important;
+}
+
+#modal.v10PublicEndOpen .v10PublicEpilogue p{
+ padding:6px 9px!important;
+}
+
+@media (max-height:620px){
+ #modal.v10PublicEndOpen{
+   padding:7px!important;
+ }
+ #modal.v10PublicEndOpen>section{
+   width:min(820px,calc(100vw - 14px))!important;
+   padding:9px 12px!important;
+ }
+ #modal.v10PublicEndOpen #winPanel{
+   padding:3px 4px 2px!important;
+ }
+ #modal.v10PublicEndOpen #winPanel h2{
+   font-size:clamp(32px,6vw,54px)!important;
+   margin:0 0 5px!important;
+ }
+ #modal.v10PublicEndOpen .v130b59-endline,
+ #modal.v10PublicEndOpen .v130b59-endquote{
+   margin:5px 0!important;
+   line-height:1.35!important;
+ }
+ #modal.v10PublicEndOpen .v10PublicRunTitle{
+   padding:5px 10px!important;
+   font-size:11px!important;
+ }
+ #modal.v10PublicEndOpen .v130b59-endstats div{
+   padding:6px!important;
+ }
+ #modal.v10PublicEndOpen .v130b59-endstats b{
+   font-size:16px!important;
+ }
+ #modal.v10PublicEndOpen .v10PublicEpilogue p{
+   padding:5px 8px!important;
+   font-size:9px!important;
+ }
+ #modal.v10PublicEndOpen .choice{
+   min-height:38px!important;
+   padding:7px 10px!important;
+ }
+}
+
+/* Hide the scrollbar visually where supported; scrolling remains available. */
+#modal.v10PublicEndOpen{
+ scrollbar-width:thin;
+ scrollbar-color:#526a5b #0a0f0c;
+}
+#modal.v10PublicEndOpen::-webkit-scrollbar{width:7px}
+#modal.v10PublicEndOpen::-webkit-scrollbar-track{background:#0a0f0c}
+#modal.v10PublicEndOpen::-webkit-scrollbar-thumb{background:#526a5b}
+
+
+/* ============================================================
+   IT SHIFT 1.0 PUBLIC.2 — MOBILE ORIENTATION FIX
+   Never block gameplay because of browser orientation detection.
+   ============================================================ */
+#mobileRotate{
+ display:none!important;
+ pointer-events:none!important;
+}
+
+@media (hover:none),(pointer:coarse) and (orientation:portrait){
+ #mobileRotate{
+   display:flex!important;
+   position:fixed!important;
+   left:50%!important;
+   top:max(6px,env(safe-area-inset-top))!important;
+   transform:translateX(-50%)!important;
+   z-index:260!important;
+   width:auto!important;
+   max-width:92vw!important;
+   height:auto!important;
+   inset:auto!important;
+   align-items:center!important;
+   gap:8px!important;
+   padding:6px 8px!important;
+   background:rgba(7,12,9,.90)!important;
+   border:1px solid #53665a!important;
+   color:#c8d6cb!important;
+   font:900 8px monospace!important;
+   letter-spacing:1px!important;
+   pointer-events:none!important;
+ }
+ #mobileRotate span{
+   display:block!important;
+   white-space:nowrap!important;
+ }
+ #mobileRotateDismiss{
+   display:none!important;
+ }
+}
+
+/* Portrait is allowed. Compress UI so it remains playable. */
+@media (hover:none),(pointer:coarse) and (orientation:portrait){
+ #gameScreen{
+   width:100vw!important;
+   height:100dvh!important;
+ }
+ #gameScreen main{
+   height:calc(100dvh - 44px)!important;
+ }
+ #game{
+   max-width:100vw!important;
+   max-height:calc(100dvh - 44px)!important;
+ }
+ #v130b1SideHud.v130b4-hud{
+   top:52px!important;
+   right:4px!important;
+   width:158px!important;
+ }
+ #v130b1SideHud .v130b4-map,
+ #v130b1SideHud .v130b4-quickinv{
+   display:none!important;
+ }
+ #mobileTop{
+   right:8px!important;
+   top:auto!important;
+   bottom:112px!important;
+ }
+ #mobileActions{
+   right:8px!important;
+   bottom:10px!important;
+   grid-template-columns:46px 64px 46px!important;
+   gap:5px!important;
+ }
+ .mobileAction.primary{
+   width:64px!important;
+   height:64px!important;
+   font-size:21px!important;
+ }
+ .mobileAction.secondary{
+   width:46px!important;
+   height:46px!important;
+   font-size:16px!important;
+ }
+ #joy{
+   left:10px!important;
+   bottom:10px!important;
+   width:88px!important;
+   height:88px!important;
+ }
+ #joy i{
+   left:27px!important;
+   top:27px!important;
+   width:32px!important;
+   height:32px!important;
+ }
+ #modal section{
+   width:96vw!important;
+   max-height:88dvh!important;
+   padding:10px!important;
+ }
+}
+
+/* Browser chrome/orientation bugs can leave the element visible after rotation.
+   This makes it a harmless hint rather than a gameplay gate. */
+#mobileRotate,
+#mobileRotate *{
+ touch-action:manipulation!important;
 }

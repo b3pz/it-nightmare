@@ -7236,7 +7236,10 @@ function v10PublicEndingLines(){
 
 function ending(type,text,win=false){
  state.phase="ended";state.min=END;clamp();
- const body=$("#modalBody");$("#modal").classList.remove("hidden");
+ const body=$("#modalBody");
+ const endModal=$("#modal");
+ endModal.classList.remove("hidden");
+ endModal.classList.toggle("v10PublicEndOpen",!!win);
 
  if(win){
    const name=typeof v130b2PlayerName==="function"?v130b2PlayerName():"IT";
@@ -13048,4 +13051,36 @@ document.addEventListener("keydown",function v130b563EscInput(e){
    e.stopImmediatePropagation();
  }
 },true);
+
+
+
+
+/* 1.0 PUBLIC.2 — mobile orientation safeguard */
+function v10Public2RefreshMobileOrientation(){
+ const hint=document.getElementById("mobileRotate");
+ if(!hint)return;
+
+ const touch=window.matchMedia?.("(hover:none), (pointer:coarse)")?.matches;
+ if(!touch){
+   hint.style.setProperty("display","none","important");
+   return;
+ }
+
+ // Landscape: always hide. Portrait: CSS may show only a small non-blocking hint.
+ if(window.innerWidth>=window.innerHeight){
+   hint.style.setProperty("display","none","important");
+ }else{
+   hint.style.removeProperty("display");
+ }
+}
+
+window.addEventListener("resize",v10Public2RefreshMobileOrientation,{passive:true});
+window.addEventListener("orientationchange",()=>{
+ setTimeout(v10Public2RefreshMobileOrientation,100);
+ setTimeout(v10Public2RefreshMobileOrientation,450);
+},{passive:true});
+document.addEventListener("DOMContentLoaded",()=>{
+ v10Public2RefreshMobileOrientation();
+ setTimeout(v10Public2RefreshMobileOrientation,300);
+});
 

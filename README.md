@@ -2177,3 +2177,25 @@ La schermata finale ora include:
 - IT SHIFT // GIORNO 1 COMPLETATO.
 
 Il gameplay e il bilanciamento della 1.0 FINAL restano invariati.
+
+
+## 1.0 PUBLIC.1 — ENDING LAYOUT FIX
+
+Correzione esclusivamente grafica della schermata finale:
+- GIORNATA COMPLETATA non può più finire sopra il bordo dello schermo;
+- sui viewport bassi il pannello parte sempre dall'alto;
+- lo scroll avviene sul backdrop, non dentro una card centrata fuori schermo;
+- finale compattato leggermente sotto i 620 px di altezza;
+- nessuna modifica al gameplay, punteggi, Lorenzo o bilanciamento.
+
+
+## 1.0 PUBLIC.2 — MOBILE ORIENTATION FIX
+
+Correzione compatibilità telefono:
+- rimosso il blocco fullscreen "RUOTA IL TELEFONO";
+- il gioco è avviabile anche in verticale;
+- in verticale compare al massimo un piccolo suggerimento non bloccante;
+- in orizzontale il suggerimento sparisce automaticamente;
+- aggiunto refresh su resize/orientationchange per Safari/Chrome mobile;
+- UI touch compressa anche in portrait;
+- nessuna modifica al gameplay.

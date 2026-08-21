@@ -1,0 +1,11 @@
+{
+  "build": "VERSIONE1ITSHIFT 1.0 PUBLIC.1",
+  "base": "1.0 PUBLIC MOBILE",
+  "fix": {
+    "ending_title_clip": true,
+    "short_viewport_layout": true,
+    "outer_modal_scrolling": true,
+    "compact_ending_under_620px": true
+  },
+  "gameplay_changes": false
+}
