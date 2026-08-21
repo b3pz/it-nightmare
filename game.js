@@ -4204,6 +4204,17 @@ const V122_DIALOG={queue:[],active:null,timer:null};
 
 
 let dialogPause=false;
+
+// PUBLIC.2 MOBILE DIALOG TAP FIX
+// On touch devices, the dialogue itself is the CONTINUE control.
+function v10DialogueContinueCue(){
+ try{
+   return window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches
+     ? "TOCCA PER CONTINUARE  ▶"
+     : "E / ENTER  ▶";
+ }catch(_){return "E / ENTER  ▶"}
+}
+
 function v124PortraitCode(name){
  const n=String(name||"NPC").toUpperCase();
  if(n.includes("ZIA"))return"ZA";
@@ -4220,8 +4231,8 @@ function v124PortraitCode(name){
 }
 function v122Say(name,text,effect=""){V122_DIALOG.queue.push({name:String(name||"NPC"),parts:[String(text||""),...(effect?[String(effect)]:[])]});if(!V122_DIALOG.active)v122DialogNext()}
 function v122DialogNext(){if(!V122_DIALOG.queue.length){V122_DIALOG.active=null;dialogPause=false;document.getElementById("v122Dialogue")?.classList.add("hidden");return}const d=V122_DIALOG.queue.shift();V122_DIALOG.active={...d,index:0,shown:0};dialogPause=true;document.getElementById("v122Dialogue")?.classList.remove("hidden");v130b42SetSpeakerMeta(document.getElementById("v122Dialogue"),d.name);document.getElementById("v122Speaker").textContent=d.name.toUpperCase();const p=document.getElementById("v122Portrait");if(p)p.textContent=v124PortraitCode(d.name);v122TypeCurrent()}
-function v122TypeCurrent(){const d=V122_DIALOG.active;if(!d)return;clearInterval(V122_DIALOG.timer);const el=document.getElementById("v122Text"),c=document.getElementById("v122Continue"),text=d.parts[d.index]||"";d.shown=0;el.textContent="";v130b42FitDialogText(el,text);c.textContent="● ● ●";V122_DIALOG.timer=setInterval(()=>{if(!V122_DIALOG.active)return clearInterval(V122_DIALOG.timer);d.shown=Math.min(text.length,d.shown+1);el.textContent=text.slice(0,d.shown);if(d.shown>=text.length){clearInterval(V122_DIALOG.timer);c.textContent="E / ENTER  ▶"}},26)}
-function v122Advance(){const d=V122_DIALOG.active;if(!d)return false;const text=d.parts[d.index]||"";if(d.shown<text.length){clearInterval(V122_DIALOG.timer);d.shown=text.length;document.getElementById("v122Text").textContent=text;document.getElementById("v122Continue").textContent="E / ENTER  ▶";return true}if(d.index<d.parts.length-1){d.index++;v122TypeCurrent();return true}clearInterval(V122_DIALOG.timer);V122_DIALOG.active=null;v122DialogNext();return true}
+function v122TypeCurrent(){const d=V122_DIALOG.active;if(!d)return;clearInterval(V122_DIALOG.timer);const el=document.getElementById("v122Text"),c=document.getElementById("v122Continue"),text=d.parts[d.index]||"";d.shown=0;el.textContent="";v130b42FitDialogText(el,text);c.textContent="● ● ●";V122_DIALOG.timer=setInterval(()=>{if(!V122_DIALOG.active)return clearInterval(V122_DIALOG.timer);d.shown=Math.min(text.length,d.shown+1);el.textContent=text.slice(0,d.shown);if(d.shown>=text.length){clearInterval(V122_DIALOG.timer);c.textContent=v10DialogueContinueCue()}},26)}
+function v122Advance(){const d=V122_DIALOG.active;if(!d)return false;const text=d.parts[d.index]||"";if(d.shown<text.length){clearInterval(V122_DIALOG.timer);d.shown=text.length;document.getElementById("v122Text").textContent=text;document.getElementById("v122Continue").textContent=v10DialogueContinueCue();return true}if(d.index<d.parts.length-1){d.index++;v122TypeCurrent();return true}clearInterval(V122_DIALOG.timer);V122_DIALOG.active=null;v122DialogNext();return true}
 
 let V122_CALLS={hr:-999,zia:-999};
 function v122SpecialCalls(){
@@ -4407,6 +4418,7 @@ function storyDialog(who,text,cb=null){
  if(!$("#modal")?.classList.contains("hidden")){deferredDialogs.push({who,text,cb});phoneMessage(who,text);return}
  storyOpen=true;storyCallback=cb;keys={};
  const b=$("#storyDialog");if(!b)return;
+ const cue=b.querySelector("small");if(cue)cue.textContent=v10DialogueContinueCue();
  $("#storyWho").textContent=who;$("#storyText").textContent=text;
  v130b42SetSpeakerMeta(b,who);
  v130b42FitDialogText($("#storyText"),text);
@@ -11257,25 +11269,39 @@ v10BindMobileButton("#mMap",()=>{
  toast(fullMap?"MAPPA COMPLETA":"CAMERA PLAYER");
 });
 
-// On touch screens, tapping narrative dialogue is equivalent to E.
-document.getElementById("v130b43StoryScene")?.addEventListener("pointerdown",e=>{
- if(typeof V130B43_STORY!=="undefined"&&V130B43_STORY.active){
+// PUBLIC.2 MOBILE DIALOG TAP FIX
+// These dialogue nodes are declared after game.js in index.html, therefore
+// direct listeners here used to miss v130b43StoryScene and v122Dialogue.
+// Event delegation works regardless of when the popup enters the DOM.
+document.addEventListener("pointerdown",e=>{
+ const t=e.target;
+ if(!(t instanceof Element))return;
+
+ const storyScene=t.closest("#v130b43StoryScene");
+ if(storyScene && !storyScene.classList.contains("hidden") &&
+    typeof V130B43_STORY!=="undefined" && V130B43_STORY.active){
    e.preventDefault();
+   e.stopPropagation();
    v130b43StoryAdvance();
+   return;
  }
-});
-document.getElementById("v122Dialogue")?.addEventListener("pointerdown",e=>{
- if(typeof V122_DIALOG!=="undefined"&&V122_DIALOG.active){
+
+ const queuedDialog=t.closest("#v122Dialogue");
+ if(queuedDialog && !queuedDialog.classList.contains("hidden") &&
+    typeof V122_DIALOG!=="undefined" && V122_DIALOG.active){
    e.preventDefault();
+   e.stopPropagation();
    v122Advance();
+   return;
  }
-});
-document.getElementById("storyDialog")?.addEventListener("pointerdown",e=>{
- if(storyOpen){
+
+ const normalDialog=t.closest("#storyDialog");
+ if(normalDialog && !normalDialog.classList.contains("hidden") && storyOpen){
    e.preventDefault();
+   e.stopPropagation();
    closeStory();
  }
-});
+},{passive:false});
 
 
 
@@ -12287,7 +12313,7 @@ function v130b43StoryType(){
    if(el)el.textContent=text.slice(0,s.shown);
    if(s.shown>=text.length){
      clearInterval(s.timer);
-     if(cont)cont.textContent="E / ENTER  ▶";
+     if(cont)cont.textContent=v10DialogueContinueCue();
    }
  },24);
 }
@@ -12323,7 +12349,7 @@ function v130b43StoryAdvance(){
    clearInterval(s.timer);
    s.shown=text.length;
    if(el)el.textContent=text;
-   if(cont)cont.textContent="E / ENTER  ▶";
+   if(cont)cont.textContent=v10DialogueContinueCue();
    return true;
  }
  if(s.index<s.parts.length-1){

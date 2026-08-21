@@ -2425,3 +2425,24 @@ body:has(#gameScreen.active) #v130b43StoryScene:not(.hidden) + #v130b42AutoDialo
 #mobileRotate *{
  touch-action:manipulation!important;
 }
+
+/* ============================================================
+   PUBLIC.2 MOBILE DIALOG TAP FIX
+   Dialogue boxes are real touch targets on phones/tablets.
+   ============================================================ */
+@media (hover:none), (pointer:coarse){
+ #storyDialog,
+ #v122Dialogue,
+ #v130b43StoryScene .v130b43StoryBox,
+ #v130b43StoryScene .v130b43PortraitStage{
+   cursor:pointer!important;
+   touch-action:manipulation!important;
+   -webkit-tap-highlight-color:transparent;
+ }
+
+ #storyDialog:active,
+ #v122Dialogue:active,
+ #v130b43StoryScene .v130b43StoryBox:active{
+   transform:translateX(-50%) translateY(2px)!important;
+ }
+}
