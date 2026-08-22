@@ -1,10 +1,10 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>IT SHIFT 1.0 // A DAY IN IT SUPPORT</title><link rel="stylesheet" href="style.css?v=1.0-PUBLIC.2-mobile-controls-fix"></head>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>IT SHIFT 1.0 // A DAY IN IT SUPPORT</title><link rel="stylesheet" href="style.css?v=1.0-b3pz-final"></head>
 <body>
 
 
 <section id="boot" class="screen active">
  <div class="v130b3-title">
-   <canvas id="v130b3TitleCanvas" width="1280" height="720"></canvas>
+   <div class="v130b3-art" aria-hidden="true"></div>
 
    <div class="v130b3-brand">
      <div id="realDateLine" class="v130b3-date">08:58 // OGGI</div>
@@ -13,16 +13,15 @@
    </div>
 
    <div class="v130b3-start">
-     <button id="v130b55Continue" class="v130b3-startbtn v130b55-continue hidden" type="button">
-       <span class="arrow">↻</span>
-       <span>CONTINUA TURNO</span>
-       <small id="v130b55ContinueMeta"></small>
-     </button>
-     <button id="toLore" class="v130b3-startbtn">
+     <button id="toLore" class="v130b3-startbtn v130b3-newgame" type="button">
        <span class="arrow">▶</span>
        <span>NUOVA PARTITA</span>
      </button>
-     <div class="v130b3-caption">Un giorno normale. Finché qualcuno non apre un ticket.</div>
+     <button id="v130b55Continue" class="v130b3-startbtn v130b55-continue hidden" type="button">
+       <span class="arrow">↻</span>
+       <span>CONTINUA</span>
+       <small id="v130b55ContinueMeta"></small>
+     </button>
    </div>
 
    <div class="v130b3-footer">
@@ -78,6 +77,7 @@
  </div>
 </section>
 <section id="gameScreen" class="screen"><header id="hud"><div><b id="clock">09:00</b><small>TIME</small></div><div><b id="stress">0%</b><small>STRESS</small></div><div><b id="rep">★★★★★</b><small>REPUTAZIONE</small></div><div><b id="strikes">0/3</b><small>ERRORI</small></div><div><b id="xp">0</b><small>XP</small></div><div><b id="incident">0%</b><small>INCIDENT</small></div></header>
+<button id="audioToggle" type="button" aria-label="Attiva o disattiva audio">ATTIVA AUDIO</button>
 <div id="taskProgressWrap"><span>TASK PROGRESS</span><div id="taskProgress"><i id="taskProgressFill"></i></div><b id="taskProgressText">0%</b></div>
 <main>
 <div id="viewportFrame"><canvas id="game" width="1600" height="1040"></canvas></div>
@@ -142,8 +142,8 @@
  <section id="v130b1Inventory" class="v130b4-quickinv"></section>
 </aside>
 
-<footer><b>VERSIONE1ITSHIFT 1.0 PUBLIC.2</b> · WASD/FRECCE — MUOVITI · E — INTERAGISCI · TAB — TABLET IT · M — MAP · F2 — DEBUG · F3 — DIAG · F6 — PIXEL TEST · F7 — DEMO CORRIERE · F8 — TEST GAMEPLAY · C — CAMERA · F9 — CAMERA</footer></section>
-<div id="jsError" class="hidden"></div><div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=1.0-PUBLIC.2-mobile-controls-fix"></script><div id="endGameOverlay" class="hidden"><div class="endGameCard"><div class="kicker">FINE TURNO // 19:00</div><h2>GIORNATA CONCLUSA</h2><div id="endGameStats"></div><div class="endGameActions"><button id="retryRun">RIPROVA SUBITO</button><button id="newDay">NUOVA GIORNATA</button></div><small>ENTER / E — RIPROVA · N — HOME</small></div></div>
+<footer><b>IT SHIFT 2D // VERSIONE FINALE GITHUB</b> · WASD/FRECCE — MUOVITI · E — INTERAGISCI · TAB — TABLET IT · M — MAP · F2 — DEBUG · F3 — DIAG · F6 — PIXEL TEST · F7 — DEMO CORRIERE · F8 — TEST GAMEPLAY · C — CAMERA · F9 — CAMERA</footer></section>
+<div id="jsError" class="hidden"></div><div id="modal" class="hidden"><section><button id="x">×</button><div id="modalBody"></div></section></div><script src="game.js?v=1.0-b3pz-final"></script><div id="endGameOverlay" class="hidden"><div class="endGameCard"><div class="kicker">FINE TURNO // 19:00</div><h2>GIORNATA CONCLUSA</h2><div id="endGameStats"></div><div class="endGameActions"><button id="retryRun">RIPROVA SUBITO</button><button id="newDay">NUOVA GIORNATA</button></div><small>ENTER / E — RIPROVA · N — HOME</small></div></div>
 
 <div id="v130b43StoryScene" class="hidden" aria-hidden="true">
  <div class="v130b43StoryBackdrop"></div>

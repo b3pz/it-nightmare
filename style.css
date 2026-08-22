@@ -798,91 +798,122 @@ linear-gradient(90deg,rgba(37,52,40,.055) 1px,transparent 1px),#d7dba9;backgroun
 
 
 /* ============================================================
-   1.0.30B3 — TITLE REBUILD
-   Actual game-like canvas scene, not a web mockup.
+   FINAL GITHUB BUILD — RETRO HANDHELD TITLE SCREEN
+   The image carries the presentation; HTML buttons stay functional.
    ============================================================ */
-#boot{background:#070b08!important}
+#boot{
+ background:#080d09!important;
+ align-items:center!important;
+ justify-content:center!important;
+}
 .v130b3-title{
  position:relative;
- width:min(1280px,96vw);
- height:min(720px,92vh);
- background:#090d0a;
- border:5px solid #1c2920;
- box-shadow:0 0 0 4px #4f6254,14px 14px 0 rgba(0,0,0,.38);
+ width:min(1380px,96vw,138vh);
+ aspect-ratio:3/2;
+ height:auto;
+ background:#10170d;
+ border:4px solid #33442c;
+ box-shadow:0 0 0 4px #718253,14px 14px 0 rgba(0,0,0,.45);
  overflow:hidden;
  image-rendering:pixelated;
 }
-#v130b3TitleCanvas{
- position:absolute;inset:0;width:100%;height:100%;
+.v130b3-art{
+ position:absolute;
+ inset:0;
+ background-image:url("title-screen.png");
+ background-size:100% 100%;
+ background-position:center;
+ background-repeat:no-repeat;
  image-rendering:pixelated;
- background:#0b100d;
 }
+/* Title and subtitle are part of the artwork. */
 .v130b3-brand{
  position:absolute;
- left:48px;top:46px;
- z-index:4;
- text-shadow:4px 4px #142019;
+ left:4.2%;
+ top:4.2%;
+ z-index:5;
+ display:block!important;
+ pointer-events:none;
 }
+.v130b3-brand h1,.v130b3-sub{display:none!important}
 .v130b3-date{
- font:900 10px monospace;
- color:#e0c45e;
- letter-spacing:3px;
- margin-bottom:7px;
+ display:inline-block;
+ padding:7px 10px 6px;
+ background:rgba(12,20,10,.82);
+ border:2px solid #4d6340;
+ box-shadow:0 0 0 2px rgba(0,0,0,.35);
+ color:#d7e08d;
+ font:900 clamp(8px,.95vw,12px) monospace;
+ letter-spacing:2px;
+ text-transform:uppercase;
+ text-shadow:1px 1px #111;
 }
-.v130b3-brand h1{
- margin:0;
- font:900 clamp(62px,8vw,104px) monospace;
- letter-spacing:-8px;
- color:#baff4c;
- line-height:.88;
-}
-.v130b3-sub{
- margin-top:11px;
- font:900 12px monospace;
- letter-spacing:6px;
- color:#c3cabf;
-}
+
+/* Cover the menu painted into the artwork with the real clickable menu. */
 .v130b3-start{
  position:absolute;
- left:48px;bottom:74px;
- z-index:4;
- width:390px;
+ left:50%;
+ top:54.1%;
+ transform:translateX(-50%);
+ z-index:5;
+ width:35.5%;
+ min-width:330px;
+ padding:7px 10px 10px;
+ background:#12200f;
+ border:4px solid #314827;
+ box-shadow:0 0 0 3px #70844d,5px 5px 0 rgba(0,0,0,.46);
 }
 .v130b3-startbtn{
  width:100%;
- min-height:52px;
+ min-height:49px;
  display:flex;
  align-items:center;
- gap:14px;
- padding:10px 16px;
- border:4px solid #172019;
- background:#d5dda1;
- color:#172019;
- font:900 15px monospace;
+ justify-content:flex-start;
+ gap:13px;
+ padding:8px 16px;
+ border:0;
+ background:transparent;
+ color:#ede9c9;
+ font:900 clamp(13px,1.45vw,22px) monospace;
+ letter-spacing:1px;
  cursor:pointer;
- box-shadow:6px 6px 0 #172019;
+ box-shadow:none;
+ text-align:left;
 }
-.v130b3-startbtn:hover{
- background:#eff0bd;
- transform:translate(-2px,-2px);
- box-shadow:8px 8px 0 #172019;
+.v130b3-startbtn + .v130b3-startbtn{margin-top:1px}
+.v130b3-startbtn:hover,
+.v130b3-startbtn:focus-visible{
+ background:#b6c875;
+ color:#172019;
+ transform:none;
+ box-shadow:none;
+ outline:none;
 }
-.v130b3-startbtn .arrow{color:#5c783f}
-.v130b3-caption{
- margin-top:15px;
- padding:8px 10px;
- background:rgba(8,13,10,.78);
- border-left:4px solid #8ba168;
- color:#d9dfc8;
- font:700 10px/1.45 monospace;
+.v130b3-startbtn .arrow{color:#9fc65d;min-width:20px}
+.v130b3-startbtn:hover .arrow,
+.v130b3-startbtn:focus-visible .arrow{color:#23351a}
+.v130b3-startbtn small{
+ margin-left:auto;
+ font-size:7px;
+ color:#899778;
 }
+.v130b3-caption{display:none!important}
+
+/* This covers the generated footer/copyright and becomes our actual control hint. */
 .v130b3-footer{
  position:absolute;
- left:48px;bottom:25px;
- color:#7f9585;
- font:900 8px monospace;
- letter-spacing:2px;
- z-index:4;
+ left:50%;
+ bottom:3.7%;
+ transform:translateX(-50%);
+ z-index:5;
+ width:37%;
+ padding:7px 10px;
+ background:#0b1209;
+ border:2px solid #26351f;
+ color:#c9caa9;
+ text-align:center;
+ font:900 clamp(7px,.72vw,11px) monospace;
+ letter-spacing:1px;
 }
 .v130b3-title:after{
  content:"";
@@ -892,12 +923,44 @@ linear-gradient(90deg,rgba(37,52,40,.055) 1px,transparent 1px),#d7dba9;backgroun
  z-index:3;
 }
 @media(max-width:720px){
- .v130b3-title{width:100vw;height:100vh;border:0}
- .v130b3-brand{left:24px;top:30px}
- .v130b3-start{left:24px;right:24px;width:auto}
- .v130b3-footer{left:24px}
+ #boot{overflow:hidden!important}
+ .v130b3-title{
+   width:100vw;
+   height:100vh;
+   aspect-ratio:auto;
+   border:0;
+   box-shadow:none;
+   background:#0b1009;
+ }
+ .v130b3-art{
+   background-size:cover;
+   background-position:50% center;
+ }
+ .v130b3-brand{left:16px;top:16px}
+ .v130b3-date{font-size:10px;letter-spacing:1px;padding:6px 8px 5px}
+ .v130b3-start{
+   left:16px;
+   right:16px;
+   top:auto;
+   bottom:13%;
+   transform:none;
+   width:auto;
+   min-width:0;
+   padding:8px 10px;
+ }
+ .v130b3-startbtn{
+   min-height:52px;
+   font-size:16px;
+ }
+ .v130b3-footer{
+   left:16px;
+   right:16px;
+   bottom:4%;
+   transform:none;
+   width:auto;
+   font-size:8px;
+ }
 }
-
 /* B3 setup cleanup: less dashboard, more RPG menu */
 .v130b2-setup{background:#0d1510!important;border-color:#172019!important;box-shadow:0 0 0 4px #607260,12px 12px 0 rgba(0,0,0,.38)!important}
 .v130b2-setup>header{background:#1c2b21!important}
@@ -2543,4 +2606,39 @@ body:has(#gameScreen.active) #v130b43StoryScene:not(.hidden) + #v130b42AutoDialo
  #mobileTop{
    bottom:142px!important;
  }
+}
+
+/* IT SHIFT 2D — finale harder pass */
+.v2dBossStatus{
+  margin:10px 0 12px;
+  padding:8px 10px;
+  border:2px solid #586b60;
+  background:#0a120d;
+  color:#d7e4dc;
+  font:700 10px Consolas,monospace;
+  letter-spacing:1px;
+  text-align:center;
+}
+.bossGame .bossStep{min-height:68px!important;line-height:1.25}
+@media(max-width:700px){
+  .v2dBossStatus{font-size:9px;padding:7px 8px}
+  .bossGame .bossStep{min-height:54px!important}
+}
+
+
+/* IT SHIFT 2D — AUDIO2: visible audio state + stronger mobile feedback */
+#audioToggle{
+ position:fixed;right:12px;top:92px;z-index:16000;
+ min-width:104px;height:32px;padding:0 10px;
+ border:2px solid #718578;background:#111a15;color:#dce7df;
+ box-shadow:3px 3px #000;font:900 9px Consolas,monospace;letter-spacing:.7px;
+ cursor:pointer;
+}
+#audioToggle.audioReady{border-color:#9cff57;color:#baff87;background:#142218}
+#audioToggle.audioOff{border-color:#8c5d5d;color:#e5b0b0;background:#241414}
+@media (hover:none),(pointer:coarse){
+ #audioToggle{top:max(66px,calc(env(safe-area-inset-top) + 58px));right:max(8px,env(safe-area-inset-right));min-width:100px;height:34px;font-size:9px}
+}
+@media (hover:none),(pointer:coarse) and (orientation:landscape) and (max-height:460px){
+ #audioToggle{top:48px;right:8px;height:30px;min-width:92px;font-size:8px}
 }

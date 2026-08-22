@@ -26,6 +26,138 @@ window.addEventListener("unhandledrejection",e=>{
 // IT NIGHTMARE V6.5 // STUDIO CONSOLIDATION
 const $=s=>document.querySelector(s),C=$("#game"),g=C.getContext("2d");g.imageSmoothingEnabled=false;
 const W=C.width,H=C.height,START=540,BOSS=1132,END=1140,TIME_SPEED=5.2;
+
+
+/* ============================================================
+   IT SHIFT 2D — PROCEDURAL AUDIO / FX // AUDIBLE MIX
+   Browser-generated ambience + FX. No external audio files.
+   First user gesture unlocks Web Audio on desktop/mobile.
+   ============================================================ */
+const V2D_AUDIO={ctx:null,master:null,ambient:null,music:null,unlocked:false,muted:false,nextToneAt:0,lastStepAt:0,noise:null,nextMusicAt:0,musicStep:0,lastSolved:null};
+function v2dAudioSetLabel(){
+ const b=document.getElementById("audioToggle");if(!b)return;
+ const running=!!(V2D_AUDIO.ctx&&V2D_AUDIO.ctx.state==="running");
+ b.textContent=V2D_AUDIO.muted?"AUDIO OFF":(running?"AUDIO ON":"ATTIVA AUDIO");
+ b.classList.toggle("audioOff",V2D_AUDIO.muted);
+ b.classList.toggle("audioReady",running&&!V2D_AUDIO.muted);
+}
+function v2dAudioApplyVolume(){
+ if(!V2D_AUDIO.master)return;
+ const now=V2D_AUDIO.ctx?.currentTime||0;
+ const target=V2D_AUDIO.muted?0:.58;
+ try{V2D_AUDIO.master.gain.cancelScheduledValues(now);V2D_AUDIO.master.gain.setTargetAtTime(target,now,.025)}catch(_){V2D_AUDIO.master.gain.value=target}
+ v2dAudioSetLabel();
+}
+function v2dAudioUnlock(){
+ try{
+   if(V2D_AUDIO.ctx){
+     if(V2D_AUDIO.ctx.state==="suspended"){
+       const r=V2D_AUDIO.ctx.resume();if(r&&r.then)r.then(()=>{V2D_AUDIO.unlocked=true;v2dAudioApplyVolume()}).catch(()=>v2dAudioSetLabel());
+     }else{V2D_AUDIO.unlocked=true;v2dAudioApplyVolume()}
+     return true;
+   }
+   const AC=window.AudioContext||window.webkitAudioContext;if(!AC){v2dAudioSetLabel();return false}
+   const ctx=new AC();V2D_AUDIO.ctx=ctx;
+   const master=ctx.createGain();master.gain.value=.58;master.connect(ctx.destination);V2D_AUDIO.master=master;
+   const ambient=ctx.createGain();ambient.gain.value=.30;ambient.connect(master);V2D_AUDIO.ambient=ambient;
+   const music=ctx.createGain();music.gain.value=.34;music.connect(master);V2D_AUDIO.music=music;
+
+   // Office electrical bed: audible but still background-level on phone speakers.
+   const hum=ctx.createOscillator(),humGain=ctx.createGain(),lp=ctx.createBiquadFilter();
+   hum.type="sine";hum.frequency.value=56;humGain.gain.value=.10;lp.type="lowpass";lp.frequency.value=210;
+   hum.connect(lp);lp.connect(humGain);humGain.connect(ambient);hum.start();
+   const hum2=ctx.createOscillator(),hum2Gain=ctx.createGain();
+   hum2.type="triangle";hum2.frequency.value=112;hum2Gain.gain.value=.030;hum2.connect(hum2Gain);hum2Gain.connect(ambient);hum2.start();
+
+   const len=Math.floor(ctx.sampleRate*.18),buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
+   for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);V2D_AUDIO.noise=buf;
+   V2D_AUDIO.nextToneAt=performance.now()+3500+Math.random()*4500;V2D_AUDIO.nextMusicAt=performance.now()+120;V2D_AUDIO.musicStep=0;V2D_AUDIO.unlocked=true;
+   // Tiny audible confirmation: useful on iOS/Android to prove audio is unlocked.
+   setTimeout(()=>{v2dTone(520,.045,.055,"square");setTimeout(()=>v2dTone(690,.055,.045,"square"),65)},10);
+   v2dAudioApplyVolume();return true;
+ }catch(e){console.warn("IT SHIFT AUDIO:",e);v2dAudioSetLabel();return false}
+}
+function v2dTone(freq=220,dur=.08,vol=.07,type="square",dest=null){
+ const ctx=V2D_AUDIO.ctx;if(!ctx||ctx.state!=="running"||V2D_AUDIO.muted)return;
+ const o=ctx.createOscillator(),g0=ctx.createGain(),now=ctx.currentTime;o.type=type;o.frequency.value=freq;
+ g0.gain.setValueAtTime(.0001,now);g0.gain.exponentialRampToValueAtTime(Math.max(.0002,vol),now+.008);g0.gain.exponentialRampToValueAtTime(.0001,now+dur);
+ o.connect(g0);g0.connect(dest||V2D_AUDIO.master);o.start(now);o.stop(now+dur+.03);
+}
+function v2dNoise(vol=.05,dur=.06){
+ const ctx=V2D_AUDIO.ctx;if(!ctx||ctx.state!=="running"||!V2D_AUDIO.noise||V2D_AUDIO.muted)return;
+ const src=ctx.createBufferSource(),gain=ctx.createGain(),lp=ctx.createBiquadFilter(),now=ctx.currentTime;
+ src.buffer=V2D_AUDIO.noise;lp.type="lowpass";lp.frequency.value=850;gain.gain.setValueAtTime(vol,now);gain.gain.exponentialRampToValueAtTime(.0001,now+dur);
+ src.connect(lp);lp.connect(gain);gain.connect(V2D_AUDIO.master);src.start(now);src.stop(now+dur+.02);
+}
+function v2dAudioUi(){v2dTone(430,.04,.050,"square")}
+function v2dAudioNotify(){v2dTone(650,.08,.085,"square");setTimeout(()=>v2dTone(860,.075,.065,"square"),75)}
+function v2dAudioMission(){v2dTone(175,.11,.090,"sawtooth");setTimeout(()=>v2dTone(270,.13,.065,"square"),100)}
+function v2dAudioError(){v2dTone(88,.22,.13,"sawtooth");v2dNoise(.10,.15)}
+function v2dAudioSuccess(){v2dTone(330,.08,.080,"square");setTimeout(()=>v2dTone(495,.10,.070,"square"),80)}
+
+// Clear mission jingles: short, deliberately more musical than normal UI FX.
+function v2dAudioMissionWin(){
+ const notes=[523.25,659.25,783.99,1046.50];
+ notes.forEach((f,i)=>setTimeout(()=>v2dTone(f,.16,.12,i<3?"square":"triangle"),i*92));
+ setTimeout(()=>v2dTone(523.25,.34,.055,"triangle"),315);
+}
+function v2dAudioMissionFail(){
+ const notes=[246.94,207.65,164.81,123.47];
+ notes.forEach((f,i)=>setTimeout(()=>v2dTone(f,.19,.115,i<2?"sawtooth":"square"),i*105));
+ setTimeout(()=>v2dNoise(.085,.18),185);
+}
+
+// Fixed PSX-style musical bed: D-minor arpeggio under the office ambience.
+const V2D_MUSIC_SEQ=[146.83,220.00,174.61,220.00,261.63,220.00,174.61,220.00,146.83,196.00,174.61,220.00,261.63,233.08,174.61,196.00];
+function v2dAudioMusicTick(nowMs){
+ const ctx=V2D_AUDIO.ctx;if(!ctx||ctx.state!=="running"||V2D_AUDIO.muted||!V2D_AUDIO.music)return;
+ if(nowMs<V2D_AUDIO.nextMusicAt)return;
+ const step=V2D_AUDIO.musicStep%V2D_MUSIC_SEQ.length;
+ const f=V2D_MUSIC_SEQ[step];
+ v2dTone(f,.52,.060,"triangle",V2D_AUDIO.music);
+ if(step%4===0)v2dTone(f/2,.72,.038,"sine",V2D_AUDIO.music);
+ if(step===7||step===15)setTimeout(()=>v2dTone(f*2,.34,.025,"sine",V2D_AUDIO.music),135);
+ V2D_AUDIO.musicStep=(step+1)%V2D_MUSIC_SEQ.length;
+ V2D_AUDIO.nextMusicAt=nowMs+505;
+}
+function v2dAudioBossStart(){v2dTone(58,.72,.12,"sawtooth");setTimeout(()=>v2dTone(82,.52,.075,"triangle"),190)}
+function v2dAudioStep(){
+ const now=performance.now();if(now-V2D_AUDIO.lastStepAt<150)return;V2D_AUDIO.lastStepAt=now;
+ v2dTone(120+Math.random()*24,.055,.040,"sine");v2dNoise(.035,.045);
+}
+function v2dAudioTick(){
+ const ctx=V2D_AUDIO.ctx;if(!ctx||ctx.state!=="running"||V2D_AUDIO.muted||!state||state.phase==="ended")return;
+ const now=performance.now();
+
+ // Persistent musical bed.
+ v2dAudioMusicTick(now);
+
+ // Any completed mission increments state.solved: one global hook catches tickets, deliveries and events.
+ const solved=Number(state.solved||0);
+ if(V2D_AUDIO.lastSolved===null)V2D_AUDIO.lastSolved=solved;
+ else if(solved>V2D_AUDIO.lastSolved){V2D_AUDIO.lastSolved=solved;v2dAudioMissionWin()}
+ else if(solved<V2D_AUDIO.lastSolved)V2D_AUDIO.lastSolved=solved;
+
+ // Sparse horror/office accents sit above the fixed music.
+ if(now<V2D_AUDIO.nextToneAt)return;
+ const late=Math.max(0,Math.min(1,(Number(state.min||START)-START)/(BOSS-START)));
+ const stress=Math.max(0,Math.min(1,Number(state.stress||0)/100));
+ const f=late>.72?55+Math.random()*45:95+Math.random()*80;
+ v2dTone(f,.75+Math.random()*.85,.028+.032*stress,"sine",V2D_AUDIO.ambient);
+ if(late>.78&&Math.random()<.52)setTimeout(()=>v2dTone(f*1.497,.4,.022,"triangle",V2D_AUDIO.ambient),180+Math.random()*420);
+ V2D_AUDIO.nextToneAt=now+(late>.75?3400:5200)+Math.random()*(late>.75?4800:7200);
+}
+function v2dAudioToggle(){
+ if(!V2D_AUDIO.ctx){V2D_AUDIO.muted=false;v2dAudioUnlock();return}
+ V2D_AUDIO.muted=!V2D_AUDIO.muted;
+ if(!V2D_AUDIO.muted&&V2D_AUDIO.ctx.state==="suspended")V2D_AUDIO.ctx.resume().then(v2dAudioApplyVolume).catch(v2dAudioSetLabel);
+ else v2dAudioApplyVolume();
+}
+document.addEventListener("pointerdown",v2dAudioUnlock,{passive:true});
+document.addEventListener("touchstart",v2dAudioUnlock,{passive:true});
+document.addEventListener("keydown",v2dAudioUnlock,{passive:true});
+document.addEventListener("click",e=>{if(e.target&&e.target.closest&&e.target.closest("button")&&!e.target.closest("#audioToggle"))v2dAudioUi()},true);
+document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("audioToggle");if(b){b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();v2dAudioToggle()});v2dAudioSetLabel()}});
 const difficultyConfig={
  easy:{name:"FACILE",maxStrikes:8,timeMult:2.50,stressMult:.55,incidentMult:.42,criticalChance:.018,timeSpeed:.86,maxTickets:2,spawnSeconds:24},
  normal:{name:"NORMALE",maxStrikes:5,timeMult:1.90,stressMult:.82,incidentMult:.70,criticalChance:.050,timeSpeed:1.25,maxTickets:3,spawnSeconds:19},
@@ -993,12 +1125,12 @@ const V130B5112_LORE = {
 };
 
 const V130B5112_SPECIAL_SUMMARY = {
- "manager":"IT MANAGER // coordina il turno e interviene quando la situazione degenera.",
- "zia":"SEGRETERIA // Zia Ale conosce tutto quello che succede nello studio.",
- "don":"JOLLY // alleato sociale, può togliere pressione o coprire un errore.",
- "pao":"BIM // gira molto nello studio e può darti dritte o una pausa.",
- "hr":"HR // Betty interviene soprattutto quando la pressione diventa alta.",
- "mokasa":"DIREZIONE // CAPO."
+ "manager":"IT",
+ "zia":"SEGRETERIA",
+ "don":"JOLLY",
+ "pao":"BIM",
+ "hr":"HR",
+ "mokasa":"DIREZIONE"
 };
 
 const V130B5112_CALL_SLOTS = [645,735,865,950,1035]; // 10:45, 12:15, 14:25, 15:50, 17:15
@@ -1196,7 +1328,8 @@ function v130b5112LoreTalk(n){
  const line=arr[Math.floor(Math.random()*arr.length)];
  if(!dayFlags[key]){
    dayFlags[key]=true;
-   v130b43StorySay(n.name,[line,`${p.department} // ${p.summary}`]);
+   // Personality is shown through dialogue/behaviour, not development notes.
+   v130b43StorySay(n.name,line);
  }else{
    sideMessage(n.name,line);
  }
@@ -1204,9 +1337,9 @@ function v130b5112LoreTalk(n){
 }
 function v130b5112PersonSummary(n){
  const p=v130b5112Lore(n);
- if(p)return `${p.department} // ${p.summary}`;
+ if(p)return p.department;
  const sp=V130B5112_SPECIAL_SUMMARY[String(n?.id||"").toLowerCase()];
- return sp||String(n?.role||n?.homeRoom||"STUDIO");
+ return sp||String(n?.role||n?.homeRoom||"STUDIO").split("//")[0].trim();
 }
 function v130b5112PeopleHtml(){
  const unique=[...new Map([...(ambientNPCs||[]),...(npcs||[]),mokasa].filter(Boolean).filter(n=>n.id).map(n=>[n.id,n])).values()];
@@ -3077,6 +3210,7 @@ function pokemonEncounter(n){
  },1100);
 }
 function phoneMessage(sender,text){
+ if(typeof v2dAudioNotify==="function")v2dAudioNotify();
  if(typeof v130b1SetAlert==="function")v130b1SetAlert(sender,text);
  const box=$("#phoneNotification");if(!box)return;
  // During a minigame/result, queue non-critical messages instead of covering UI.
@@ -3225,6 +3359,7 @@ function v126RemoveOwnedTaskItems(extra=[]){
 }
 
 function v126MissionFailed(title="MISSIONE FALLITA",reason="Tempo scaduto."){
+ if(typeof v2dAudioMissionFail==="function")v2dAudioMissionFail();
  const c=typeof carryMission!=="undefined"?carryMission:null;
  const extra=c?[c.item,c.object,c.label].filter(Boolean):[];
  v126RemoveOwnedTaskItems(extra);
@@ -4367,6 +4502,7 @@ function v130b58ForceHideMissionBanner(){
 }
 
 function showMissionBanner(title,text,reward="",kicker="MISSIONE"){
+ if(typeof v2dAudioMission==="function")v2dAudioMission();
  if(typeof v130b1SetAlert==="function")v130b1SetAlert(kicker||"MISSIONE",`${title} // ${text}`);
  const b=$("#missionBanner");if(!b)return;
  b.dataset.kind=String(kicker||"MISSIONE").toUpperCase();
@@ -5691,7 +5827,7 @@ function v130b52UpdateManagerArrival(dt){
 }
 
 /* 1.0.30B5.6.2 RACE TUNING
-   Player speed: ~205
+   Player speed: ~250 (frenetic 2D pass)
    Manager race speed: 168
    Manager start reaction delay: 280 ms
    Target: visibly competitive but still beatable with a clean route.
@@ -5968,7 +6104,7 @@ function reset(){
  Object.keys(npcRelations).forEach(k=>delete npcRelations[k]);
 
  introFreeWalk=false;entranceOpened=false;enteredStudio=false;window.__entranceDialogReady=false;
-const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0,errorShield:0,npcCallSlots:{},npcCallHistory:{},lunchNotices:{first:false,second:false}};player={x:705,y:985,s:205,name:(typeof v130b2PlayerName==="function"?v130b2PlayerName():"IT"),gender:(typeof V130B2_PROFILE!=="undefined"?V130B2_PROFILE.gender:"male")};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;studioEvent=null;studioEventNext=610;eventSerial=0;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};Object.keys(V130B5_DECK).forEach(k=>V130B5_DECK[k]=[]);lunchMode=false;fullMap=false;introStage="outside";introFreeWalk=false;entranceOpened=false;enteredStudio=false;shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;raceState="idle";workstationOnline=false;firstMissionResolved=false;spawnNPCs();v12c4InitRelations();runV10Audit();runV8Audit();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=900;m.state="outside";m.route=null;m.routeIndex=0}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();v129ResetIntro();
+const bad=validateMap();if(bad.length)console.warn("Unreachable task points disabled:",bad);state={phase:"shift",min:538,stress:0,rep:5,xp:0,incident:0,strikes:0,maxStrikes:difficultyConfig[difficulty].maxStrikes,solved:0,anomalyPenalty:0,bossPhase:0,errorShield:0,npcCallSlots:{},npcCallHistory:{},lunchNotices:{first:false,second:false}};player={x:705,y:985,s:250,name:(typeof v130b2PlayerName==="function"?v130b2PlayerName():"IT"),gender:(typeof V130B2_PROFILE!=="undefined"?V130B2_PROFILE.gender:"male")};tickets=[];last=performance.now();spawnTimer=0;anomTimer=0;phoneQueue=[];visualAnomaly=null;inventory=[];carryMission=null;studioEvent=null;studioEventNext=610;eventSerial=0;pendingOffers={};firstCarryTriggered=true;encounterLock=false;dayFlags={};Object.keys(V130B5_DECK).forEach(k=>V130B5_DECK[k]=[]);lunchMode=false;fullMap=false;introStage="outside";introFreeWalk=false;entranceOpened=false;enteredStudio=false;shiftStarted=false;managerRaceDone=false;managerPenaltyDone=false;raceState="idle";workstationOnline=false;firstMissionResolved=false;spawnNPCs();v12c4InitRelations();runV10Audit();runV8Audit();const m=npcs.find(n=>n.id==="manager");if(m){m.x=650;m.y=900;m.state="outside";m.route=null;m.routeIndex=0}updateInventoryUI();updateTaskProgress();setupCompactHUD();setupMiniMapControls();hud();v129ResetIntro();
  v1FinalAudit();
 
  v102FinalAudit();
@@ -6153,6 +6289,7 @@ function miniHeader(t,title,subtitle){
 
 
 function showRewardResult(title,rows,kind="success"){
+ if(kind==="failure"&&typeof v2dAudioMissionFail==="function")v2dAudioMissionFail();
  const ov=$("#rewardOverlay"),box=$("#rewardRows"),ttl=$("#rewardTitle");if(!ov||!box||!ttl){toast(title+" // "+rows.join(" · "));return}
  if(window.__rewardTimer)clearTimeout(window.__rewardTimer);ttl.textContent=title;ttl.className=kind;box.innerHTML=rows.map((x,i)=>`<div><span>${i===0?"✓":"+"}</span><b>${x}</b></div>`).join("");ov.classList.remove("hidden");
  const close=()=>{if(ov.classList.contains("hidden"))return;ov.classList.add("hidden");window.removeEventListener("keydown",key);clearTimeout(window.__rewardTimer);setTimeout(flushDeferredDialog,80)};
@@ -6490,6 +6627,21 @@ function updateBettySupport(dt){
  const band=bettyStressBand();
  const betty=npcs.find(n=>n.id==="hr");
 
+ // Betty is part of the day even when stress is low: short, deterministic check-ins.
+ // They make her present without turning her into a tutorial popup.
+ if(betty&&!isLunch()&&!v130b5112UiBusy()){
+   if(state.min>=690&&!dayFlags.bettyBeat1130){
+     dayFlags.bettyBeat1130=true;
+     phoneMessage("BETTY","Come stai messo? Non farti trascinare da chi urla più forte: guarda chi è davvero bloccato.");
+   }else if(state.min>=980&&!dayFlags.bettyBeat1620){
+     dayFlags.bettyBeat1620=true;
+     phoneMessage("BETTY","Ti vedo correre da un'ora. Se serve, passa da me: facciamo ordine prima dell'ultimo sprint.");
+   }else if(state.min>=1095&&!dayFlags.bettyBeat1815){
+     dayFlags.bettyBeat1815=true;
+     phoneMessage("BETTY","Ultimo tratto. Io tengo a bada le richieste non urgenti: tu chiudi quello che blocca davvero lo studio.");
+   }
+ }
+
  if(band>0&&band>bettyLastStressBand&&!bettyPinged&&bettySupportCooldown<=0&&betty){
    bettyPinged=true;bettyLastStressBand=band;
    createPendingOffer(betty);
@@ -6821,6 +6973,7 @@ function answer(i,n){
  tickets.splice(i,1);$("#modal").classList.add("hidden");
  if(ok){state.xp+=xp;state.solved++;state.incident-=({LOW:2,MEDIUM:4,HIGH:7,CRITICAL:8}[t.level]);state.stress-=4;toast(`${t.level} RISOLTO +${xp} XP`)}
  else{
+   if(typeof v2dAudioMissionFail==="function")v2dAudioMissionFail();
    const protectedError=v130b5112ApplyErrorShield();
    if(!protectedError)state.strikes++;
    state.stress+=({LOW:7,MEDIUM:12,HIGH:18,CRITICAL:20}[t.level])*difficultyConfig[difficulty].stressMult*(protectedError?.35:1);
@@ -7151,7 +7304,16 @@ function v130b57EndingUpdate(dt){
      `${name}, giornata interessante.`,
      "Prima di andare via avrei ancora una cosina.",
      "Facciamo l'ultimo controllo insieme. Poi vediamo com'è andata davvero."
-   ],()=>{e.active=false;e.phase="done";startBoss()});
+   ],()=>{
+     v130b43StorySay("BETTY",[
+       "La sala è pronta e le persone stanno aspettando.",
+       "Le altre richieste le tengo fuori io. Tu pensa solo a chiudere questa senza saltare passaggi."
+     ],()=>{
+       v130b43StorySay("IT MANAGER","Catena video, handshake, audio e rete. Controlla tutto nell'ordine giusto.",()=>{
+         e.active=false;e.phase="done";startBoss();
+       });
+     });
+   });
    return true;
  }
  return true;
@@ -7183,28 +7345,67 @@ function startBoss(){
    return false;
  }
 
- state.phase="boss";state.min=BOSS;tickets=[];renderTickets();state.bossPhase=1;bossModal();
+ state.phase="boss";state.min=BOSS;tickets=[];renderTickets();
+ state.bossPhase=1;state.bossMistakes=0;
+ if(typeof v2dAudioBossStart==="function")v2dAudioBossStart();
+ bossModal();
 }
+const V2D_FINAL_BOSS=[
+ {
+  stamp:"18:52 // SALA MEET CAPO",title:"SEGNALE VIDEO",text:"Il monitor non riceve segnale. Ricostruisci la catena fisica corretta.",
+  options:["RX → TX → HDMI","TX → CAT6 → RX","USB-C → RX → SWITCH","TX → USB → RX"],correct:1
+ },
+ {
+  stamp:"18:54 // SALA MEET CAPO",title:"HANDSHAKE / EDID",text:"La catena è cablata ma lo schermo resta nero. Qual è il controllo meno invasivo e più sensato?",
+  options:["CAMBIA SUBITO TUTTO IL CABLAGGIO","FORMATTA IL PC SORGENTE","VERIFICA INPUT + HANDSHAKE / EDID","RIAVVIA IL SERVER DHCP"],correct:2
+ },
+ {
+  stamp:"18:56 // SALA MEET CAPO",title:"AUDIO SALA",text:"Il video è tornato ma l'audio esce dal laptop.",
+  options:["MUTE GENERALE","SPEAKER SALA / HDMI","SPEAKER LAPTOP","DISABILITA DRIVER AUDIO"],correct:1
+ },
+ {
+  stamp:"18:58 // IT MANAGER",title:"RETE RECEIVER",text:"Il receiver AV non risponde al controllo di rete. Prima di resettarlo, cosa verifichi?",
+  options:["IP / LINK / PING DEL RECEIVER","RESET DI FABBRICA","CAMBIA VLAN A TUTTO LO STUDIO","SPEGNI LO SWITCH CORE"],correct:0
+ },
+ {
+  stamp:"18:59 // TUTTI IN SALA",title:"TEST END-TO-END",text:"Ultimo minuto. Devi validare la sala prima che parta la presentazione.",
+  options:["SOLO VIDEO","RIAVVIA TUTTO PER SICUREZZA","VIDEO + AUDIO + RETE + SORGENTE REALE","MODIFICA CONFIG SENZA TEST"],correct:2
+ }
+];
 function bossModal(){
- const phases=[
-  ["18:52 // SALA MEET CAPO","HDMI EXTENDER","Ripristina la catena video prima della presentazione."],
-  ["18:55 // SALA MEET CAPO","AUDIO CHECK","Seleziona l'uscita sala corretta."],
-  ["18:58 // IT MANAGER","TEST END-TO-END","Conferma video, audio e rete."]
- ];
- const q=phases[state.bossPhase-1];
- $("#modalBody").innerHTML=`<div class="pixelTaskHead"><span>${q[0]}</span><h2>${q[1]}</h2><p>${q[2]}</p></div>
+ const q=V2D_FINAL_BOSS[state.bossPhase-1]||V2D_FINAL_BOSS[V2D_FINAL_BOSS.length-1];
+ const mistakes=Number(state.bossMistakes)||0;
+ $("#modalBody").innerHTML=`<div class="pixelTaskHead"><span>${q.stamp}</span><h2>${q.title}</h2><p>${q.text}</p></div>
+ <div class="v2dBossStatus">FASE ${state.bossPhase}/${V2D_FINAL_BOSS.length} // ERRORI FINALE ${mistakes}/4</div>
  <div class="miniGame bossGame">
-  <button class="pixelAction bossStep" data-ok="0">${state.bossPhase===1?"RX → TX":state.bossPhase===2?"SPEAKER LAPTOP":"MODIFICA CONFIG"}</button>
-  <button class="pixelAction bossStep" data-ok="1">${state.bossPhase===1?"TX → CAT6 → RX":state.bossPhase===2?"SPEAKER SALA":"TEST VIDEO + AUDIO + RETE"}</button>
-  <button class="pixelAction bossStep" data-ok="0">${state.bossPhase===1?"USB → RX":state.bossPhase===2?"MUTE":"RIAVVIA TUTTO"}</button>
+  ${q.options.map((opt,i)=>`<button class="pixelAction bossStep" data-ok="${i===q.correct?1:0}">${opt}</button>`).join("")}
  </div><div id="miniError"></div>`;
  $("#modal").classList.remove("hidden");
  document.querySelectorAll(".bossStep").forEach(b=>b.onclick=()=>bossAnswer(+b.dataset.ok));
 }
 function bossAnswer(ok){
- if(!ok){state.incident+=8;state.stress+=5;miniMistake("INTERVENTO NON CORRETTO");clamp();hud();return}
- state.xp+=500;
- if(state.bossPhase<3){state.bossPhase++;bossModal()}else ending("WIN","GIORNATA COMPLETATA",true);
+ if(!ok){
+   state.bossMistakes=(Number(state.bossMistakes)||0)+1;
+   state.incident+=10;state.stress+=8;
+   if(state.bossMistakes%2===0)state.strikes=Math.min(state.maxStrikes,state.strikes+1);
+   clamp();hud();
+   if(typeof v2dAudioError==="function")v2dAudioError();
+   if(state.bossMistakes>=4){
+     return ending("PRESENTAZIONE SALTATA","Troppi errori nell'ultimo intervento: la sala non è pronta e il CAPO interrompe il test.");
+   }
+   const err=$("#miniError");
+   if(err)err.textContent=`SCELTA ERRATA // INCIDENT +10 // STRESS +8 // ERRORI FINALE ${state.bossMistakes}/4`;
+   return;
+ }
+ state.xp+=300;
+ if(typeof v2dAudioSuccess==="function")v2dAudioSuccess();
+ if(state.bossPhase<V2D_FINAL_BOSS.length){
+   state.bossPhase++;
+   bossModal();
+ }else{
+   state.xp+=500;
+   ending("WIN","GIORNATA COMPLETATA",true);
+ }
 }
 
 /* ============================================================
@@ -7242,7 +7443,11 @@ function v10PublicEndingLines(){
    ?"Te l'avevo detto: ogni tanto chiamare l'elettricista è davvero la soluzione."
    :"Oh, almeno lo studio è ancora in piedi.";
 
- return {capo,manager,lorenzo};
+ let betty="Hai chiuso la giornata. Adesso stacca davvero.";
+ if((Number(state?.stress)||0)>=65)betty="Sei arrivato in fondo tirando troppo. Domani partiamo dalle priorità, non dalla corsa.";
+ else if((Number(state?.strikes)||0)===0)betty="Hai tenuto il ritmo senza farti travolgere. È questo il punto.";
+
+ return {capo,manager,betty,lorenzo};
 }
 
 
@@ -7277,6 +7482,7 @@ function ending(type,text,win=false){
       <div class="v10PublicEpilogue">
        <p><b>CAPO</b><span>${v130b4Esc(lines.capo)}</span></p>
        <p><b>IT MANAGER</b><span>${v130b4Esc(lines.manager)}</span></p>
+       <p><b>BETTY</b><span>${v130b4Esc(lines.betty)}</span></p>
        <p><b>LORENZO</b><span>${v130b4Esc(lines.lorenzo)}</span></p>
       </div>
 
@@ -8714,6 +8920,7 @@ v125MeetingUrgentWatch();
  v122SpecialCalls();
  v117Trace('update-start');
  v117RuntimeWatchdog(dt);
+ if(typeof v2dAudioTick==="function")v2dAudioTick();
 
  v117Trace('v114UiLockWatchdog');v118SafeCall('v114UiLockWatchdog',()=>v114UiLockWatchdog());
  v117Trace('v114LunchRecoveryWatch');v118SafeCall('v114LunchRecoveryWatch',()=>v114LunchRecoveryWatch());
@@ -8794,6 +9001,7 @@ v125MeetingUrgentWatch();
  v117Trace('updateAmbient');v118SafeCall('updateAmbient',()=>updateAmbient(dt));
  /* 1.0.9 legacy hunter AI removed. */
  const moved=Math.hypot(player.x-lastPlayerPos.x,player.y-lastPlayerPos.y);
+ if(moved>2&&typeof v2dAudioStep==="function")v2dAudioStep();
  if(moved<2)idleMinutes+=dt*difficultyConfig[difficulty].timeSpeed;else{idleMinutes=0;lastPlayerPos={x:player.x,y:player.y}}
  
   /* 1.0.13 CAPO proximity encounter removed */
